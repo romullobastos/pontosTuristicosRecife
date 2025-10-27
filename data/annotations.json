@@ -1,0 +1,47 @@
+[
+  {
+    "image_path": "images/animals/dog1.jpg",
+    "question": "Que animal é este?",
+    "answer": "Este é um cão",
+    "explanation": "Os cães são mamíferos domésticos da família Canidae. Eles são conhecidos por serem leais aos humanos e possuem excelente olfato e audição.",
+    "category": "animals",
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "image_path": "images/plants/flower1.jpg",
+    "question": "Que tipo de planta é esta?",
+    "answer": "Esta é uma flor",
+    "explanation": "As flores são estruturas reprodutivas das plantas. Elas são responsáveis pela produção de sementes e muitas vezes são coloridas para atrair polinizadores.",
+    "category": "plants",
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "image_path": "images/objects/car1.jpg",
+    "question": "Que objeto é este?",
+    "answer": "Este é um carro",
+    "explanation": "Os carros são veículos automotores para transporte terrestre. Eles revolucionaram a mobilidade humana e são essenciais na sociedade moderna.",
+    "category": "objects",
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "image_path": "images/nature/mountain1.jpg",
+    "question": "Que tipo de paisagem é esta?",
+    "answer": "Esta é uma montanha",
+    "explanation": "As montanhas são formações geológicas elevadas que se destacam do relevo circundante. Elas são importantes para o clima e abrigam diversos ecossistemas.",
+    "category": "nature",
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "image_path": "images/animals/cat1.jpg",
+    "question": "Que animal é este?",
+    "answer": "Este é um gato",
+    "explanation": "Os gatos são mamíferos carnívoros da família Felidae. São animais domésticos populares conhecidos por sua independência e habilidades de caça.",
+    "category": "animals",
+    "difficulty": "easy",
+    "points": 10
+  }
+]

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Jogo Educacional Multimodal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .player-setup {
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .image-upload {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .image-upload.dragover {
+            border-color: #667eea;
+            background-color: #f0f2ff;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .question-input {
+            margin-top: 20px;
+        }
+
+        .question-input textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .question-input textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .response-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+
+        .response-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .response-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .achievement {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .leaderboard {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .player-info {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .player-level {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Jogo Educacional Multimodal</h1>
+            <p>Desenvolva suas habilidades de observação e aprenda com IA!</p>
+        </div>
+
+        <!-- Painel de Estatísticas -->
+        <div class="stats-panel" id="statsPanel" style="display: none;">
+            <h2>📊 Suas Estatísticas</h2>
+            <div class="stats-grid" id="statsGrid">
+                <!-- Estatísticas serão preenchidas dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Setup do Jogador -->
+        <div class="card player-setup" id="playerSetup">
+            <h2>👤 Criar Jogador</h2>
+            <div class="input-group">
+                <label for="playerName">Nome do Jogador:</label>
+                <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
+            </div>
+            <button class="btn" onclick="createPlayer()">Começar Jogo</button>
+        </div>
+
+        <!-- Interface Principal do Jogo -->
+        <div class="game-container hidden" id="gameInterface">
+            <!-- Upload de Imagem -->
+            <div class="card">
+                <h2>📸 Enviar Imagem</h2>
+                <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
+                    <p>📁 Clique aqui ou arraste uma imagem</p>
+                    <p style="color: #666; font-size: 0.9em;">Formatos suportados: JPG, PNG, GIF</p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+                
+                <div class="question-input">
+                    <label for="questionInput">❓ Sua pergunta sobre a imagem:</label>
+                    <textarea id="questionInput" placeholder="Ex: Que animal é este? Que tipo de planta é esta? O que você vê nesta imagem?"></textarea>
+                </div>
+                
+                <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 Analisar Imagem</button>
+            </div>
+
+            <!-- Resposta do Sistema -->
+            <div class="card">
+                <h2>🤖 Resposta do Sistema</h2>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analisando imagem e gerando resposta...</p>
+                </div>
+                <div id="responseArea" style="display: none;">
+                    <!-- Respostas serão preenchidas dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Resposta -->
+        <div class="response-panel hidden" id="responsePanel">
+            <!-- Respostas detalhadas aparecerão aqui -->
+        </div>
+
+        <!-- Ranking -->
+        <div class="leaderboard">
+            <h2>🏆 Ranking</h2>
+            <div id="leaderboardList">
+                <!-- Ranking será preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayerId = null;
+        let currentImageData = null;
+
+        // Criar jogador
+        async function createPlayer() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Por favor, digite um nome!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/create_player', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPlayerId = result.player_id;
+                    document.getElementById('playerSetup').style.display = 'none';
+                    document.getElementById('gameInterface').classList.remove('hidden');
+                    document.getElementById('statsPanel').style.display = 'block';
+                    
+                    // Carregar estatísticas iniciais
+                    loadPlayerStats();
+                    loadLeaderboard();
+                } else {
+                    alert('Erro ao criar jogador: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+
+        // Upload de imagem
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                document.getElementById('imagePreview').src = currentImageData;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('analyzeBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Drag and drop
+        const imageUpload = document.getElementById('imageUpload');
+        
+        imageUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            imageUpload.classList.add('dragover');
+        });
+        
+        imageUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            imageUpload.classList.remove('dragover');
+        });
+        
+        imageUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            imageUpload.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        currentImageData = e.target.result;
+                        document.getElementById('imagePreview').src = currentImageData;
+                        document.getElementById('imagePreview').style.display = 'block';
+                        document.getElementById('analyzeBtn').disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // Analisar imagem
+        async function analyzeImage() {
+            if (!currentImageData || !currentPlayerId) {
+                alert('Por favor, carregue uma imagem e crie um jogador primeiro!');
+                return;
+            }
+
+            const question = document.getElementById('questionInput').value.trim() || 'O que você vê nesta imagem?';
+            
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('responseArea').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/process_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: currentImageData,
+                        question: question,
+                        player_id: currentPlayerId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResponse(result);
+                    loadPlayerStats(); // Atualizar estatísticas
+                    loadLeaderboard(); // Atualizar ranking
+                } else {
+                    alert('Erro ao processar imagem: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        // Exibir resposta
+        function displayResponse(result) {
+            const responseArea = document.getElementById('responseArea');
+            const responsePanel = document.getElementById('responsePanel');
+            
+            responseArea.innerHTML = `
+                <div class="response-item">
+                    <div class="response-label">Resposta:</div>
+                    <div>${result.answer}</div>
+                </div>
+                <div class="response-item">
+                    <div class="response-label">Explicação:</div>
+                    <div>${result.explanation}</div>
+                </div>
+                <div class="response-item">
+                    <div class="response-label">Tempo de Resposta:</div>
+                    <div>${result.response_time}</div>
+                </div>
+                <div class="response-item">
+                    <div class="response-label">Confiança:</div>
+                    <div>${result.confidence}</div>
+                </div>
+                <div class="response-item">
+                    <div class="response-label">Pontuação:</div>
+                    <div>${result.score} pontos</div>
+                </div>
+            `;
+            
+            responseArea.style.display = 'block';
+            responsePanel.classList.remove('hidden');
+            
+            // Mostrar conquistas se houver
+            if (result.game_result && result.game_result.new_achievements) {
+                displayAchievements(result.game_result.new_achievements);
+            }
+            
+            // Mostrar level up se houver
+            if (result.game_result && result.game_result.level_up) {
+                alert(`🎉 Parabéns! Você subiu para o nível ${result.game_result.new_level}!`);
+            }
+        }
+
+        // Exibir conquistas
+        function displayAchievements(achievements) {
+            const achievementHtml = achievements.map(achievement => 
+                `<div class="achievement">${achievement.icon} ${achievement.name}</div>`
+            ).join('');
+            
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML += `
+                <div class="response-item">
+                    <div class="response-label">🏆 Novas Conquistas:</div>
+                    <div>${achievementHtml}</div>
+                </div>
+            `;
+        }
+
+        // Carregar estatísticas do jogador
+        async function loadPlayerStats() {
+            if (!currentPlayerId) return;
+
+            try {
+                const response = await fetch(`/api/player_stats/${currentPlayerId}`);
+                const stats = await response.json();
+                
+                if (!stats.error) {
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.level}</div>
+                            <div class="stat-label">Nível</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.experience}</div>
+                            <div class="stat-label">Experiência</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.coins}</div>
+                            <div class="stat-label">Moedas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.streak}</div>
+                            <div class="stat-label">Sequência</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${(stats.accuracy * 100).toFixed(1)}%</div>
+                            <div class="stat-label">Precisão</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.achievements}</div>
+                            <div class="stat-label">Conquistas</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Carregar ranking
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const leaderboard = await response.json();
+                
+                const leaderboardList = document.getElementById('leaderboardList');
+                leaderboardList.innerHTML = leaderboard.map((player, index) => `
+                    <div class="leaderboard-item">
+                        <div class="rank">#${player.rank}</div>
+                        <div class="player-info">
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-level">Nível ${player.level} • ${player.experience} XP</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold; color: #667eea;">${(player.accuracy * 100).toFixed(1)}%</div>
+                            <div style="font-size: 0.9em; color: #666;">Precisão</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar ranking:', error);
+            }
+        }
+
+        // Carregar ranking inicial
+        loadLeaderboard();
+    </script>
+</body>
+</html>
