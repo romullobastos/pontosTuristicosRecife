@@ -55,9 +55,9 @@ temp_*.jpg
 .env
 .env.local
 
-# Data (manter estrutura mas não fotos)
-data/recife_historic/*/
-!data/recife_historic/.gitkeep
+# Data (incluir fotos)
+# data/recife_historic/*/
+# !data/recife_historic/.gitkeep
 
 # Training artifacts
 *.pkl
