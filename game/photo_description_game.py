@@ -5,6 +5,19 @@ from typing import Dict, List, Tuple
 from difflib import SequenceMatcher
 import random
 
+# NLP Libraries
+try:
+    import nltk
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+    from nltk.stem import WordNetLemmatizer
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    NLP_AVAILABLE = True
+except ImportError:
+    NLP_AVAILABLE = False
+    print("NLP libraries not available. Using basic comparison.")
+
 class PhotoDescriptionGame:
     """
     Sistema de jogo baseado em descrições de fotos históricas do Recife
@@ -20,6 +33,34 @@ class PhotoDescriptionGame:
             "current_streak": 0,
             "best_streak": 0
         }
+        
+        # Inicializar NLP
+        if NLP_AVAILABLE:
+            self._initialize_nlp()
+            self.use_nlp = True
+        else:
+            self.use_nlp = False
+    
+    def _initialize_nlp(self):
+        """Inicializa recursos do NLTK"""
+        try:
+            print("\n🚀 Inicializando NLP...")
+            # Download recursos necessários
+            nltk.download('punkt', quiet=True)
+            nltk.download('stopwords', quiet=True)
+            nltk.download('wordnet', quiet=True)
+            nltk.download('omw-1.4', quiet=True)
+            
+            self.stop_words = set(stopwords.words('portuguese'))
+            self.lemmatizer = WordNetLemmatizer()
+            self.vectorizer = TfidfVectorizer(max_features=1000)
+            
+            print("✅ NLP inicializado com sucesso!")
+            print(f"   - Stopwords carregadas: {len(self.stop_words)} palavras")
+            print(f"   - Método de similaridade: TF-IDF + Cosseno")
+        except Exception as e:
+            print(f"❌ Erro ao inicializar NLP: {e}")
+            self.use_nlp = False
     
     def _load_photos_data(self) -> List[Dict]:
         """Carrega os dados das fotos históricas"""
@@ -55,8 +96,21 @@ class PhotoDescriptionGame:
         user_desc_clean = self._clean_text(user_description)
         official_desc_clean = self._clean_text(self.current_photo["official_description"])
         
+        # Processar com NLP se disponível
+        if self.use_nlp:
+            user_desc_processed = self._preprocess_nlp(user_desc_clean)
+            official_desc_processed = self._preprocess_nlp(official_desc_clean)
+            
+            # Debug: mostrar processamento NLP
+            print(f"\n🔍 [NLP DEBUG]")
+            print(f"   Original: {user_desc_clean[:100]}...")
+            print(f"   Processado: {user_desc_processed[:100]}...")
+        else:
+            user_desc_processed = user_desc_clean
+            official_desc_processed = official_desc_clean
+        
         # Calcular similaridade
-        similarity_score = self._calculate_similarity(user_desc_clean, official_desc_clean)
+        similarity_score = self._calculate_similarity(user_desc_processed, official_desc_processed)
         
         # Verificar palavras-chave
         keyword_score = self._check_keywords(user_desc_clean, self.current_photo["keywords"])
@@ -107,9 +161,43 @@ class PhotoDescriptionGame:
         
         return text
     
+    def _preprocess_nlp(self, text: str) -> str:
+        """Processa texto com NLP (tokenização, lemmatização, remoção de stopwords)"""
+        if not self.use_nlp:
+            return text
+        
+        try:
+            # Tokenizar
+            tokens = word_tokenize(text, language='portuguese')
+            
+            # Remover stopwords e lemmatizar
+            processed_tokens = []
+            for token in tokens:
+                if token.lower() not in self.stop_words:
+                    lemma = self.lemmatizer.lemmatize(token.lower())
+                    if len(lemma) > 2:  # Filtrar palavras muito curtas
+                        processed_tokens.append(lemma)
+            
+            return ' '.join(processed_tokens)
+        except Exception as e:
+            print(f"Erro no preprocessing NLP: {e}")
+            return text
+    
     def _calculate_similarity(self, text1: str, text2: str) -> float:
-        """Calcula similaridade entre dois textos usando SequenceMatcher"""
-        return SequenceMatcher(None, text1, text2).ratio()
+        """Calcula similaridade entre dois textos"""
+        if self.use_nlp:
+            # Usar TF-IDF + Cosseno para similaridade semântica
+            try:
+                tfidf_matrix = self.vectorizer.fit_transform([text1, text2])
+                similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+                return float(similarity)
+            except Exception as e:
+                print(f"Erro no cálculo TF-IDF: {e}")
+                # Fallback para SequenceMatcher
+                return SequenceMatcher(None, text1, text2).ratio()
+        else:
+            # Usar SequenceMatcher (básico)
+            return SequenceMatcher(None, text1, text2).ratio()
     
     def _check_keywords(self, user_text: str, keywords: List[str]) -> float:
         """Verifica quantas palavras-chave foram encontradas"""
