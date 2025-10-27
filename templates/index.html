@@ -294,8 +294,191 @@
             display: none;
         }
 
+        /* Estilos para abas */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9ff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            background: white;
+            color: #333;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            background: #f0f2ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Estilos específicos para o jogo de descrições */
+        .photo-game-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .photo-display {
+            text-align: center;
+        }
+
+        .photo-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+
+        .photo-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .photo-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .photo-difficulty {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .description-input {
+            margin-bottom: 20px;
+        }
+
+        .description-input textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .description-input textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .description-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .game-stats {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stats-label {
+            color: #666;
+        }
+
+        .stats-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .result-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9ff;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .keywords-found {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .keyword-tag {
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .feedback {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .feedback.error {
+            background: #ffeaea;
+            border-left-color: #f44336;
+        }
+
         @media (max-width: 768px) {
             .game-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .photo-game-container {
                 grid-template-columns: 1fr;
             }
             
@@ -308,8 +491,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎮 Jogo Educacional Multimodal</h1>
-            <p>Desenvolva suas habilidades de observação e aprenda com IA!</p>
+            <h1>🎮 Jogo Educacional - Recife Histórico</h1>
+            <p>Explore os pontos históricos do Recife e desenvolva suas habilidades!</p>
         </div>
 
         <!-- Painel de Estatísticas -->
@@ -330,42 +513,110 @@
             <button class="btn" onclick="createPlayer()">Começar Jogo</button>
         </div>
 
-        <!-- Interface Principal do Jogo -->
-        <div class="game-container hidden" id="gameInterface">
-            <!-- Upload de Imagem -->
-            <div class="card">
-                <h2>📸 Enviar Imagem</h2>
-                <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
-                    <p>📁 Clique aqui ou arraste uma imagem</p>
-                    <p style="color: #666; font-size: 0.9em;">Formatos suportados: JPG, PNG, GIF</p>
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                    <img id="imagePreview" class="image-preview" style="display: none;">
-                </div>
-                
-                <div class="question-input">
-                    <label for="questionInput">❓ Sua pergunta sobre a imagem:</label>
-                    <textarea id="questionInput" placeholder="Ex: Que animal é este? Que tipo de planta é esta? O que você vê nesta imagem?"></textarea>
-                </div>
-                
-                <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 Analisar Imagem</button>
+        <!-- Abas dos Jogos -->
+        <div class="hidden" id="gameInterface">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('imageAnalysis')">🔍 Análise de Imagens</button>
+                <button class="tab" onclick="switchTab('photoDescription')">📝 Descrição de Fotos</button>
             </div>
 
-            <!-- Resposta do Sistema -->
-            <div class="card">
-                <h2>🤖 Resposta do Sistema</h2>
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Analisando imagem e gerando resposta...</p>
+            <!-- Aba 1: Análise de Imagens -->
+            <div class="tab-content active" id="imageAnalysis">
+                <div class="game-container">
+                    <!-- Upload de Imagem -->
+                    <div class="card">
+                        <h2>📸 Enviar Imagem</h2>
+                        <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
+                            <p>📁 Clique aqui ou arraste uma imagem</p>
+                            <p style="color: #666; font-size: 0.9em;">Formatos suportados: JPG, PNG, GIF</p>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                            <img id="imagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        
+                        <div class="question-input">
+                            <label for="questionInput">❓ Sua pergunta sobre a imagem:</label>
+                            <textarea id="questionInput" placeholder="Ex: Que local histórico é este? Que tipo de arquitetura você vê?"></textarea>
+                        </div>
+                        
+                        <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 Analisar Imagem</button>
+                    </div>
+
+                    <!-- Resposta do Sistema -->
+                    <div class="card">
+                        <h2>🤖 Resposta do Sistema</h2>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>Analisando imagem e gerando resposta...</p>
+                        </div>
+                        <div id="responseArea" style="display: none;">
+                            <!-- Respostas serão preenchidas dinamicamente -->
+                        </div>
+                    </div>
                 </div>
-                <div id="responseArea" style="display: none;">
-                    <!-- Respostas serão preenchidas dinamicamente -->
+
+                <!-- Painel de Resposta -->
+                <div class="response-panel hidden" id="responsePanel">
+                    <!-- Respostas detalhadas aparecerão aqui -->
                 </div>
             </div>
-        </div>
 
-        <!-- Painel de Resposta -->
-        <div class="response-panel hidden" id="responsePanel">
-            <!-- Respostas detalhadas aparecerão aqui -->
+            <!-- Aba 2: Descrição de Fotos -->
+            <div class="tab-content" id="photoDescription">
+                <div class="photo-game-container">
+                    <!-- Exibição da Foto -->
+                    <div class="card photo-display">
+                        <h2>📸 Foto Histórica</h2>
+                        <div id="photoContainer">
+                            <p>Clique em "Nova Foto" para começar!</p>
+                        </div>
+                        <div class="photo-info hidden" id="photoInfo">
+                            <div class="photo-name" id="photoName"></div>
+                            <div class="photo-difficulty" id="photoDifficulty"></div>
+                        </div>
+                        <button class="btn" onclick="loadNewPhoto()">🔄 Nova Foto</button>
+                    </div>
+
+                    <!-- Interface de Descrição -->
+                    <div class="card">
+                        <h2>✍️ Sua Descrição</h2>
+                        <div class="description-input">
+                            <label for="descriptionInput">Descreva o que você vê nesta foto histórica:</label>
+                            <textarea id="descriptionInput" placeholder="Ex: Esta é uma praça histórica com calçada de pedra portuguesa e vista para o mar..."></textarea>
+                        </div>
+                        <button class="btn" id="submitDescriptionBtn" onclick="submitDescription()" disabled>📤 Enviar Descrição</button>
+                    </div>
+                </div>
+
+                <!-- Estatísticas do Jogo de Descrições -->
+                <div class="game-stats hidden" id="photoGameStats">
+                    <h3>📊 Estatísticas do Jogo</h3>
+                    <div class="stats-row">
+                        <span class="stats-label">Tentativas:</span>
+                        <span class="stats-value" id="totalAttempts">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Acertos:</span>
+                        <span class="stats-value" id="totalCorrect">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Precisão:</span>
+                        <span class="stats-value" id="accuracy">0%</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Sequência Atual:</span>
+                        <span class="stats-value" id="currentStreak">0</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Melhor Sequência:</span>
+                        <span class="stats-value" id="bestStreak">0</span>
+                    </div>
+                </div>
+
+                <!-- Painel de Resultado -->
+                <div class="result-panel hidden" id="resultPanel">
+                    <!-- Resultados aparecerão aqui -->
+                </div>
+            </div>
         </div>
 
         <!-- Ranking -->
@@ -380,6 +631,7 @@
     <script>
         let currentPlayerId = null;
         let currentImageData = null;
+        let currentPhoto = null;
 
         // Criar jogador
         async function createPlayer() {
@@ -630,6 +882,174 @@
             } catch (error) {
                 console.error('Erro ao carregar ranking:', error);
             }
+        }
+
+        // Funções para o jogo de descrições de fotos
+        async function loadNewPhoto() {
+            try {
+                const response = await fetch('/api/photo_game/random_photo');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPhoto = result.photo;
+                    
+                    // Exibir foto
+                    const photoContainer = document.getElementById('photoContainer');
+                    if (currentPhoto.image_data) {
+                        // Usar imagem em base64
+                        photoContainer.innerHTML = `
+                            <img src="${currentPhoto.image_data}" alt="${currentPhoto.name}" class="photo-image">
+                        `;
+                    } else {
+                        // Fallback para caminho de arquivo
+                        const imageUrl = currentPhoto.image_path.replace(/\\/g, '/');
+                        photoContainer.innerHTML = `
+                            <img src="${imageUrl}" alt="${currentPhoto.name}" class="photo-image">
+                        `;
+                    }
+                    
+                    // Exibir informações da foto
+                    document.getElementById('photoName').textContent = currentPhoto.name;
+                    document.getElementById('photoDifficulty').textContent = `Dificuldade: ${currentPhoto.difficulty} • Pontos: ${currentPhoto.points}`;
+                    document.getElementById('photoInfo').classList.remove('hidden');
+                    
+                    // Habilitar botão de envio
+                    document.getElementById('submitDescriptionBtn').disabled = false;
+                    
+                    // Limpar descrição anterior
+                    document.getElementById('descriptionInput').value = '';
+                    
+                    // Esconder resultado anterior
+                    document.getElementById('resultPanel').classList.add('hidden');
+                    
+                } else {
+                    alert('Erro ao carregar foto: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+
+        async function submitDescription() {
+            if (!currentPhoto) {
+                alert('Por favor, carregue uma foto primeiro!');
+                return;
+            }
+
+            const description = document.getElementById('descriptionInput').value.trim();
+            if (!description) {
+                alert('Por favor, escreva uma descrição!');
+                return;
+            }
+
+            // Desabilitar botão durante o processamento
+            document.getElementById('submitDescriptionBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/photo_game/submit_description', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        description: description
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayDescriptionResult(result);
+                    loadPhotoGameStats();
+                } else {
+                    alert('Erro ao processar descrição: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            } finally {
+                document.getElementById('submitDescriptionBtn').disabled = false;
+            }
+        }
+
+        function displayDescriptionResult(result) {
+            const resultPanel = document.getElementById('resultPanel');
+            
+            const keywordsHtml = result.keywords_found.map(keyword => 
+                `<span class="keyword-tag">${keyword}</span>`
+            ).join('');
+
+            resultPanel.innerHTML = `
+                <h3>📊 Resultado da Avaliação</h3>
+                
+                <div class="result-item">
+                    <div class="result-label">Status:</div>
+                    <div>${result.is_correct ? '✅ Acertou!' : '❌ Tente novamente'}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Pontuação Final:</div>
+                    <div>${(result.final_score * 100).toFixed(1)}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Similaridade:</div>
+                    <div>${(result.similarity_score * 100).toFixed(1)}%</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Palavras-chave encontradas:</div>
+                    <div>${(result.keyword_score * 100).toFixed(1)}%</div>
+                    <div class="keywords-found">${keywordsHtml}</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Pontos ganhos:</div>
+                    <div>${result.points_earned} pontos</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Descrição oficial:</div>
+                    <div>${result.official_description}</div>
+                </div>
+                
+                <div class="feedback ${result.is_correct ? '' : 'error'}">
+                    <strong>💬 Feedback:</strong><br>
+                    ${result.feedback}
+                </div>
+            `;
+            
+            resultPanel.classList.remove('hidden');
+        }
+
+        async function loadPhotoGameStats() {
+            try {
+                const response = await fetch('/api/photo_game/stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.stats;
+                    document.getElementById('totalAttempts').textContent = stats.total_attempts;
+                    document.getElementById('totalCorrect').textContent = stats.total_correct;
+                    document.getElementById('accuracy').textContent = (stats.accuracy * 100).toFixed(1) + '%';
+                    document.getElementById('currentStreak').textContent = stats.current_streak;
+                    document.getElementById('bestStreak').textContent = stats.best_streak;
+                    
+                    document.getElementById('photoGameStats').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Função para alternar entre abas
+        function switchTab(tabName) {
+            // Remover classe active de todas as abas e conteúdos
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Adicionar classe active à aba selecionada
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
         }
 
         // Carregar ranking inicial

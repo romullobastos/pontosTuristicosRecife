@@ -1,0 +1,209 @@
+[
+  {
+    "id": "marco_zero_1",
+    "image_path": "data/recife_historic/marco_zero/marco-zero-6-1030x579.jpeg",
+    "name": "Marco Zero",
+    "official_description": "Praça mais famosa do Recife, ponto onde a cidade começou em 1537. Tem chão de pedra portuguesa e vista linda para o mar.",
+    "keywords": ["praça", "marco zero", "recife antigo", "pedra portuguesa", "mar", "histórico", "fundação", "1537", "turismo", "ponto turístico", "recife", "foto", "centro histórico"],
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "id": "marco_zero_2", 
+    "image_path": "data/recife_historic/marco_zero/fonte-getty-images-reproducao-10.jpeg",
+    "name": "Marco Zero - Vista Panorâmica",
+    "official_description": "Vista de cima do Marco Zero mostrando a praça, o mar e os prédios antigos ao redor. Um dos lugares mais visitados da cidade.",
+    "keywords": ["vista panorâmica", "praça", "recife antigo", "mar", "prédios históricos", "fotografia", "ponto turístico", "paisagem", "recife", "centro"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "casa_cultura_1",
+    "image_path": "data/recife_historic/casa_da_cultura/bdf-20250516-070544-8be936-750x400.jpeg",
+    "name": "Casa da Cultura",
+    "official_description": "Antiga cadeia construída em 1855 e transformada em centro cultural em 1976. Hoje abriga lojas e exposições de arte local.",
+    "keywords": ["casa da cultura", "prédio histórico", "casa de detenção", "centro cultural", "arte", "história", "arquitetura colonial", "turismo", "1855", "1976", "recife antigo"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "casa_cultura_2",
+    "image_path": "data/recife_historic/casa_da_cultura/download.jpeg",
+    "name": "Casa da Cultura - Fachada",
+    "official_description": "Fachada principal da Casa da Cultura, com estilo colonial e antigas celas transformadas em lojinhas de artesanato.",
+    "keywords": ["fachada", "arquitetura colonial", "celas", "artesanato", "cultura", "histórico", "lojas", "turismo", "casa da cultura", "recife"],
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "id": "forte_cinco_pontas_1",
+    "image_path": "data/recife_historic/forte_das_cinco_pontas/images.jpeg",
+    "name": "Forte das Cinco Pontas",
+    "official_description": "Forte construído pelos holandeses em 1630 com formato de estrela de cinco pontas. Servia para proteger a cidade.",
+    "keywords": ["forte", "cinco pontas", "holandeses", "1630", "militar", "defesa", "fortaleza", "histórico", "recife antigo", "turismo", "arquitetura militar"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "forte_cinco_pontas_2",
+    "image_path": "data/recife_historic/forte_das_cinco_pontas/museu-do-recife-forte-das-cinco-pontas-foto-arthur-de-souza-31.jpg",
+    "name": "Forte das Cinco Pontas - Museu",
+    "official_description": "Dentro do Forte das Cinco Pontas funciona o Museu da Cidade do Recife, com exposições sobre a história local.",
+    "keywords": ["museu", "cidade do recife", "história", "colonial", "forte", "cinco pontas", "cultura", "turismo", "arquitetura militar", "patrimônio"],
+    "difficulty": "hard",
+    "points": 20
+  },
+  {
+    "id": "igreja_madre_deus_1",
+    "image_path": "data/recife_historic/igreja_madre_de_deus/01-Igreja-Madre-de-Deus-no-Bairro-do-Recife-Credito-Daniel-Tavares-PCR-1024x680.jpg",
+    "name": "Igreja Madre de Deus",
+    "official_description": "Igreja do século XVIII com arquitetura barroca, muito bonita e importante para a história religiosa do Recife.",
+    "keywords": ["igreja", "madre de deus", "barroca", "religiosa", "século XVIII", "recife antigo", "histórica", "cultura", "turismo", "arquitetura"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "igreja_madre_deus_2",
+    "image_path": "data/recife_historic/igreja_madre_de_deus/madre-de-deus.jpg",
+    "name": "Igreja Madre de Deus - Interior",
+    "official_description": "Interior da Igreja Madre de Deus com altar dourado e decoração barroca cheia de detalhes artísticos.",
+    "keywords": ["interior", "barroca", "altar dourado", "arte", "igreja", "colonial", "religiosa", "recife", "histórico", "detalhes"],
+    "difficulty": "hard",
+    "points": 20
+  },
+  {
+    "id": "igreja_carmo_1",
+    "image_path": "data/recife_historic/igreja_nossa_senhora_do_carmo/Basílica_do_Carmo_-_Recife_(PE).jpg",
+    "name": "Basílica do Carmo",
+    "official_description": "Igreja imponente com estilo barroco e torre alta, dedicada a Nossa Senhora do Carmo. Um dos templos mais importantes da cidade.",
+    "keywords": ["basílica", "nossa senhora do carmo", "igreja", "barroca", "torre alta", "histórica", "religiosa", "recife", "turismo", "século XVIII"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "igreja_carmo_2",
+    "image_path": "data/recife_historic/igreja_nossa_senhora_do_carmo/Basílica_do_Carmo_e_Ordem_Terceira_do_Carmo_-_Recife,_Brasil.jpg",
+    "name": "Basílica do Carmo - Complexo",
+    "official_description": "Conjunto da Basílica do Carmo com a Ordem Terceira, formando um belo exemplo da arquitetura barroca do século XVIII.",
+    "keywords": ["complexo", "ordem terceira", "arquitetônico", "barroco", "século XVIII", "igreja", "religiosa", "história", "recife", "turismo"],
+    "difficulty": "hard",
+    "points": 20
+  },
+  {
+    "id": "igreja_santo_antonio_1",
+    "image_path": "data/recife_historic/igreja_santo_antonio/Igreja_do_Santíssimo_Sacramento_de_Santo_Antônio,_Recife_(PE).jpg",
+    "name": "Igreja Santo Antônio",
+    "official_description": "Igreja do Santíssimo Sacramento de Santo Antônio, com estilo colonial e grande valor histórico e religioso.",
+    "keywords": ["igreja", "santo antônio", "colonial", "religiosa", "histórica", "recife", "cultura", "turismo", "sacramento", "patrimônio"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "igreja_santo_antonio_2",
+    "image_path": "data/recife_historic/igreja_santo_antonio/setembro24conventosantoantonio.jpeg",
+    "name": "Convento Santo Antônio",
+    "official_description": "Convento ligado à Igreja de Santo Antônio, com estilo colonial e parte importante da história religiosa do Recife.",
+    "keywords": ["convento", "santo antônio", "colonial", "religioso", "histórico", "recife", "igreja", "arquitetura", "turismo", "patrimônio"],
+    "difficulty": "hard",
+    "points": 20
+  },
+  {
+    "id": "igreja_sao_pedro_1",
+    "image_path": "data/recife_historic/igreja_sao_pedro_dos_clerigos/Concatedral_de_São_Pedro_dos_Clérigos_-_Recife,_Pernambuco,_Brasil.jpg",
+    "name": "Concatedral São Pedro dos Clérigos",
+    "official_description": "Construída entre 1728 e 1782, a Concatedral São Pedro dos Clérigos tem uma bela torre e fachada barroca impressionante.",
+    "keywords": ["concatedral", "são pedro dos clérigos", "barroca", "igreja", "religiosa", "histórica", "torre", "arquitetura", "recife", "1728", "1782"],
+    "difficulty": "hard",
+    "points": 20
+  },
+  {
+    "id": "igreja_sao_pedro_2",
+    "image_path": "data/recife_historic/igreja_sao_pedro_dos_clerigos/Concatedral_de_São_Pedro_dos_Clérigos,_Recife.jpg",
+    "name": "Concatedral São Pedro - Vista Lateral",
+    "official_description": "Vista lateral da Concatedral mostrando sua torre barroca e o estilo colonial típico das igrejas antigas do Recife.",
+    "keywords": ["vista lateral", "torre barroca", "igreja", "colonial", "concatedral", "religiosa", "recife antigo", "arquitetura", "turismo", "histórico"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "mercado_sao_jose_1",
+    "image_path": "data/recife_historic/mercado_sao_jose/mercado-de-sao-jose-foto-alfeu-tavares-01.jpg",
+    "name": "Mercado São José",
+    "official_description": "Mercado público mais tradicional do Recife, com estrutura de ferro e muitas barracas de comida e artesanato.",
+    "keywords": ["mercado", "são josé", "público", "histórico", "ferro", "comércio", "artesanato", "comida", "cultura", "turismo", "recife"],
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "id": "palacio_justica_1",
+    "image_path": "data/recife_historic/palacio_da_justica/entrada.jpg",
+    "name": "Palácio da Justiça - Entrada",
+    "official_description": "Entrada principal do Palácio da Justiça, prédio elegante com estilo neoclássico, sede do Tribunal de Justiça de Pernambuco.",
+    "keywords": ["palácio da justiça", "tribunal", "pernambuco", "neoclássico", "arquitetura", "entrada", "histórico", "institucional", "recife", "turismo"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "palacio_justica_2",
+    "image_path": "data/recife_historic/palacio_da_justica/images.jpeg",
+    "name": "Palácio da Justiça - Fachada",
+    "official_description": "Fachada principal do Palácio da Justiça, exemplo marcante da arquitetura neoclássica no centro do Recife.",
+    "keywords": ["fachada", "neoclássico", "palácio", "justiça", "arquitetura", "recife", "institucional", "histórico", "turismo", "centro"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "rua_aurora_1",
+    "image_path": "data/recife_historic/rua_aurora/2e8f290dea089b813bc80123cfbcd754.jpeg",
+    "name": "Rua da Aurora",
+    "official_description": "Rua histórica às margens do Rio Capibaribe, famosa pelos casarões coloridos e pela arquitetura colonial.",
+    "keywords": ["rua da aurora", "recife", "histórica", "colonial", "cultural", "casarões", "rio capibaribe", "turismo", "arquitetura", "foto"],
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "id": "rua_aurora_2",
+    "image_path": "data/recife_historic/rua_aurora/Recife-Rua-da-Aurora-Imagem-Fundarpe.jpg",
+    "name": "Rua da Aurora - Vista Completa",
+    "official_description": "Vista completa da Rua da Aurora mostrando a arquitetura colonial, casarões históricos e o calçamento tradicional.",
+    "keywords": ["vista completa", "rua da aurora", "arquitetura colonial", "casarões históricos", "calçamento tradicional", "rio", "recife antigo", "patrimônio", "história", "beleza"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "rua_bom_jesus_1",
+    "image_path": "data/recife_historic/rua_do_bom_jesus/12-28.jpg",
+    "name": "Rua do Bom Jesus",
+    "official_description": "Uma das ruas mais antigas e bonitas do Recife Antigo, com casas coloridas e clima histórico.",
+    "keywords": ["rua do bom jesus", "recife antigo", "casas coloridas", "colonial", "histórica", "cultural", "turismo", "foto", "arquitetura", "centro"],
+    "difficulty": "easy",
+    "points": 10
+  },
+  {
+    "id": "rua_bom_jesus_2",
+    "image_path": "data/recife_historic/rua_do_bom_jesus/Bom_Jesus_street,_Old_Recife_-_Recife,_Pernambuco,_Brazil(3).jpg",
+    "name": "Rua do Bom Jesus - Detalhes",
+    "official_description": "Detalhes da Rua do Bom Jesus com suas fachadas coloridas e charme colonial, símbolo do Recife Antigo.",
+    "keywords": ["rua do bom jesus", "fachadas", "coloridas", "colonial", "histórico", "recife antigo", "turismo", "arquitetura", "foto", "cultura"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "teatro_santa_isabel_1",
+    "image_path": "data/recife_historic/teatro_santa_isabel/Teatro_Santa_Isabel_-_Recife,_vista_frontal.jpeg",
+    "name": "Teatro Santa Isabel",
+    "official_description": "Um dos teatros mais bonitos do Brasil, com estilo neoclássico e palco de grandes apresentações culturais.",
+    "keywords": ["teatro", "santa isabel", "neoclássico", "cultura", "histórico", "recife", "arte", "turismo", "patrimônio", "arquitetura"],
+    "difficulty": "medium",
+    "points": 15
+  },
+  {
+    "id": "teatro_santa_isabel_2",
+    "image_path": "data/recife_historic/teatro_santa_isabel/Teatro-Santa-Isabel-Imagem-Rodrigojordy.jpg",
+    "name": "Teatro Santa Isabel - Vista Frontal",
+    "official_description": "Vista frontal do Teatro Santa Isabel mostrando sua fachada neoclássica e beleza arquitetônica.",
+    "keywords": ["teatro", "santa isabel", "fachada", "neoclássico", "arquitetura", "recife", "cultura", "histórico", "foto", "turismo"],
+    "difficulty": "medium",
+    "points": 15
+  }
+]

@@ -18,6 +18,7 @@ import io
 # Importar nossos módulos
 from models.multimodal_model import EducationalMultimodalModel
 from game.gamification import GamificationSystem
+from game.photo_description_game import PhotoDescriptionGame
 import sys
 sys.path.append('training')
 from improved_recife_trainer import ImprovedRecifeHistoricTrainer
@@ -36,6 +37,7 @@ class EducationalGame:
         # Inicializar componentes
         self.tokenizer = SimpleTokenizer()
         self.gamification = GamificationSystem()
+        self.photo_description_game = PhotoDescriptionGame()
         
         # Inicializar treinador MELHORADO de pontos históricos do Recife
         self.recife_trainer = ImprovedRecifeHistoricTrainer()
@@ -476,7 +478,7 @@ class EducationalGame:
         return min(score, 5)  # Máximo de 5 pontos
 
 # Configuração da aplicação Flask
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # Instanciar o jogo
@@ -599,6 +601,84 @@ def get_player_stats():
     """Retorna estatísticas do jogador"""
     player_name = request.args.get('player_name', 'Jogador')
     return jsonify(game.gamification.get_player_stats(player_name))
+
+# Rotas para o jogo de descrições de fotos
+@app.route('/api/photo_game/random_photo', methods=['GET'])
+def get_random_photo():
+    """Retorna uma foto aleatória para o jogo de descrições"""
+    try:
+        photo = game.photo_description_game.get_random_photo()
+        if photo:
+            # Ler imagem e converter para base64
+            import base64
+            image_path = photo['image_path']
+            
+            try:
+                with open(image_path, 'rb') as img_file:
+                    img_data = img_file.read()
+                    img_base64 = base64.b64encode(img_data).decode('utf-8')
+                    photo['image_data'] = f"data:image/jpeg;base64,{img_base64}"
+            except Exception as e:
+                print(f"Erro ao carregar imagem: {e}")
+                photo['image_data'] = None
+            
+            return jsonify({
+                'success': True,
+                'photo': photo
+            })
+        else:
+            return jsonify({'error': 'Nenhuma foto disponível'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/photo_game/submit_description', methods=['POST'])
+def submit_description():
+    """Submete descrição do usuário para avaliação"""
+    try:
+        data = request.json
+        description = data.get('description', '')
+        
+        if not description.strip():
+            return jsonify({'error': 'Descrição não pode estar vazia'}), 400
+        
+        result = game.photo_description_game.submit_description(description)
+        
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 400
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/photo_game/stats', methods=['GET'])
+def get_photo_game_stats():
+    """Retorna estatísticas do jogo de descrições"""
+    try:
+        stats = game.photo_description_game.get_game_stats()
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/photo_game/reset', methods=['POST'])
+def reset_photo_game():
+    """Reseta o jogo de descrições"""
+    try:
+        game.photo_description_game.reset_game()
+        return jsonify({
+            'success': True,
+            'message': 'Jogo resetado com sucesso'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve arquivos estáticos incluindo imagens"""
+    return app.send_static_file(filename)
 
 if __name__ == '__main__':
     print("Iniciando servidor do Jogo Educacional de Pontos Historicos do Recife...")
