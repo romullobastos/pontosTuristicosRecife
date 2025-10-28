@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Chatbot Educacional - Recife Histórico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            height: 90vh;
+        }
+
+        /* SIDEBAR ESQUERDA - Perfil e Stats */
+        .sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .profile-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin: 0 auto 15px;
+        }
+
+        .profile-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .profile-level {
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .stats-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .achievements {
+            margin-top: 20px;
+        }
+
+        .achievements-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin: 5px;
+            font-weight: bold;
+        }
+
+        /* ÁREA CENTRAL - Chat */
+        .chat-area {
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            font-size: 1.5em;
+        }
+
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9ff;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .message.system {
+            background: #fff3cd;
+            color: #856404;
+            align-self: center;
+            text-align: center;
+            font-size: 0.9em;
+            padding: 10px 15px;
+        }
+
+        .message-time {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quick-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .image-upload-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload-btn:hover {
+            background: #764ba2;
+            transform: scale(1.1);
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+        }
+
+        #chatInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #sendBtn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* SIDEBAR DIREITA - Atividade e Conquistas */
+        .activity-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .activity-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .activity-icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .sidebar, .activity-sidebar {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div class="card player-setup" id="loginScreen" style="max-width: 400px; margin: auto;">
+        <h2 style="text-align: center; margin-bottom: 30px;">👤 Entrar no Jogo</h2>
+        <div class="input-group">
+            <label for="playerName">Nome do Jogador:</label>
+            <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
+        </div>
+        <button class="btn" style="width: 100%; margin-top: 20px;" onclick="createPlayer()">Iniciar Chatbot</button>
+    </div>
+
+    <!-- Interface Principal do Chatbot -->
+    <div class="chat-container hidden" id="chatbotScreen">
+        <!-- Sidebar Esquerda -->
+        <div class="sidebar">
+            <div class="profile-header">
+                <div class="profile-avatar" id="playerAvatar">👤</div>
+                <div class="profile-name" id="playerNameDisplay">Jogador</div>
+                <div class="profile-level">Nível <span id="playerLevel">1</span></div>
+            </div>
+
+            <div class="stats-item">
+                <span class="stats-label">XP:</span>
+                <span class="stats-value" id="playerXP">0</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">Precisão:</span>
+                <span class="stats-value" id="playerAccuracy">0%</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-label">Sequência:</span>
+                <span class="stats-value" id="playerStreak">0</span>
+            </div>
+
+            <div class="achievements">
+                <div class="achievements-title">🏆 Conquistas Recentes</div>
+                <div id="achievementsList">
+                    <p style="color: #999; font-size: 0.9em;">Complete desafios para ganhar conquistas!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área Central do Chat -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div>
+                    <h2>🤖 Assistente Educacional</h2>
+                    <div class="chat-status">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Mensagens aparecerão aqui -->
+            </div>
+
+            <div class="chat-input-area">
+                <div class="image-preview" id="imagePreviewContainer">
+                    <img id="imagePreview" alt="Preview">
+                </div>
+                <div class="input-container">
+                    <input type="file" id="imageInput" class="file-input" accept="image/*">
+                    <button class="image-upload-btn" onclick="document.getElementById('imageInput').click()">📷</button>
+                    <textarea id="chatInput" placeholder="Digite sua mensagem ou faça uma pergunta..." rows="1"></textarea>
+                    <button id="sendBtn" onclick="sendMessage()">📤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Direita -->
+        <div class="activity-sidebar">
+            <div class="section-title">📊 Atividades Recentes</div>
+            <div id="recentActivity">
+                <p style="color: #999; font-size: 0.9em;">Suas atividades aparecerão aqui...</p>
+            </div>
+
+            <div class="section-title" style="margin-top: 30px;">✨ Dicas Rápidas</div>
+            <div class="activity-item">
+                <span class="activity-icon">💡</span>
+                Envie uma foto de um local histórico do Recife para identificá-lo
+            </div>
+            <div class="activity-item">
+                <span class="activity-icon">📝</span>
+                Descreva o que você vê para ganhar pontos
+            </div>
+            <div class="activity-item">
+                <span class="activity-icon">🎯</span>
+                Acumule sequências para ganhar mais XP
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayerId = null;
+        let currentImageData = null;
+        let currentPhoto = null;
+
+        // Criar jogador
+        async function createPlayer() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Por favor, digite um nome!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/create_player', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPlayerId = result.player_id;
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('chatbotScreen').classList.remove('hidden');
+                    document.getElementById('playerNameDisplay').textContent = name;
+                    
+                    // Mensagem de boas-vindas
+                    addBotMessage("Olá! Eu sou seu assistente educacional! 🤖\n\nEstou aqui para te guiar pelos pontos históricos do Recife através de desafios interativos!\n\nVamos começar?");
+                    
+                    // Iniciar experiência gamificada
+                    setTimeout(() => {
+                        startGamifiedExperience();
+                    }, 2000);
+                    
+                    // Carregar estatísticas iniciais
+                    loadPlayerStats();
+                } else {
+                    alert('Erro ao criar jogador: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+
+        // Upload de imagem
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                document.getElementById('imagePreview').src = currentImageData;
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Adicionar mensagem do usuário
+        function addUserMessage(text, image = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            
+            let content = text;
+            if (image) {
+                content += `<br><img src="${image}" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">`;
+            }
+            
+            messageDiv.innerHTML = `
+                ${content}
+                <div class="message-time">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Adicionar mensagem do bot
+        function addBotMessage(text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            messageDiv.innerHTML = `
+                ${text}
+                <div class="message-time">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Adicionar mensagem do sistema
+        function addSystemMessage(text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            
+            messageDiv.innerHTML = text;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Adicionar indicador de digitação
+        function addTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Remover indicador de digitação
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) typingIndicator.remove();
+        }
+
+        // Enviar mensagem
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            const hasImage = currentImageData !== null;
+
+            if (!message && !hasImage) return;
+
+            // Limpar input
+            input.value = '';
+            
+            // Adicionar mensagem do usuário
+            addUserMessage(message || '📷 [Imagem enviada]', hasImage ? currentImageData : null);
+            
+            // Processar
+            addTypingIndicator();
+            
+            try {
+                if (hasImage) {
+                    // Verificar se está no modo identificação
+                    if (currentGameMode === 'identification') {
+                        // Modo identificação: comparar visualmente (SEM identificar)
+                        await processImageIdentification();
+                    } else if (message) {
+                        // Análise normal de imagem
+                        await processImageAnalysis(message);
+                    } else {
+                        // Análise normal sem mensagem
+                        await processImageAnalysis("Que local histórico é este?");
+                    }
+                } else {
+                    // Apenas pergunta de texto
+                    await processTextMessage(message);
+                }
+            } catch (error) {
+                addBotMessage("❌ Ops! Tive um problema. Por favor, tente novamente.");
+            } finally {
+                removeTypingIndicator();
+                currentImageData = null;
+                document.getElementById('imagePreviewContainer').style.display = 'none';
+            }
+        }
+
+        // Processar análise de imagem (modo normal - identificar local)
+        async function processImageAnalysis(question) {
+            try {
+                const response = await fetch('/api/process_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: currentImageData,
+                        question,
+                        player_id: currentPlayerId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addBotMessage(`
+                        <strong>🔍 Análise Completa com Deep Learning!</strong><br><br>
+                        
+                        <strong>🎯 Local Identificado:</strong> ${result.answer}<br><br>
+                        
+                        <strong>📖 História:</strong><br>
+                        ${result.explanation}<br><br>
+                    `);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        // Processar identificação de imagem (comparar visualmente com dataset)
+        async function processImageIdentification() {
+            if (!currentChallenge || !currentImageData) {
+                addBotMessage("❌ Erro: Foto não encontrada.");
+                return;
+            }
+
+            addTypingIndicator();
+
+            try {
+                // Calcular similaridade visual entre a foto enviada e as fotos do dataset
+                const compareResponse = await fetch('/api/compare_visual_similarity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_image: currentImageData,
+                        target_location: currentChallenge.id,
+                        player_id: currentPlayerId
+                    })
+                });
+
+                const compareResult = await compareResponse.json();
+                
+                if (compareResult.success) {
+                    const visualSimilarity = compareResult.similarity_score;
+                    const points_earned = compareResult.points_earned || 0;
+                    
+                    // Determinar emoji e status baseado na similaridade
+                    let emoji = '';
+                    let statusText = '';
+                    
+                    if (visualSimilarity >= 0.8) {
+                        emoji = '🎉';
+                        statusText = 'Excelente! Sua foto tem alta correspondência visual!';
+                    } else if (visualSimilarity >= 0.6) {
+                        emoji = '🎯';
+                        statusText = 'Muito bom! Sua foto corresponde bem ao local.';
+                    } else if (visualSimilarity >= 0.4) {
+                        emoji = '📸';
+                        statusText = 'Bom! Sua foto tem correspondência moderada.';
+                    } else if (visualSimilarity >= 0.2) {
+                        emoji = '⚠️';
+                        statusText = 'Foto aceita com baixa correspondência visual.';
+                    } else {
+                        emoji = '❌';
+                        statusText = 'Foto com correspondência muito baixa.';
+                    }
+
+                    addBotMessage(`
+                        <strong>🔍 Análise de Similaridade Visual!</strong><br><br>
+                        
+                        <strong>📊 Similaridade Visual:</strong> ${(visualSimilarity * 100).toFixed(1)}%<br>
+                        ${emoji} ${statusText}<br><br>
+                        
+                        <strong>💰 Pontos Ganhos:</strong> <strong>${points_earned} pontos</strong><br>
+                        <strong>📍 Local do Desafio:</strong> ${currentChallenge.name}<br><br>
+                        
+                        <small>💡 Quanto maior a similaridade, mais pontos você ganha!</small><br><br>
+                        
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
+                            <button class="quick-btn" onclick="showStats()">📊 Estatísticas</button>
+                        </div>
+                    `);
+                    
+                    loadPlayerStats();
+                    currentGameMode = null;
+                }
+            } catch (error) {
+                addBotMessage("❌ Erro ao processar identificação. Tente novamente.");
+                console.error('Erro:', error);
+            } finally {
+                removeTypingIndicator();
+            }
+        }
+
+        // Processar descrição de foto
+        async function processDescription(description) {
+            try {
+                const response = await fetch('/api/photo_game/submit_description', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mensagem de resultado
+                    let resultMessage = `
+                        <strong>${result.is_correct ? '🎉 Excelente!' : '📝 Boa tentativa!'}</strong><br><br>
+                        ${result.feedback}<br><br>
+                        <small>Similaridade: ${(result.final_score * 100).toFixed(1)}% • Pontos: ${result.points_earned}</small>
+                    `;
+                    
+                    addBotMessage(resultMessage);
+                    
+                    // Adicionar botão para nova foto
+                    addBotMessage(`
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="loadPhotoForDescription()">📸 Nova Foto</button>
+                            <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
+                        </div>
+                    `);
+                    
+                    // Limpar foto atual
+                    currentPhoto = null;
+                    document.getElementById('chatInput').placeholder = 'Digite sua mensagem...';
+                    
+                    loadPlayerStats();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        // Processar mensagem de texto
+        async function processTextMessage(message) {
+            const lowerMessage = message.toLowerCase();
+
+            // Verificar se está no modo mistério
+            if (currentGameMode === 'mystery' && currentChallenge) {
+                await processMysteryGuess(message);
+                return;
+            }
+
+            // Verificar se está no modo descrição
+            if (currentGameMode === 'description' && currentChallenge) {
+                await processDescriptionMode(message);
+                return;
+            }
+
+            // Se há foto ativa (legado), processar como descrição
+            if (currentPhoto) {
+                await processDescription(message);
+                return;
+            }
+
+            // Comandos do chatbot
+            if (lowerMessage.includes('foto') || lowerMessage.includes('nova foto') || lowerMessage.includes('descrever')) {
+                await loadPhotoForDescription();
+            } else if (lowerMessage.includes('ajuda') || lowerMessage.includes('help')) {
+                addBotMessage(`
+                    <strong>Como posso ajudá-lo?</strong><br><br>
+                    📷 <strong>Enviar foto</strong> - Envie uma foto de um local histórico para identificá-lo<br>
+                    📝 <strong>Descrever foto</strong> - Eu te mostro uma foto histórica para você descrever<br>
+                    📊 <strong>Estatísticas</strong> - Veja seu progresso e conquistas<br>
+                    🏆 <strong>Ranking</strong> - Veja os melhores jogadores<br><br>
+                    <small>Tente: "mostre uma foto" ou "quero descrever"</small>
+                `);
+            } else {
+                addBotMessage(`
+                    Olá! Eu sou seu assistente educacional para pontos históricos do Recife.<br><br>
+                    <strong>Como posso ajudá-lo?</strong><br>
+                    📷 Envie uma foto<br>
+                    📝 Digite "nova foto" para jogar<br>
+                    💬 Digite "ajuda" para ver opções<br><br>
+                    <small>Experimente descrever fotos históricas para ganhar pontos!</small>
+                `);
+            }
+        }
+
+        // Carregar foto para descrição
+        async function loadPhotoForDescription() {
+            try {
+                const response = await fetch('/api/photo_game/random_photo');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPhoto = result.photo;
+                    
+                    addBotMessage(`
+                        <strong>📸 Aqui está uma foto histórica do Recife!</strong><br><br>
+                        Descreva o que você vê nesta foto. Quanto mais detalhes, melhor!<br>
+                        <small>${currentPhoto.difficulty} • Pontos: ${currentPhoto.points}</small>
+                    `);
+                    
+                    // Mostrar foto
+                    if (currentPhoto.image_data) {
+                        addUserMessage('📷 [Foto do jogo]', currentPhoto.image_data);
+                    }
+                    
+                    // Adicionar input para descrição
+                    addBotMessage(`
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startDescription()">✍️ Escrever Descrição</button>
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                addBotMessage("❌ Erro ao carregar foto. Tente novamente.");
+            }
+        }
+
+        // Iniciar descrição de foto
+        function startDescription() {
+            if (!currentPhoto) {
+                addBotMessage("❌ Nenhuma foto ativa. Digite 'nova foto' para começar.");
+                return;
+            }
+
+            addBotMessage("📝 Escreva sua descrição sobre o que você vê na foto. Seja detalhado!");
+            
+            // Aguardar resposta do usuário (a descrição será enviada através do input normal)
+            document.getElementById('chatInput').placeholder = 'Descreva a foto histórica...';
+            document.getElementById('chatInput').focus();
+        }
+
+        // Carregar estatísticas
+        async function loadPlayerStats() {
+            if (!currentPlayerId) return;
+
+            try {
+                const response = await fetch(`/api/player_stats/${currentPlayerId}`);
+                const stats = await response.json();
+                
+                if (!stats.error) {
+                    document.getElementById('playerXP').textContent = stats.experience || 0;
+                    
+                    // Calcular precisão
+                    const accuracy = stats.total_attempts > 0 ? 
+                        (stats.total_correct / stats.total_attempts) * 100 : 0;
+                    document.getElementById('playerAccuracy').textContent = accuracy.toFixed(1) + '%';
+                    
+                    document.getElementById('playerStreak').textContent = stats.streak || 0;
+                    document.getElementById('playerLevel').textContent = stats.level || 1;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Mostrar estatísticas detalhadas
+        async function showStats() {
+            if (!currentPlayerId) return;
+
+            const response = await fetch(`/api/player_stats/${currentPlayerId}`);
+            const stats = await response.json();
+            
+            if (!stats.error) {
+                addBotMessage(`
+                    <strong>📊 Suas Estatísticas Detalhadas</strong><br><br>
+                    🎯 <strong>Tentativas:</strong> ${stats.total_attempts || 0}<br>
+                    ✅ <strong>Acertos:</strong> ${stats.total_correct || 0}<br>
+                    🎖️ <strong>Nível:</strong> ${stats.level || 1}<br>
+                    ⭐ <strong>XP:</strong> ${stats.experience || 0}<br>
+                    🔥 <strong>Sequência:</strong> ${stats.streak || 0}<br>
+                    🏆 <strong>Conquistas:</strong> ${stats.achievements || 0}
+                `);
+            }
+        }
+
+        // INÍCIO DA EXPERIÊNCIA GAMIFICADA UNIFICADA
+        let currentChallenge = null;
+        let challengesCompleted = 0;
+        let currentGameMode = null; // 'identification', 'description', 'mystery'
+
+        async function startGamifiedExperience() {
+            addBotMessage(`
+                <strong>🎮 Seja Bem-vindo ao Tour Virtual do Recife!</strong><br><br>
+                Vou te guiar pelos principais pontos históricos da cidade através de desafios interativos.<br><br>
+                
+                <strong>Como funciona:</strong><br>
+                📸 Você receberá fotos de locais históricos<br>
+                🔍 Escolha como interagir com cada desafio<br>
+                💬 Ganhe pontos e desbloqueie novos locais!<br><br>
+                
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="startNextChallenge()">🚀 Começar Tour</button>
+                    <button class="quick-btn" onclick="showHelp()">📖 Ver Regras</button>
+                </div>
+            `);
+        }
+
+        async function startNextChallenge() {
+            try {
+                const response = await fetch('/api/photo_game/random_photo');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentChallenge = result.photo;
+                    challengesCompleted++;
+                    
+                    addBotMessage(`
+                        <strong>🏛️ Desafio #${challengesCompleted}: ${currentChallenge.name}</strong><br><br>
+                        
+                        <strong>Escolha como quer interagir:</strong><br><br>
+                        
+                        1️⃣ <strong>Modo Foto</strong> - Tire uma foto do mesmo local e compare comigo<br>
+                        2️⃣ <strong>Modo Descrição</strong> - Descreva o que você vê nesta foto<br>
+                        3️⃣ <strong>Modo Mistério</strong> - Descubra o local sem dicas!<br><br>
+                        
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startIdentificationMode()">📷 Foto</button>
+                            <button class="quick-btn" onclick="startDescriptionMode()">✍️ Descrição</button>
+                            <button class="quick-btn" onclick="startMysteryMode()">❓ Mistério</button>
+                        </div>
+                    `);
+                    
+                    // Mostrar foto
+                    if (currentChallenge.image_data) {
+                        addUserMessage('📷 [Foto do desafio]', currentChallenge.image_data);
+                    }
+                }
+            } catch (error) {
+                addBotMessage("❌ Erro ao iniciar desafio. Tente novamente.");
+            }
+        }
+
+        async function startIdentificationMode() {
+            if (!currentChallenge) {
+                addBotMessage("❌ Nenhum desafio ativo.");
+                return;
+            }
+
+            currentGameMode = 'identification';
+            
+            // Pegar keywords da descrição para identificar o local
+            const photoInfo = await getPhotoInfo(currentChallenge.id);
+            
+            addBotMessage(`
+                <strong>📷 Modo Foto Ativado!</strong><br><br>
+                
+                <strong>Desafio:</strong><br>
+                📍 Tire uma foto do local: <strong>${currentChallenge.name}</strong><br><br>
+                
+                <strong>Como funciona:</strong><br>
+                📷 Você tira uma foto do mesmo local<br>
+                📤 Envie usando o botão 📷 ao lado do campo de mensagem<br>
+                🤖 Comparo sua foto com a foto do desafio usando Deep Learning<br>
+                📊 Sua pontuação será baseada na similaridade visual!<br><br>
+                
+                <strong>🎁 Recompensas por Similaridade:</strong><br>
+                🏆 ≥80%: ${currentChallenge.points * 1.5} pontos<br>
+                🥈 ≥60%: ${currentChallenge.points} pontos<br>
+                🥉 ≥40%: ${Math.floor(currentChallenge.points * 0.5)} pontos<br><br>
+                
+                <em>💡 Envie sua foto usando o botão 📷</em>
+            `);
+            
+            // Atualizar placeholder do input
+            document.getElementById('chatInput').placeholder = 'Clique em 📷 para enviar sua foto do local...';
+        }
+
+        // Buscar informações completas da foto
+        async function getPhotoInfo(photoId) {
+            try {
+                const response = await fetch(`/api/photo_game/get_photo/${photoId}`);
+                const result = await response.json();
+                return result.photo || null;
+            } catch (error) {
+                console.error('Erro ao buscar info:', error);
+                return null;
+            }
+        }
+
+        async function analyzeChallengePhoto() {
+            if (!currentChallenge || !currentChallenge.image_data) {
+                addBotMessage("❌ Erro ao processar foto.");
+                return;
+            }
+
+            // Usar a foto do desafio para análise
+            addTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/process_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image: currentChallenge.image_data,
+                        question: `Que local histórico do Recife é este? Descreva sua história e importância.`,
+                        player_id: currentPlayerId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addBotMessage(`
+                        <strong>🔍 Análise Completa!</strong><br><br>
+                        
+                        <strong>🎯 Local Identificado:</strong><br>
+                        ${result.answer}<br><br>
+                        
+                        <strong>📖 História e Importância:</strong><br>
+                        ${result.explanation}<br><br>
+                        
+                        <strong>✅ Desafio Completado!</strong><br>
+                        💰 Pontos ganhos: <strong>${currentChallenge.points} pontos</strong><br>
+                        🎖️ Confiança do modelo: ${result.confidence}<br>
+                        ⏱️ Tempo de resposta: ${result.response_time}<br><br>
+                        
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
+                            <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
+                        </div>
+                    `);
+                    
+                    loadPlayerStats();
+                } else {
+                    addBotMessage("❌ Erro ao analisar foto. Tente novamente.");
+                }
+            } catch (error) {
+                addBotMessage("❌ Erro de conexão. Tente novamente.");
+            } finally {
+                removeTypingIndicator();
+                currentGameMode = null;
+            }
+        }
+
+        async function startDescriptionMode() {
+            if (!currentChallenge) {
+                addBotMessage("❌ Nenhum desafio ativo.");
+                return;
+            }
+
+            currentGameMode = 'description';
+
+            addBotMessage(`
+                <strong>✍️ Modo Descrição Ativado!</strong><br><br>
+                Observe a foto acima e descreva detalhadamente o que você vê.<br><br>
+                
+                <strong>💡 Dicas para uma boa descrição:</strong><br>
+                • Elementos arquitetônicos (estilo colonial, barroco, etc.)<br>
+                • Cores e materiais (pedra, azulejo, madeira)<br>
+                • Características históricas (português, holandês, século)<br>
+                • Localização e contexto<br><br>
+                
+                <strong>🎁 Recompensas:</strong><br>
+                🏆 Alta similaridade (≥80%): <strong>${currentChallenge.points * 1.5} pontos</strong><br>
+                🥈 Boa descrição (≥60%): <strong>${currentChallenge.points} pontos</strong><br>
+                🥉 Tentativa (≥40%): <strong>${Math.floor(currentChallenge.points * 0.5)} pontos</strong><br><br>
+                
+                <em>Digite sua descrição no campo abaixo 👇</em>
+            `);
+        }
+
+        // Processar resposta do modo descrição
+        async function processDescriptionMode(description) {
+            if (!currentChallenge) {
+                addBotMessage("❌ Nenhum desafio ativo.");
+                return;
+            }
+
+            addTypingIndicator();
+
+            try {
+                const response = await fetch('/api/photo_game/submit_description', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        description,
+                        photo_id: currentChallenge.id,  // ID da foto do desafio
+                        player_id: currentPlayerId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addBotMessage(`
+                        <strong>${result.is_correct ? '🎉 Excelente Descrição!' : '📝 Boa Tentativa!'}</strong><br><br>
+                        ${result.feedback}<br><br>
+                        
+                        <strong>📊 Resultados:</strong><br>
+                        📈 Similaridade: ${(result.similarity_score * 100).toFixed(1)}%<br>
+                        🎯 Keywords encontradas: ${(result.keyword_score * 100).toFixed(1)}%<br>
+                        💰 <strong>Pontos ganhos: ${result.points_earned}</strong><br><br>
+                        
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
+                            <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
+                        </div>
+                    `);
+                    
+                    loadPlayerStats();
+                }
+            } catch (error) {
+                addBotMessage("❌ Erro ao processar descrição. Tente novamente.");
+            } finally {
+                removeTypingIndicator();
+                currentGameMode = null;
+            }
+        }
+
+        async function startMysteryMode() {
+            if (!currentChallenge) {
+                addBotMessage("❌ Nenhum desafio ativo.");
+                return;
+            }
+
+            currentGameMode = 'mystery';
+            
+            addBotMessage(`
+                <strong>❓ Modo Mistério!</strong><br><br>
+                Você precisa descobrir QUAL local histórico é este SEM ver a foto completa!<br><br>
+                
+                <strong>Regras:</strong><br>
+                🔐 A foto está oculta<br>
+                💬 Digite o nome do local que você acha que é<br>
+                🎁 Bônus de 2x pontos se acertar!<br><br>
+                
+                <strong>Dicas disponíveis:</strong><br>
+                📅 Ano de construção<br>
+                🏛️ Tipo de arquitetura<br>
+                📍 Localização<br><br>
+                
+                <em>Digite seu palpite no campo abaixo!</em><br><br>
+                
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="requestHint('year')">📅 Dica 1: Ano</button>
+                    <button class="quick-btn" onclick="requestHint('type')">🏛️ Dica 2: Tipo</button>
+                    <button class="quick-btn" onclick="requestHint('location')">📍 Dica 3: Localização</button>
+                </div>
+            `);
+        }
+
+        async function requestHint(type) {
+            if (!currentChallenge) return;
+
+            const hints = {
+                'year': "Dica de ano: Este local foi construído no século XVIII ou XIX",
+                'type': "Dica de tipo: É um prédio religioso ou cultural do Recife Antigo",
+                'location': "Dica de localização: Fica no centro histórico do Recife, próximo ao Marco Zero"
+            };
+
+            addBotMessage(hints[type] || "Sem dicas disponíveis.");
+        }
+
+        // Processar palpite do modo mistério
+        async function processMysteryGuess(guess) {
+            if (!currentChallenge) {
+                addBotMessage("❌ Nenhum desafio ativo.");
+                return;
+            }
+
+            const guessLower = guess.toLowerCase();
+            const correctName = currentChallenge.name.toLowerCase();
+            
+            // Verificar se acertou (comparação flexível)
+            let isCorrect = false;
+            let actualSimilarity = 0;
+            
+            // Comparação usando NLP (mesmo sistema de descrição)
+            try {
+                const response = await fetch('/api/photo_game/submit_description', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        description: guess,
+                        challenge_mode: true
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    actualSimilarity = result.final_score;
+                    // Considera acerto se similaridade >= 50%
+                    isCorrect = actualSimilarity >= 0.5;
+                }
+            } catch (error) {
+                console.error('Erro ao processar palpite:', error);
+            }
+            
+            // Feedback
+            if (isCorrect) {
+                // Duplicar pontos para modo mistério
+                const bonusPoints = currentChallenge.points * 2;
+                
+                addBotMessage(`
+                    <strong>🎉 ACERTOU!!!</strong><br><br>
+                    É o <strong>${currentChallenge.name}</strong>!<br><br>
+                    Parabéns! Você identificou corretamente o local histórico!<br>
+                    
+                    <strong>🎁 Recompensas:</strong><br>
+                    ✅ Bônus de 2x pontos: <strong>${bonusPoints} pontos</strong><br>
+                    🏆 Modo mistério completado!<br><br>
+                `);
+                
+                // Mostrar foto completa
+                addUserMessage('📷 [Foto revelada]', currentChallenge.image_data);
+                
+                // Próximo desafio
+                setTimeout(() => {
+                    addBotMessage(`
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
+                            <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
+                        </div>
+                    `);
+                }, 1500);
+            } else {
+                addBotMessage(`
+                    <strong>❌ Não foi desta vez...</strong><br><br>
+                    Sua resposta: "${guess}"<br>
+                    Resposta correta: <strong>${currentChallenge.name}</strong><br><br>
+                    Não desista! Tente novamente ou peça mais dicas!<br><br>
+                    
+                    <div class="quick-buttons">
+                        <button class="quick-btn" onclick="requestHint('location')">📍 Pedir Mais Dicas</button>
+                        <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
+                    </div>
+                `);
+            }
+            
+            // Limpar modo
+            currentGameMode = null;
+        }
+
+        function showHelp() {
+            addBotMessage(`
+                <strong>📖 Regras do Jogo</strong><br><br>
+                
+                <strong>Objetivo:</strong><br>
+                Explore os principais pontos históricos do Recife através de desafios interativos!<br><br>
+                
+                <strong>Três Modos de Jogo:</strong><br><br>
+                
+                📷 <strong>Modo Foto:</strong><br>
+                - Você tira uma foto do mesmo local<br>
+                - Sistema compara as duas fotos visualmente<br>
+                - Sua pontuação baseada na similaridade<br>
+                - Quanto mais parecida, mais pontos!<br><br>
+                
+                ✍️ <strong>Modo Descrição:</strong><br>
+                - Veja uma foto histórica<br>
+                - Descreva o que você observa<br>
+                - Sistema avalia com IA/NLP<br>
+                - Pontos baseados na qualidade!<br><br>
+                
+                ❓ <strong>Modo Mistério:</strong><br>
+                - Desafio sem ver a foto completa<br>
+                - Adivinhe o local histórico<br>
+                - Use dicas para ajudar<br>
+                - Bônus de pontos se acertar!<br><br>
+                
+                <strong>Sistema de Pontos:</strong><br>
+                💰 Ganhe pontos por cada desafio<br>
+                🎖️ Suba de nível acumulando XP<br>
+                🔥 Mantenha sequências para bônus<br>
+                🏆 Desbloqueie conquistas!<br><br>
+                
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="startNextChallenge()">🚀 Começar Jogo</button>
+                </div>
+            `);
+        }
+
+        // Enter para enviar
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('chatInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+    </script>
+</body>
+</html>
+

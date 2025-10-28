@@ -30,10 +30,7 @@ class EducationalDataset(Dataset):
         """Carrega os dados do dataset"""
         # Estrutura esperada:
         # data/
-        #   ├── images/
-        #   │   ├── animals/
-        #   │   ├── plants/
-        #   │   └── objects/
+        #   ├── recife_historic/
         #   └── annotations.json
         
         annotations_path = os.path.join(self.data_path, "annotations.json")
@@ -49,31 +46,31 @@ class EducationalDataset(Dataset):
         """Cria um dataset de exemplo para demonstração"""
         sample_data = [
             {
-                "image_path": "images/animals/dog1.jpg",
-                "question": "Que animal é este?",
-                "answer": "Este é um cão",
-                "explanation": "Os cães são mamíferos domésticos da família Canidae",
-                "category": "animals",
-                "difficulty": "easy",
-                "points": 10
+                "image_path": "data/recife_historic/marco_zero/marco-zero-6-1030x579.jpeg",
+                "question": "Que local histórico é este?",
+                "answer": "Este é o Marco Zero do Recife",
+                "explanation": "O Marco Zero é a praça principal do Recife Antigo, onde a cidade foi fundada em 1537",
+                "category": "historic_location",
+                "difficulty": "medium",
+                "points": 20
             },
             {
-                "image_path": "images/plants/flower1.jpg", 
-                "question": "Que tipo de planta é esta?",
-                "answer": "Esta é uma flor",
-                "explanation": "As flores são estruturas reprodutivas das plantas",
-                "category": "plants",
-                "difficulty": "easy",
-                "points": 10
+                "image_path": "data/recife_historic/casa_da_cultura/bdf-20250516-070544-8be936-750x400.jpeg", 
+                "question": "Que local histórico é este?",
+                "answer": "Esta é a Casa da Cultura",
+                "explanation": "A Casa da Cultura é um importante centro cultural do Recife, localizado no antigo prédio da Casa de Detenção",
+                "category": "historic_location",
+                "difficulty": "medium",
+                "points": 20
             },
             {
-                "image_path": "images/objects/car1.jpg",
-                "question": "Que objeto é este?",
-                "answer": "Este é um carro",
-                "explanation": "Os carros são veículos automotores para transporte",
-                "category": "objects",
-                "difficulty": "easy",
-                "points": 10
+                "image_path": "data/recife_historic/forte_das_cinco_pontas/museu-do-recife-forte-das-cinco-pontas-foto-arthur-de-souza-31.jpg",
+                "question": "Que local histórico é este?",
+                "answer": "Este é o Forte das Cinco Pontas",
+                "explanation": "O Forte das Cinco Pontas é uma fortaleza histórica construída pelos holandeses em 1630",
+                "category": "historic_location",
+                "difficulty": "hard",
+                "points": 25
             }
         ]
         
@@ -147,9 +144,9 @@ class SimpleTokenizer:
         # Palavras comuns em português
         common_words = [
             "que", "é", "este", "esta", "um", "uma", "de", "da", "do", "das", "dos",
-            "animal", "planta", "objeto", "cão", "gato", "pássaro", "flor", "árvore",
-            "carro", "casa", "livro", "mesa", "cadeira", "água", "sol", "lua",
-            "verde", "azul", "vermelho", "amarelo", "grande", "pequeno", "alto", "baixo"
+            "recife", "histórico", "local", "praça", "igreja", "forte", "teatro", "marco",
+            "casa", "rua", "avenida", "ponte", "praia", "cultura", "centro", "história",
+            "barroca", "colonial", "neoclássica", "arquitetura", "monumento", "turismo", "cidade"
         ]
         
         for i, word in enumerate(common_words):

@@ -1,6 +1,6 @@
 """
 Sistema de Treinamento Real para Reconhecimento de Imagens
-Treina um modelo CNN do zero para identificar animais e objetos
+Treina um modelo CNN do zero para identificar locais históricos do Recife
 """
 
 import torch
@@ -32,19 +32,18 @@ class ImageDataset(Dataset):
         print("Carregando dataset de imagens...")
         
         # Criar diretórios se não existirem
-        categories = ['animais', 'plantas', 'objetos', 'paisagens']
+        categories = ['recife_historic']
         for category in categories:
             category_dir = self.data_dir / category
             category_dir.mkdir(parents=True, exist_ok=True)
         
-        # Mapear classes
+        # Mapear classes - locais históricos do Recife
         self.class_to_idx = {
-            'cavalo': 0, 'zebra': 1, 'elefante': 2, 'leão': 3, 'cão': 4, 'gato': 5,
-            'pássaro': 6, 'arara': 7, 'cardeal': 8, 'peixe': 9, 'cobra': 10,
-            'vaca': 11, 'touro': 12, 'veado': 13,
-            'flor': 14, 'rosa': 15, 'girassol': 16, 'árvore': 17, 'tronco': 18,
-            'carro': 19, 'bicicleta': 20, 'ferramenta': 21, 'mesa': 22, 'cadeira': 23,
-            'montanha': 24, 'lago': 25, 'floresta': 26, 'deserto': 27, 'céu': 28
+            'marco_zero': 0, 'casa_da_cultura': 1, 'forte_das_cinco_pontas': 2,
+            'igreja_madre_de_deus': 3, 'igreja_nossa_senhora_do_carmo': 4,
+            'igreja_santo_antonio': 5, 'igreja_sao_pedro_dos_clerigos': 6,
+            'marco_zero': 7, 'mercado_sao_jose': 8, 'palacio_da_justica': 9,
+            'rua_aurora': 10, 'rua_do_bom_jesus': 11, 'teatro_santa_isabel': 12
         }
         
         # Carregar imagens existentes
@@ -246,18 +245,16 @@ def create_sample_dataset():
     data_dir = Path('data/training_images')
     data_dir.mkdir(parents=True, exist_ok=True)
     
-    # Criar imagens sintéticas para cada classe
+    # Criar imagens sintéticas para cada classe - locais históricos do Recife
     classes = {
-        'cavalo': (139, 69, 19),      # Marrom
-        'zebra': (255, 255, 255),     # Branco
-        'elefante': (128, 128, 128),  # Cinza
-        'leão': (255, 165, 0),        # Laranja
-        'cão': (160, 82, 45),         # Marrom escuro
-        'gato': (105, 105, 105),      # Cinza escuro
-        'carro': (192, 192, 192),     # Prata
-        'bicicleta': (255, 0, 0),     # Vermelho
-        'flor': (255, 192, 203),      # Rosa
-        'árvore': (34, 139, 34),      # Verde
+        'marco_zero': (139, 69, 19),           # Marrom (calçada portuguesa)
+        'casa_da_cultura': (105, 105, 105),     # Cinza (arquitetura antiga)
+        'forte_das_cinco_pontas': (160, 82, 45),# Marrom escuro (pedra)
+        'teatro_santa_isabel': (192, 192, 192), # Branco/Prata (neoclássico)
+        'igreja_madre_de_deus': (255, 250, 240), # Bege (barroca)
+        'igreja_nossa_senhora_do_carmo': (139, 0, 0), # Vermelho escuro
+        'palacio_da_justica': (245, 245, 220), # Branco/Bege (institucional)
+        'rua_do_bom_jesus': (218, 165, 32),    # Dourado (casas coloridas)
     }
     
     for class_name, color in classes.items():

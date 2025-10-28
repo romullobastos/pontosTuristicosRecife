@@ -24,11 +24,13 @@ class AdvancedImageTransforms:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         
-        # Transformações de treinamento com augmentation (reduzido)
+        # Transformações de treinamento com augmentation MELHORADO
         self.train_transforms = transforms.Compose([
-            transforms.Resize((image_size, image_size)),  # Tamanho fixo
-            transforms.RandomHorizontalFlip(p=0.2),  # Flip horizontal reduzido
-            transforms.ColorJitter(brightness=0.1, contrast=0.1),  # Cor reduzida
+            transforms.Resize((image_size, image_size)),
+            transforms.RandomHorizontalFlip(p=0.5),  # Mais flip para diferentes ângulos
+            transforms.RandomRotation(10),  # Rotação para simular diferentes ângulos
+            transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.1),
+            transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),  # Translação
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -47,19 +49,24 @@ class AdvancedImageTransforms:
             image = transforms.ToPILImage()(image)
         
         # Aplicar filtros específicos para pontos históricos
-        if random.random() < 0.3:
+        if random.random() < 0.5:
             # Filtro de nitidez para destacar detalhes arquitetônicos
             image = image.filter(ImageFilter.SHARPEN)
         
-        if random.random() < 0.2:
+        if random.random() < 0.4:
             # Ajuste de contraste para melhorar definição
             enhancer = ImageEnhance.Contrast(image)
-            image = enhancer.enhance(random.uniform(0.8, 1.2))
+            image = enhancer.enhance(random.uniform(0.7, 1.3))
         
-        if random.random() < 0.2:
+        if random.random() < 0.4:
             # Ajuste de brilho
             enhancer = ImageEnhance.Brightness(image)
-            image = enhancer.enhance(random.uniform(0.9, 1.1))
+            image = enhancer.enhance(random.uniform(0.8, 1.2))
+        
+        if random.random() < 0.3:
+            # Ajuste de saturação (útil para distinguir cores arquitetônicas)
+            enhancer = ImageEnhance.Color(image)
+            image = enhancer.enhance(random.uniform(0.8, 1.2))
         
         return image
 
@@ -443,6 +450,69 @@ class ImprovedRecifeHistoricTrainer:
             'historia': 'Local com importância histórica para a cidade',
             'caracteristicas': 'Arquitetura e características únicas'
         })
+    
+    def compare_images(self, img1, img2):
+        """
+        Compara duas imagens retornando similaridade (0-1)
+        Método: Classifica ambas as imagens e verifica se são do MESMO local histórico
+        """
+        self.model.eval()
+        
+        try:
+            # Processar ambas as imagens
+            img1_tensor = self.val_transform(img1).unsqueeze(0).to(self.device)
+            img2_tensor = self.val_transform(img2).unsqueeze(0).to(self.device)
+            
+            with torch.no_grad():
+                # Passar pelo modelo para obter predições
+                output1 = self.model(img1_tensor)
+                output2 = self.model(img2_tensor)
+                
+                # Obter probabilidades
+                probs1 = torch.nn.functional.softmax(output1, dim=1)
+                probs2 = torch.nn.functional.softmax(output2, dim=1)
+                
+                # Pegar as classes preditas
+                _, pred_class1 = torch.max(output1, 1)
+                _, pred_class2 = torch.max(output2, 1)
+                
+                # Pegar as probabilidades das classes preditas
+                confidence1 = probs1[0][pred_class1].item()
+                confidence2 = probs2[0][pred_class2].item()
+                
+                # Verificar se são da MESMA classe (mesmo local histórico)
+                same_location = (pred_class1 == pred_class2).item()
+                
+                if same_location:
+                    # São do mesmo local! Calcular similaridade baseada na média das confianças
+                    similarity = (confidence1 + confidence2) / 2
+                    
+                    # Se as confianças são altas, ambas estão bem classificadas
+                    if confidence1 > 0.7 and confidence2 > 0.7:
+                        similarity = min(0.95, similarity * 1.1)  # Boost para fotos bem classificadas
+                else:
+                    # São de locais diferentes! 
+                    # Calcular dissimilaridade baseada na diferença entre as predições
+                    diff = abs(confidence1 - confidence2)
+                    
+                    # Se uma foto tem confiança alta e a outra é claramente diferente
+                    if confidence1 > 0.8 or confidence2 > 0.8:
+                        similarity = 0.1  # Muito baixa similaridade
+                    else:
+                        # Ambas mal classificadas ou incertas
+                        similarity = 0.3  # Similaridade baixa
+                
+                # Garantir que está entre 0.1 e 0.95
+                similarity = max(0.1, min(0.95, similarity))
+                
+                return similarity
+                
+        except Exception as e:
+            print(f"Erro ao comparar imagens: {e}")
+            import traceback
+            traceback.print_exc()
+            # Retornar uma similaridade mínima em caso de erro
+            return 0.1
 
 if __name__ == "__main__":
     # Testar o sistema melhorado

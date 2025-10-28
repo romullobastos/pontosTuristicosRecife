@@ -85,6 +85,18 @@ class PhotoDescriptionGame:
             "points": self.current_photo["points"]
         }
     
+    def set_current_photo(self, photo_id: str) -> bool:
+        """Define a foto atual pelo ID"""
+        if not self.photos_data:
+            return False
+        
+        for photo in self.photos_data:
+            if photo["id"] == photo_id:
+                self.current_photo = photo
+                return True
+        
+        return False
+    
     def submit_description(self, user_description: str) -> Dict:
         """
         Compara a descrição do usuário com a descrição oficial
@@ -118,8 +130,8 @@ class PhotoDescriptionGame:
         # Calcular pontuação final
         final_score = self._calculate_final_score(similarity_score, keyword_score)
         
-        # Determinar se acertou (threshold de 60%)
-        is_correct = final_score >= 0.6
+        # Determinar se acertou (threshold de 40% - mais acessível)
+        is_correct = final_score >= 0.4
         
         # Atualizar estatísticas
         self._update_stats(is_correct)
@@ -215,24 +227,38 @@ class PhotoDescriptionGame:
     def _calculate_final_score(self, similarity: float, keyword_score: float) -> float:
         """Calcula pontuação final combinando similaridade e palavras-chave"""
         # Peso: 60% similaridade + 40% palavras-chave
-        return (similarity * 0.6) + (keyword_score * 0.4)
+        final_score = (similarity * 0.6) + (keyword_score * 0.4)
+        
+        # Debug: mostrar detalhes do cálculo
+        print(f"\n[SCORE DEBUG]")
+        print(f"   Similaridade: {similarity:.2%}")
+        print(f"   Keywords: {keyword_score:.2%}")
+        print(f"   Score final: {final_score:.2%}")
+        print(f"   Threshold: 40% (para ganhar pontos)")
+        
+        return final_score
     
     def _calculate_points(self, final_score: float, is_correct: bool) -> int:
         """Calcula pontos ganhos baseado na pontuação"""
-        if not is_correct:
-            return 0
-        
         base_points = self.current_photo["points"]
         
-        # Multiplicador baseado na qualidade da resposta
-        if final_score >= 0.9:
-            multiplier = 1.5  # Excelente
-        elif final_score >= 0.8:
-            multiplier = 1.3  # Muito bom
-        elif final_score >= 0.7:
-            multiplier = 1.1  # Bom
+        # Dar pontos proporcionais mesmo se não acertou completamente
+        if is_correct:
+            # Se passou do threshold, dar pontos completos
+            if final_score >= 0.9:
+                multiplier = 1.5  # Excelente
+            elif final_score >= 0.8:
+                multiplier = 1.3  # Muito bom
+            elif final_score >= 0.7:
+                multiplier = 1.1  # Bom
+            elif final_score >= 0.6:
+                multiplier = 1.0  # Básico
+            else:
+                multiplier = 0.8  # Ainda ganha, mas menos pontos
         else:
-            multiplier = 1.0  # Básico
+            # Dar pontos parciais proporcionalmente
+            # Ex: 30% de score = 30% dos pontos base
+            multiplier = max(0.1, final_score)  # Mínimo 10% dos pontos
         
         return int(base_points * multiplier)
     
@@ -255,9 +281,13 @@ class PhotoDescriptionGame:
         elif final_score >= 0.6:
             return "Parabéns! Você conseguiu identificar alguns elementos corretos."
         elif final_score >= 0.4:
-            return "Continue tentando! Você está no caminho certo, mas pode melhorar."
+            return "Boa tentativa! Continue melhorando seus detalhes. Descreva mais características da foto!"
+        elif final_score >= 0.3:
+            return "Você está no caminho certo! Tente descrever elementos arquitetônicos, cores e localização."
+        elif final_score >= 0.2:
+            return "Continue tentando! Preste atenção nos detalhes da arquitetura e ambiente."
         else:
-            return "Não desista! Observe melhor os detalhes da foto e tente novamente."
+            return "Não desista! Observe melhor a foto e tente mencionar o tipo de local, época e características visuais."
     
     def _update_stats(self, is_correct: bool):
         """Atualiza estatísticas do jogo"""

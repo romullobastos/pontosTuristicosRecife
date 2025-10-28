@@ -11,7 +11,6 @@ class Player:
     name: str
     level: int = 1
     experience: int = 0
-    coins: int = 0
     streak: int = 0
     total_correct: int = 0
     total_attempts: int = 0
@@ -31,7 +30,6 @@ class Achievement:
     name: str
     description: str
     condition: str
-    reward_coins: int
     reward_xp: int
     icon: str
 
@@ -53,7 +51,6 @@ class GamificationSystem:
                 name="Primeiro Passo",
                 description="Analise sua primeira imagem",
                 condition="total_attempts >= 1",
-                reward_coins=10,
                 reward_xp=50,
                 icon="🌟"
             ),
@@ -62,7 +59,6 @@ class GamificationSystem:
                 name="Detetive Novato",
                 description="Analise 10 imagens",
                 condition="total_attempts >= 10",
-                reward_coins=50,
                 reward_xp=200,
                 icon="🔍"
             ),
@@ -71,25 +67,22 @@ class GamificationSystem:
                 name="Sequência Perfeita",
                 description="Acertou 5 respostas seguidas",
                 condition="streak >= 5",
-                reward_coins=100,
                 reward_xp=300,
                 icon="🔥"
             ),
             Achievement(
-                id="animal_expert",
-                name="Especialista em Animais",
-                description="Identificou 20 animais diferentes",
-                condition="animals_identified >= 20",
-                reward_coins=200,
+                id="history_expert",
+                name="Especialista em História",
+                description="Identificou 20 locais históricos diferentes",
+                condition="historic_locations_identified >= 20",
                 reward_xp=500,
-                icon="🐾"
+                icon="🏛️"
             ),
             Achievement(
                 id="speed_demon",
                 name="Demônio da Velocidade",
                 description="Respondeu em menos de 10 segundos",
                 condition="fastest_time <= 10",
-                reward_coins=75,
                 reward_xp=250,
                 icon="⚡"
             ),
@@ -98,7 +91,6 @@ class GamificationSystem:
                 name="Cientista Mestre",
                 description="Alcançou nível 10",
                 condition="level >= 10",
-                reward_coins=500,
                 reward_xp=1000,
                 icon="🧬"
             )
@@ -112,7 +104,6 @@ class GamificationSystem:
                 "name": "Explorador Diário",
                 "description": "Analise 5 imagens hoje",
                 "target": 5,
-                "reward_coins": 25,
                 "reward_xp": 100,
                 "progress": 0
             },
@@ -121,7 +112,6 @@ class GamificationSystem:
                 "name": "Precisão Perfeita",
                 "description": "Mantenha 80% de precisão em 10 tentativas",
                 "target": 8,
-                "reward_coins": 50,
                 "reward_xp": 200,
                 "progress": 0
             },
@@ -130,7 +120,6 @@ class GamificationSystem:
                 "name": "Explorador Diverso",
                 "description": "Explore 3 categorias diferentes",
                 "target": 3,
-                "reward_coins": 30,
                 "reward_xp": 150,
                 "progress": 0
             }
@@ -159,14 +148,13 @@ class GamificationSystem:
             player.total_correct += 1
             player.streak += 1
             
-            # Calcular pontos baseados na precisão e velocidade
+            # Calcular pontos (agora só XP, sem coins)
             base_points = 10
             speed_bonus = max(0, 20 - response_time)  # Bônus por velocidade
             streak_bonus = min(player.streak * 2, 20)  # Bônus por sequência
             
             points = base_points + speed_bonus + streak_bonus
             player.experience += points
-            player.coins += points // 2
             
         else:
             player.streak = 0
@@ -176,8 +164,6 @@ class GamificationSystem:
         level_up = new_level > player.level
         if level_up:
             player.level = new_level
-            level_reward = new_level * 50
-            player.coins += level_reward
         
         # Verificar conquistas
         new_achievements = self._check_achievements(player)
@@ -192,7 +178,6 @@ class GamificationSystem:
             "new_achievements": new_achievements,
             "daily_progress": daily_progress,
             "streak": player.streak,
-            "total_coins": player.coins,
             "total_xp": player.experience
         }
     
@@ -212,7 +197,6 @@ class GamificationSystem:
             # Verificar condição da conquista
             if self._evaluate_condition(achievement.condition, player):
                 player.achievements.append(achievement.id)
-                player.coins += achievement.reward_coins
                 player.experience += achievement.reward_xp
                 new_achievements.append(achievement)
         
@@ -292,7 +276,6 @@ class GamificationSystem:
             "level": player.level,
             "experience": player.experience,
             "next_level_xp": next_level_xp,
-            "coins": player.coins,
             "streak": player.streak,
             "total_correct": player.total_correct,
             "total_attempts": player.total_attempts,
@@ -317,9 +300,9 @@ if __name__ == "__main__":
     
     # Simular algumas respostas
     results = []
-    results.append(game_system.submit_answer("player1", True, 15.5, "animals"))
-    results.append(game_system.submit_answer("player1", True, 12.3, "plants"))
-    results.append(game_system.submit_answer("player1", False, 20.1, "objects"))
+    results.append(game_system.submit_answer("player1", True, 15.5, "historic_location"))
+    results.append(game_system.submit_answer("player1", True, 12.3, "historic_location"))
+    results.append(game_system.submit_answer("player1", False, 20.1, "historic_location"))
     
     # Ver estatísticas
     stats = game_system.get_player_stats("player1")

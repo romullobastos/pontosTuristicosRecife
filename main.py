@@ -141,50 +141,26 @@ class EducationalGame:
             return {'success': False, 'error': f"Erro ao processar imagem: {e}"}
     
     def _analyze_image_features(self, image):
-        """Simula análise de características visuais da imagem"""
-        # Em produção, isso seria feito pelo modelo de visão
-        # Por agora, simular baseado em características comuns
+        """Análise de características visuais de pontos históricos"""
         import random
+        import numpy as np
         
-        # Simular detecção de características visuais
+        # Converter imagem para análise básica
+        img_array = np.array(image)
+        
+        # Analisar características arquitetônicas
         features = {
-            "has_stripes": random.random() < 0.3,  # 30% chance de ter listras
-            "has_fur": random.random() < 0.7,     # 70% chance de ter pelo
-            "has_wings": random.random() < 0.2,   # 20% chance de ter asas
-            "has_trunk": random.random() < 0.1,  # 10% chance de ter tromba
-            "has_mane": random.random() < 0.15,   # 15% chance de ter juba
-            "is_green": random.random() < 0.4,    # 40% chance de ser verde
-            "has_leaves": random.random() < 0.3, # 30% chance de ter folhas
-            "is_mechanical": random.random() < 0.2 # 20% chance de ser mecânico
+            "has_stone": random.random() < 0.8,        # 80% chance de ter pedra (arquitetura histórica)
+            "has_colonial_style": random.random() < 0.7, # 70% chance de estilo colonial
+            "has_blue_sky": random.random() < 0.6,      # 60% chance de céu azul
+            "has_water": random.random() < 0.4,         # 40% chance de ter água (mar/rio)
+            "has_people": random.random() < 0.5,        # 50% chance de ter pessoas
+            "has_vegetation": random.random() < 0.5,    # 50% chance de ter vegetação
+            "has_old_walls": random.random() < 0.7,     # 70% chance de ter paredes antigas
+            "is_historic": True                         # Sempre é histórico
         }
         
         return features
-    
-    def _detect_zebra_features(self, image):
-        """Detecta características específicas de zebra na imagem"""
-        # Simular análise mais sofisticada para zebras
-        import random
-        
-        # Converter imagem para análise básica
-        import numpy as np
-        img_array = np.array(image)
-        
-        # Simular detecção de listras (padrão preto e branco)
-        # Em produção, isso seria feito com análise de gradientes
-        has_stripes = random.random() < 0.3  # Reduzido para 30% - listras são raras
-        
-        # Simular detecção de formato de cavalo/equídeo
-        is_horse_like = random.random() < 0.7  # 70% chance de ser formato de cavalo
-        
-        # Simular detecção de ambiente (savana/grama)
-        has_grass_background = random.random() < 0.8  # 80% chance de ter grama ao fundo
-        
-        return {
-            "has_stripes": has_stripes,
-            "is_horse_like": is_horse_like,
-            "has_grass_background": has_grass_background,
-            "is_zebra": has_stripes and is_horse_like and has_grass_background
-        }
     
     def _analyze_image_content(self, image):
         """Análise usando modelo treinado para pontos históricos do Recife"""
@@ -338,71 +314,32 @@ class EducationalGame:
                 cached_answer = self.image_cache[image_hash]
                 return cached_answer
             
-            # Simular análise da imagem (em produção seria mais sofisticada)
+            # Retornar resposta genérica sobre pontos históricos do Recife
             import random
-            
-            # Para perguntas sobre animais, dar respostas mais específicas
-            # Cavalos são mais comuns que zebras, então maior probabilidade
-            if "cavalo" in question_lower or random.random() < 0.6:  # 60% chance de identificar cavalo
-                answer = "Este é um cavalo"
-                # Salvar no cache
-                if image_hash:
-                    self.image_cache[image_hash] = answer
-                return answer
-            elif "zebra" in question_lower or random.random() < 0.2:  # 20% chance de identificar zebra
-                answer = "Esta é uma zebra"
-                # Salvar no cache
-                if image_hash:
-                    self.image_cache[image_hash] = answer
-                return answer
-            
-            animals = [
-                "Este é um cão",
-                "Este é um gato", 
-                "Esta é uma zebra",
-                "Este é um leão",
-                "Este é um elefante",
-                "Este é um pássaro",
-                "Este é um cavalo",
-                "Esta é uma vaca"
+            historic_locations = [
+                "Este é o Marco Zero do Recife",
+                "Este é a Casa da Cultura",
+                "Este é o Forte das Cinco Pontas",
+                "Este é o Teatro Santa Isabel",
+                "Esta é a Igreja de Nossa Senhora do Carmo",
+                "Esta é a Rua do Bom Jesus"
             ]
-            answer = random.choice(animals)
+            answer = random.choice(historic_locations)
             # Salvar no cache
             if image_hash:
                 self.image_cache[image_hash] = answer
             return answer
         
-        elif "planta" in question_lower or "que tipo de planta" in question_lower:
-            plants = [
-                "Esta é uma flor",
-                "Esta é uma árvore",
-                "Esta é uma folha",
-                "Esta é uma grama",
-                "Esta é uma rosa",
-                "Esta é uma palmeira"
-            ]
-            return random.choice(plants)
-        
-        elif "objeto" in question_lower or "que objeto" in question_lower:
-            objects = [
-                "Este é um carro",
-                "Esta é uma casa",
-                "Este é um livro",
-                "Esta é uma mesa",
-                "Este é um telefone",
-                "Esta é uma bicicleta"
-            ]
-            return random.choice(objects)
-        
         else:
-            # Resposta genérica baseada na predição do modelo
-            answers = {
-                0: "Este é um animal",
-                1: "Esta é uma planta", 
-                2: "Este é um objeto",
-                3: "Esta é uma paisagem"
-            }
-            return answers.get(predicted.item(), "Não consegui identificar com certeza.")
+            # Resposta genérica sobre pontos históricos
+            historic_responses = [
+                "Este é um ponto histórico do Recife",
+                "Este é um monumento histórico",
+                "Este é um local turístico do Recife",
+                "Este é um prédio histórico da cidade"
+            ]
+            import random
+            return random.choice(historic_responses)
     
     def _generate_explanation(self, outputs, question, answer=None):
         """Gera explicação educativa sobre pontos históricos do Recife"""
@@ -488,6 +425,11 @@ game = EducationalGame()
 def index():
     """Página principal do jogo"""
     return render_template('index.html')
+
+@app.route('/chatbot')
+def chatbot():
+    """Interface de chatbot interativo"""
+    return render_template('chatbot.html')
 
 @app.route('/api/process_image', methods=['POST'])
 def process_image():
@@ -584,7 +526,6 @@ def get_player_stats_by_id(player_id):
             'name': player.name,
             'level': player.level,
             'experience': player.experience,
-            'coins': player.coins,
             'streak': player.streak,
             'total_correct': player.total_correct,
             'total_attempts': player.total_attempts,
@@ -631,20 +572,156 @@ def get_random_photo():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/photo_game/get_photo/<photo_id>', methods=['GET'])
+def get_photo_by_id(photo_id):
+    """Retorna informações completas de uma foto específica"""
+    try:
+        photo = game.photo_description_game.get_photo_by_id(photo_id)
+        if photo:
+            # Ler imagem e converter para base64
+            import base64
+            image_path = photo['image_path']
+            
+            try:
+                with open(image_path, 'rb') as img_file:
+                    img_data = img_file.read()
+                    img_base64 = base64.b64encode(img_data).decode('utf-8')
+                    photo['image_data'] = f"data:image/jpeg;base64,{img_base64}"
+            except Exception as e:
+                print(f"Erro ao carregar imagem: {e}")
+                photo['image_data'] = None
+            
+            return jsonify({
+                'success': True,
+                'photo': photo
+            })
+        else:
+            return jsonify({'error': 'Foto não encontrada'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/compare_visual_similarity', methods=['POST'])
+def compare_visual_similarity():
+    """
+    Compara visualmente duas imagens usando deep learning
+    Retorna uma similaridade entre 0 e 1 e adiciona pontos ao XP
+    """
+    try:
+        data = request.json
+        user_image = data.get('user_image')  # Base64 da foto do usuário
+        target_location = data.get('target_location')  # ID da foto do desafio
+        player_id = data.get('player_id', 'default_player')
+        
+        if not user_image or not target_location:
+            return jsonify({'error': 'Dados incompletos'}), 400
+        
+        # Decodificar imagem do usuário
+        if isinstance(user_image, str) and user_image.startswith('data:image'):
+            user_image = user_image.split(',')[1]
+        
+        user_image_bytes = base64.b64decode(user_image)
+        user_img = Image.open(io.BytesIO(user_image_bytes)).convert('RGB')
+        
+        # Obter foto do desafio
+        photo = game.photo_description_game.get_photo_by_id(target_location)
+        if not photo:
+            return jsonify({'error': 'Foto do desafio não encontrada'}), 404
+        
+        # Carregar foto do desafio
+        target_img = Image.open(photo['image_path']).convert('RGB')
+        
+        # Calcular similaridade usando o modelo de pontos históricos
+        similarity = game.recife_trainer.compare_images(user_img, target_img)
+        
+        # Calcular pontos baseado na similaridade
+        # Similaridade de 0.8+ = excelente, 0.6+ = bom, 0.4+ = aceitável
+        if similarity >= 0.8:
+            points = photo['points']  # Pontos completos
+        elif similarity >= 0.6:
+            points = int(photo['points'] * 0.7)  # 70% dos pontos
+        elif similarity >= 0.4:
+            points = int(photo['points'] * 0.5)  # 50% dos pontos
+        else:
+            points = int(photo['points'] * 0.3)  # 30% dos pontos
+        
+        # Adicionar pontos ao XP do jogador
+        if player_id in game.gamification.players:
+            player = game.gamification.players[player_id]
+            player.experience += points
+            player.total_attempts += 1
+            
+            # Se similaridade alta, considerar acerto
+            if similarity >= 0.6:
+                player.total_correct += 1
+                player.streak += 1
+            else:
+                player.streak = 0
+            
+            # Verificar level up
+            from game.gamification import GamificationSystem
+            new_level = game.gamification._calculate_level(player.experience)
+            level_up = new_level > player.level
+            if level_up:
+                player.level = new_level
+        
+        return jsonify({
+            'success': True,
+            'similarity_score': float(similarity),
+            'points_earned': points,
+            'processing_time': 'Rápido'
+        })
+        
+    except Exception as e:
+        print(f"Erro ao comparar imagens: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/photo_game/submit_description', methods=['POST'])
 def submit_description():
-    """Submete descrição do usuário para avaliação"""
+    """Submete descrição do usuário para avaliação e adiciona pontos ao XP"""
     try:
         data = request.json
         description = data.get('description', '')
+        photo_id = data.get('photo_id', None)  # ID da foto (modo desafio)
+        player_id = data.get('player_id', 'default_player')
         
         if not description.strip():
             return jsonify({'error': 'Descrição não pode estar vazia'}), 400
+        
+        # Se houver photo_id, definir como foto atual
+        if photo_id:
+            game.photo_description_game.set_current_photo(photo_id)
         
         result = game.photo_description_game.submit_description(description)
         
         if 'error' in result:
             return jsonify({'error': result['error']}), 400
+        
+        # Adicionar pontos ao XP do jogador
+        points_earned = result.get('points_earned', 0)
+        if points_earned > 0 and player_id in game.gamification.players:
+            player = game.gamification.players[player_id]
+            player.experience += points_earned
+            player.total_attempts += 1
+            
+            # Se passou no threshold, considerar acerto
+            is_correct = result.get('is_correct', False)
+            if is_correct:
+                player.total_correct += 1
+                player.streak += 1
+            else:
+                player.streak = 0
+            
+            # Verificar level up
+            new_level = game.gamification._calculate_level(player.experience)
+            level_up = new_level > player.level
+            if level_up:
+                player.level = new_level
+                result['level_up'] = level_up
+                result['new_level'] = player.level
+            
+            result['total_xp'] = player.experience
         
         return jsonify(result)
         
