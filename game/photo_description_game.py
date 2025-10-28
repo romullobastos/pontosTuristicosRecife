@@ -44,7 +44,7 @@ class PhotoDescriptionGame:
     def _initialize_nlp(self):
         """Inicializa recursos do NLTK"""
         try:
-            print("\n🚀 Inicializando NLP...")
+            print("\n[INFO] Inicializando NLP...")
             # Download recursos necessários
             nltk.download('punkt', quiet=True)
             nltk.download('stopwords', quiet=True)
@@ -55,11 +55,11 @@ class PhotoDescriptionGame:
             self.lemmatizer = WordNetLemmatizer()
             self.vectorizer = TfidfVectorizer(max_features=1000)
             
-            print("✅ NLP inicializado com sucesso!")
+            print("[OK] NLP inicializado com sucesso!")
             print(f"   - Stopwords carregadas: {len(self.stop_words)} palavras")
             print(f"   - Método de similaridade: TF-IDF + Cosseno")
         except Exception as e:
-            print(f"❌ Erro ao inicializar NLP: {e}")
+            print(f"[ERRO] Erro ao inicializar NLP: {e}")
             self.use_nlp = False
     
     def _load_photos_data(self) -> List[Dict]:
@@ -102,7 +102,7 @@ class PhotoDescriptionGame:
             official_desc_processed = self._preprocess_nlp(official_desc_clean)
             
             # Debug: mostrar processamento NLP
-            print(f"\n🔍 [NLP DEBUG]")
+            print(f"\n[NLP DEBUG]")
             print(f"   Original: {user_desc_clean[:100]}...")
             print(f"   Processado: {user_desc_processed[:100]}...")
         else:
@@ -167,14 +167,15 @@ class PhotoDescriptionGame:
             return text
         
         try:
-            # Tokenizar
-            tokens = word_tokenize(text, language='portuguese')
+            # Tokenizar usando split simples (mais robusto que NLTK para português)
+            tokens = re.findall(r'\b\w+\b', text)
             
             # Remover stopwords e lemmatizar
             processed_tokens = []
             for token in tokens:
-                if token.lower() not in self.stop_words:
-                    lemma = self.lemmatizer.lemmatize(token.lower())
+                token_lower = token.lower()
+                if token_lower not in self.stop_words and len(token_lower) > 2:
+                    lemma = self.lemmatizer.lemmatize(token_lower)
                     if len(lemma) > 2:  # Filtrar palavras muito curtas
                         processed_tokens.append(lemma)
             
