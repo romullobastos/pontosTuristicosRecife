@@ -3,13 +3,13 @@
 **Projeto**: Aplicativo Educacional - Pontos Históricos do Recife  
 **Autor**: Sistema Educacional com IA  
 **Data**: 2024  
-**Versão**: 1.0
+**Versão**: 1.1
 
 ---
 
 ## 📋 Sumário Executivo
 
-Este relatório documenta a implementação de um sistema de **Deep Learning** para reconhecimento de pontos históricos do Recife. O sistema utiliza **Redes Neurais Convolucionais (CNNs)** treinadas do zero, alcançando **96% de acurácia** com dataset de 25 imagens reais.
+Este relatório documenta a implementação de um sistema de **Deep Learning** para reconhecimento de pontos históricos do Recife. O sistema utiliza **Redes Neurais Convolucionais (CNNs)** treinadas do zero, alcançando **96% de acurácia** com dataset de 25 imagens reais. A gamificação foi simplificada para um sistema único de **XP** (Experiência), removendo o conceito de moedas.
 
 ### Métricas Principais
 
@@ -17,7 +17,7 @@ Este relatório documenta a implementação de um sistema de **Deep Learning** p
 - **Dataset**: 25 imagens, 12 classes
 - **Tempo de Treinamento**: ~3 minutos
 - **Parâmetros**: 13.7 milhões
-- **Modelo**: CNN customizada (ImprovedCNN)
+- **Modelo**: CNN customizada (ImprovedCNN) e opção de Transfer Learning (ResNet18)
 
 ---
 
@@ -507,28 +507,29 @@ optimizer.step()
 
 ---
 
-## 10. Referências e Recursos
+## 10. Endpoints e Gamificação
 
-### Artigos Científicos
+### 10.1 Endpoints Principais
 
-1. LeCun et al. (1998) - **LeNet**: CNNs pioneiras
-2. Krizhevsky et al. (2012) - **AlexNet**: Breakthrough em ImageNet
-3. Simonyan & Zisserman (2014) - **VGG**: Arquitetura profunda
-4. He et al. (2015) - **ResNet**: Skip connections
+- `POST /api/compare_visual_similarity`
+  - Entrada: `user_image (base64)`, `target_location`, `player_id`
+  - Saída: `similarity_score`, `points_earned`
+  - Comportamento: calcula similaridade e **soma `points_earned` ao XP** do jogador. Atualiza tentativas, acertos (se ≥ 0.6), streak e nível.
 
-### Tutoriais e Cursos
+- `POST /api/photo_game/submit_description`
+  - Entrada: `description`, `photo_id`, `player_id`
+  - Saída: `final_score`, `points_earned`, `is_correct`, `total_xp`
+  - Comportamento: avalia descrição (TF-IDF + Cosseno) e **soma `points_earned` ao XP**. Atualiza tentativas, acertos (se `is_correct`), streak e nível.
 
-- **CS231n**: Stanford Course on CNN
-- **fast.ai**: Practical Deep Learning
-- **PyTorch Tutorials**: Documentação oficial
-- **Andrew Ng**: Coursera Machine Learning
+- `GET /api/player_stats/:player_id`
+  - Retorna: `level`, `experience (XP)`, `streak`, `total_correct`, `total_attempts`, `accuracy`.
 
-### Ferramentas
+### 10.2 Sistema de Pontos (Unificado)
 
-- **PyTorch**: Framework de Deep Learning
-- **Jupyter**: Notebooks interativos
-- **TensorBoard**: Visualização de métricas
-- **Weights & Biases**: Experiment tracking
+- Apenas **XP** (Experiência)
+- Pontos ganhos nos modos Foto/Descrição viram **XP**
+- Level up baseado em XP: `level = int((XP/100) ** 0.5) + 1`
+- Conquistas concedem XP adicional (sem moedas)
 
 ---
 
@@ -541,14 +542,15 @@ Este projeto demonstra a implementação prática de **Deep Learning** para reco
 ✅ **96% de acurácia** em 12 locais históricos  
 ✅ **Modelo funcionando** em produção  
 ✅ **Treinamento rápido**: 3 minutos  
-✅ **Código educativo** para aprendizado  
+✅ **Gamificação simplificada**: sistema único de **XP**  
 
-### Lições Aprendidas
+### Atualizações recentes
 
-1. **CNNs são poderosas** para imagens
-2. **Dataset pequeno pode funcionar** com data augmentation
-3. **Regularização é crucial** (Dropout)
-4. **Learning rate scheduling** melhora convergência
+- Adicionada opção de Transfer Learning com ResNet18 pré-treinada para datasets pequenos (melhor estabilidade e acurácia).
+- Balanceamento de treino com WeightedRandomSampler para classes desbalanceadas.
+- Split estratificado train/val, métricas de validação a cada época e Early Stopping por estagnação.
+- Scheduler agora opera sobre a perda de validação.
+- Checkpoint salva e carrega a arquitetura correta (ImprovedCNN ou ResNet18); detecção automática por chaves do state_dict.
 
 ### Próximos Passos
 

@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import WeightedRandomSampler
 from torchvision import transforms
+from torchvision import models as tv_models
 from PIL import Image, ImageEnhance, ImageFilter
 import os
 from pathlib import Path
@@ -147,7 +149,7 @@ class ImprovedCNN(nn.Module):
 class ImprovedRecifeHistoricDataset(Dataset):
     """Dataset melhorado com augmentation e pré-processamento"""
     
-    def __init__(self, data_dir, transform=None, is_training=True):
+    def __init__(self, data_dir, transform=None, is_training=True, indices=None):
         self.data_dir = Path(data_dir)
         self.transform = transform
         self.is_training = is_training
@@ -157,6 +159,11 @@ class ImprovedRecifeHistoricDataset(Dataset):
         self.idx_to_class = {}
         self.augmentation = AdvancedImageTransforms()
         self._load_dataset()
+
+        # Subconjunto opcional por índices (para split train/val)
+        if indices is not None:
+            self.images = [self.images[i] for i in indices]
+            self.labels = [self.labels[i] for i in indices]
     
     def _load_dataset(self):
         """Carrega dataset com informações detalhadas"""
@@ -184,6 +191,13 @@ class ImprovedRecifeHistoricDataset(Dataset):
         
         print(f"Dataset carregado: {len(self.images)} imagens, {len(self.class_to_idx)} locais históricos")
         print(f"Locais históricos suportados: {len(self.idx_to_class)}")
+        # Mostrar distribuição por classe
+        counts = {cls: 0 for cls in self.class_to_idx.keys()}
+        for label in self.labels:
+            counts[self.idx_to_class[label]] += 1
+        print("Distribuição por classe:")
+        for cls, cnt in counts.items():
+            print(f" - {cls}: {cnt}")
     
     def __len__(self):
         return len(self.images)
@@ -206,11 +220,16 @@ class ImprovedRecifeHistoricDataset(Dataset):
 class ImprovedRecifeHistoricTrainer:
     """Treinador melhorado com técnicas avançadas"""
     
-    def __init__(self, data_dir='data/recife_historic'):
+    def __init__(self, data_dir='data/recife_historic', use_transfer: bool = False):
         self.data_dir = data_dir
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f"Usando dispositivo: {self.device}")
         
+        # Semente para reprodutibilidade
+        torch.manual_seed(42)
+        random.seed(42)
+        np.random.seed(42)
+
         # Configurar transforms
         self.transforms = AdvancedImageTransforms()
         self.train_transform = self.transforms.train_transforms
@@ -219,114 +238,208 @@ class ImprovedRecifeHistoricTrainer:
         # Carregar dataset
         self.dataset = ImprovedRecifeHistoricDataset(data_dir, self.train_transform, is_training=True)
         self.num_classes = len(self.dataset.class_to_idx)
+        self.use_transfer = use_transfer
         
-        # Criar modelo melhorado
-        self.model = ImprovedCNN(self.num_classes).to(self.device)
+        # Criar modelo: ImprovedCNN (do zero) ou ResNet18 (Transfer Learning)
+        if self.use_transfer:
+            print("Usando Transfer Learning: ResNet18 pré-treinada (ImageNet)")
+            resnet = tv_models.resnet18(weights=tv_models.ResNet18_Weights.DEFAULT)
+            in_features = resnet.fc.in_features
+            resnet.fc = nn.Linear(in_features, self.num_classes)
+            self.model = resnet.to(self.device)
+        else:
+            print("Usando modelo ImprovedCNN treinado do zero")
+            self.model = ImprovedCNN(self.num_classes).to(self.device)
         
         # Configurar otimizador com learning rate scheduler
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=0.001, weight_decay=0.01)
+        # Hiperparâmetros ajustados para dataset pequeno
+        base_lr = 1e-4 if self.use_transfer else 5e-4
+        wd = 5e-4 if not self.use_transfer else 1e-4
+        # Se Transfer Learning, regra: LR menor para backbone, maior para a cabeça
+        if self.use_transfer:
+            params = [
+                {"params": [p for n, p in self.model.named_parameters() if not n.startswith("fc.")], "lr": base_lr},
+                {"params": self.model.fc.parameters(), "lr": base_lr * 5},
+            ]
+            self.optimizer = optim.AdamW(params, weight_decay=wd)
+        else:
+            self.optimizer = optim.AdamW(self.model.parameters(), lr=base_lr, weight_decay=wd)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, mode='min', factor=0.5, patience=5
         )
         
-        # Loss function com label smoothing
-        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+        # Loss function com label smoothing leve (evita subtreino em dataset pequeno)
+        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
         
         print(f"Modelo melhorado criado: {sum(p.numel() for p in self.model.parameters())} parâmetros")
     
+    def _create_dataloaders(self, batch_size=8, val_split=0.2):
+        """Cria DataLoaders de treino e validação com split estratificado por classe."""
+        if len(self.dataset) == 0:
+            return None, None
+
+        # Índices por classe para estratificação
+        class_to_indices = {c: [] for c in self.dataset.class_to_idx.keys()}
+        for i, label in enumerate(self.dataset.labels):
+            class_to_indices[self.dataset.idx_to_class[label]].append(i)
+
+        train_indices = []
+        val_indices = []
+        for cls, idxs in class_to_indices.items():
+            if len(idxs) == 0:
+                continue
+            random.shuffle(idxs)
+            split = max(1, int(len(idxs) * val_split))
+            val_indices.extend(idxs[:split])
+            train_indices.extend(idxs[split:])
+
+        # Garantir que não fique vazio
+        if len(train_indices) == 0:
+            train_indices = val_indices
+            val_indices = []
+
+        train_dataset = ImprovedRecifeHistoricDataset(self.data_dir, self.train_transform, is_training=True, indices=train_indices)
+        val_dataset = ImprovedRecifeHistoricDataset(self.data_dir, self.val_transform, is_training=False, indices=val_indices) if len(val_indices) > 0 else None
+
+        # Sampler ponderado por classe para balancear treino
+        if len(train_dataset.labels) > 0:
+            label_counts = {}
+            for lbl in train_dataset.labels:
+                label_counts[lbl] = label_counts.get(lbl, 0) + 1
+            class_weights = {lbl: 1.0 / cnt for lbl, cnt in label_counts.items()}
+            sample_weights = [class_weights[lbl] for lbl in train_dataset.labels]
+            sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
+        else:
+            sampler = None
+
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=(sampler is None),
+            sampler=sampler,
+            num_workers=0,
+            pin_memory=True if self.device.type == 'cuda' else False
+        )
+        val_loader = None
+        if val_dataset is not None and len(val_dataset) > 0:
+            val_loader = DataLoader(
+                val_dataset,
+                batch_size=batch_size,
+                shuffle=False,
+                num_workers=0,
+                pin_memory=True if self.device.type == 'cuda' else False
+            )
+
+        return train_loader, val_loader
+
     def train(self, epochs=30, batch_size=8):
         """Treinamento melhorado com técnicas avançadas"""
         if len(self.dataset) == 0:
             print("Nenhuma imagem encontrada para treinamento!")
             return None
-        
-        # Criar DataLoader com workers
-        dataloader = DataLoader(
-            self.dataset, 
-            batch_size=batch_size, 
-            shuffle=True, 
-            num_workers=0,  # 0 para Windows
-            pin_memory=True if self.device.type == 'cuda' else False
-        )
-        
+
+        # Criar DataLoaders de treino e validação
+        train_loader, val_loader = self._create_dataloaders(batch_size=batch_size, val_split=0.2)
+
         print(f"Iniciando treinamento melhorado: {epochs} épocas, batch_size={batch_size}")
-        print(f"Dataset: {len(self.dataset)} imagens")
-        
-        best_accuracy = 0
+        if val_loader is not None:
+            print(f"Split: treino={len(train_loader.dataset)} | validação={len(val_loader.dataset)}")
+        else:
+            print(f"Dataset: {len(train_loader.dataset)} imagens (sem validação)")
+
+        best_val_acc = -1
         best_model_state = None
-        
-        self.model.train()
-        
+        patience = 8
+        epochs_no_improve = 0
+
         for epoch in range(epochs):
-            total_loss = 0
+            self.model.train()
+            total_loss = 0.0
             correct = 0
             total = 0
-            
-            for batch_idx, (images, labels) in enumerate(dataloader):
+
+            for images, labels in train_loader:
                 images, labels = images.to(self.device), labels.to(self.device)
-                
-                # Zero gradients
+
                 self.optimizer.zero_grad()
-                
-                # Forward pass
                 outputs = self.model(images)
                 loss = self.criterion(outputs, labels)
-                
-                # Backward pass
                 loss.backward()
-                
-                # Gradient clipping para estabilidade
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-                
-                # Update weights
                 self.optimizer.step()
-                
-                # Statistics
+
                 total_loss += loss.item()
-                _, predicted = torch.max(outputs.data, 1)
+                _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-            
-            # Calcular métricas da época
-            avg_loss = total_loss / len(dataloader)
-            accuracy = 100 * correct / total
-            
-            # Atualizar learning rate
-            self.scheduler.step(avg_loss)
-            
-            # Salvar melhor modelo
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
+
+            train_loss = total_loss / max(1, len(train_loader))
+            train_acc = 100.0 * correct / max(1, total)
+
+            # Validação
+            val_loss = 0.0
+            val_acc = 0.0
+            if val_loader is not None:
+                self.model.eval()
+                val_correct = 0
+                val_total = 0
+                with torch.no_grad():
+                    for v_images, v_labels in val_loader:
+                        v_images, v_labels = v_images.to(self.device), v_labels.to(self.device)
+                        v_outputs = self.model(v_images)
+                        v_loss = self.criterion(v_outputs, v_labels)
+                        val_loss += v_loss.item()
+                        _, v_pred = torch.max(v_outputs, 1)
+                        val_total += v_labels.size(0)
+                        val_correct += (v_pred == v_labels).sum().item()
+
+                val_loss = val_loss / max(1, len(val_loader))
+                val_acc = 100.0 * val_correct / max(1, val_total)
+                self.scheduler.step(val_loss)
+            else:
+                # Sem validação, use treino para scheduler (menos ideal)
+                self.scheduler.step(train_loss)
+
+            print_msg = f"Época {epoch+1}/{epochs}: TrainLoss={train_loss:.4f}, TrainAcc={train_acc:.2f}%"
+            if val_loader is not None:
+                print_msg += f", ValLoss={val_loss:.4f}, ValAcc={val_acc:.2f}%"
+            print_msg += f", LR={self.optimizer.param_groups[0]['lr']:.6f}"
+            print(print_msg)
+
+            # Early stopping baseado em ValAcc
+            current_score = val_acc if val_loader is not None else train_acc
+            if current_score > best_val_acc:
+                best_val_acc = current_score
                 best_model_state = self.model.state_dict().copy()
-            
-            print(f"Época {epoch+1}/{epochs}: Loss={avg_loss:.4f}, Accuracy={accuracy:.2f}%, LR={self.optimizer.param_groups[0]['lr']:.6f}")
-            
-            # Early stopping se accuracy muito baixa (removido para permitir treinamento completo)
-            # if epoch > 10 and accuracy < 20:
-            #     print("Early stopping devido à baixa accuracy")
-            #     break
-            
-            # Early stopping se accuracy muito alta (convergência)
-            if accuracy > 95:
+                epochs_no_improve = 0
+            else:
+                epochs_no_improve += 1
+                if epochs_no_improve >= patience:
+                    print("Early stopping por estagnação na validação.")
+                    break
+
+            if train_acc > 99 and (val_loader is None or val_acc > 95):
                 print("Convergência alcançada!")
                 break
-        
+
         # Carregar melhor modelo
         if best_model_state:
             self.model.load_state_dict(best_model_state)
-            print(f"Melhor modelo carregado com accuracy: {best_accuracy:.2f}%")
-        
+            tag = "ValAcc" if val_loader is not None else "TrainAcc"
+            print(f"Melhor modelo carregado com {tag}: {best_val_acc:.2f}%")
+
         print("Treinamento melhorado concluído!")
         return self.model
     
     def save_model(self, model_path='models/improved_recife_historic_model.pth'):
         """Salva o modelo melhorado"""
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        arch_name = 'ResNet18' if getattr(self, 'use_transfer', False) else 'ImprovedCNN'
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'class_to_idx': self.dataset.class_to_idx,
             'idx_to_class': self.dataset.idx_to_class,
-            'model_architecture': 'ImprovedCNN',
+            'model_architecture': arch_name,
             'num_classes': self.num_classes
         }, model_path)
         
@@ -339,7 +452,20 @@ class ImprovedRecifeHistoricTrainer:
             self.dataset.class_to_idx = checkpoint['class_to_idx']
             self.dataset.idx_to_class = checkpoint['idx_to_class']
             self.num_classes = checkpoint['num_classes']
-            self.model = ImprovedCNN(self.num_classes).to(self.device)
+            arch_name = checkpoint.get('model_architecture', 'ImprovedCNN')
+            # Heurística: se metadado estiver errado/ausente, detectar pelo formato das chaves
+            state_keys = list(checkpoint['model_state_dict'].keys())
+            looks_like_resnet = any(k.startswith('layer1.') or k.startswith('conv1') for k in state_keys)
+            if arch_name == 'ResNet18' or looks_like_resnet:
+                # Recriar ResNet18 com a cabeça certa e carregar pesos
+                resnet = tv_models.resnet18(weights=None)
+                in_features = resnet.fc.in_features
+                resnet.fc = nn.Linear(in_features, self.num_classes)
+                self.model = resnet.to(self.device)
+                self.use_transfer = True
+            else:
+                self.model = ImprovedCNN(self.num_classes).to(self.device)
+                self.use_transfer = False
             self.model.load_state_dict(checkpoint['model_state_dict'])
             print(f"Modelo melhorado carregado de: {model_path}")
             return True

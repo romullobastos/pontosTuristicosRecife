@@ -24,7 +24,7 @@ Como tornar o aprendizado sobre patrimônio histórico do Recife mais interativo
 Sistema chatbot gamificado que combina:
 - Análise visual de imagens com CNN
 - Processamento de linguagem natural (NLP) para avaliação de descrições
-- Gamificação (pontos, níveis, XP, conquistas)
+- Gamificação (pontos → XP, níveis, conquistas)
 - Interface interativa e intuitiva
 
 ---
@@ -47,7 +47,7 @@ Sistema chatbot gamificado que combina:
   - `official_description`: Descrição oficial detalhada
   - `keywords`: Lista de palavras-chave relevantes
   - `difficulty`: Nível de dificuldade (Fácil, Médio, Difícil)
-  - `points`: Pontos associados
+  - `points`: Pontos associados ao desafio (usados como XP base)
 
 ### 3.3 Recursos de NLP
 - **Stopwords**: 207 palavras em português (NLTK)
@@ -59,7 +59,6 @@ Sistema chatbot gamificado que combina:
 ## 4. Pipeline/ETL
 
 ### 4.1 Fluxo de Processamento de Imagens
-
 ```
 Usuário envia foto
     ↓
@@ -74,7 +73,6 @@ Modelo CNN (ImprovedCNN)
 ```
 
 ### 4.2 Fluxo de Processamento de Texto (Modo Descrição)
-
 ```
 Usuário escreve descrição
     ↓
@@ -94,7 +92,6 @@ Score combinado (60% similaridade + 40% keywords)
 ```
 
 ### 4.3 Fluxo de Comparação Visual (Modo Foto)
-
 ```
 Foto do Desafio + Foto do Usuário
     ↓
@@ -106,8 +103,7 @@ Compara Classes:
     └─→ A != B: Baixa similaridade
 ```
 
-### 4.4 Pipeline de Gamificação
-
+### 4.4 Pipeline de Gamificação (Unificado em XP)
 ```
 Ação do Usuário
     ↓
@@ -118,8 +114,6 @@ Adiciona XP
 Verifica Level Up
     ↓
 Atualiza Estatísticas
-    ↓
-Armazena em JSON (players.json)
 ```
 
 ---
@@ -128,7 +122,7 @@ Armazena em JSON (players.json)
 
 ### 5.1 Modelo de Visão (CNN)
 
-**Arquitetura**: `ImprovedCNN`
+**Arquitetura**: `ImprovedCNN` (do zero) e opção `ResNet18` (Transfer Learning)
 
 ```python
 Features (CNN):
@@ -151,7 +145,7 @@ Classifier:
   - Linear(256→num_classes)
 ```
 
-**Total de Parâmetros**: 13,704,972  
+**Total de Parâmetros**: 13,704,972 (ImprovedCNN)  
 **Classes**: 12 locais históricos  
 **Input Size**: 224x224 RGB  
 **Optimizer**: AdamW (lr=0.001, weight_decay=0.01)  
@@ -175,269 +169,69 @@ Score Final: (similarity * 0.6) + (keyword_score * 0.4)
 
 ---
 
-## 6. Estratégias de Avaliação dos Modelos
+## 6. Endpoints da API
 
-### 6.1 Avaliação do Modelo de Visão
+### 6.1 `POST /api/compare_visual_similarity`
+- Entrada: `user_image (base64)`, `target_location`, `player_id`
+- Saída: `similarity_score`, `points_earned`, `success`
+- Lógica de pontos: baseado na similaridade (≥0.8 = 100% dos pontos; ≥0.6 = 70%; ≥0.4 = 50%; <0.4 = 30%)
+- Efeito: soma `points_earned` ao **XP** do jogador, atualiza tentativas, acertos (se ≥ 0.6), streak e nível
 
-**Métricas Durante Treinamento**:
-- Accuracy: Percentual de acertos na classificação
-- Loss: CrossEntropyLoss com label smoothing
-- Learning Rate: Ajustado dinamicamente (ReduceLROnPlateau)
+### 6.2 `POST /api/photo_game/submit_description`
+- Entrada: `description`, `photo_id`, `player_id`
+- Saída: `final_score`, `keyword_score`, `points_earned`, `is_correct`, `total_xp`, `success`
+- Lógica de pontos: baseada no score final (threshold 0.4), com multiplicadores conforme desempenho
+- Efeito: soma `points_earned` ao **XP**, atualiza tentativas, acertos, streak e nível
 
-**Critérios de Parada**:
-- Early Stopping: Parar quando accuracy > 95%
-- Convergence: Atingir alta accuracy
-- Best Model: Salvar apenas melhor modelo
-
-**Avaliação de Similaridade**:
-```python
-se (foto1.classe == foto2.classe):
-    similarity = (confidence1 + confidence2) / 2
-    se (confidence1 > 0.7 e confidence2 > 0.7):
-        similarity *= 1.1  # Boost
-senão:
-    similarity = 0.1-0.3  # Baixa similaridade
-```
-
-### 6.2 Avaliação do Sistema de Descrições
-
-**Métricas**:
-- **Similarity Score**: TF-IDF cosine similarity (0-1)
-- **Keyword Score**: Percentual de keywords encontradas (0-1)
-- **Final Score**: (similarity * 0.6) + (keyword * 0.4)
-
-**Thresholds**:
-- Excelente: ≥ 80% → 150% pontos
-- Muito Bom: ≥ 70% → 130% pontos
-- Bom: ≥ 60% → 110% pontos
-- Satisfatório: ≥ 40% → 80% pontos
-- Tentativa: < 40% → 10% pontos (mínimo)
-
-### 6.3 Avaliação de Gamificação
-
-**Métricas de Engajamento**:
-- Total de Tentativas
-- Taxa de Acertos (%)
-- Sequência de Acertos (Streak)
-- Nível Alcançado
-- Conquistas Desbloqueadas
-
-**Sistema de Pontos**:
-- Base: 10-50 pontos por desafio
-- Multiplicadores: 0.5x a 1.5x
-- Bônus de Sequência: Streak bonus
-- Level Up: XP requirements
+### 6.3 `GET /api/player_stats/:player_id`
+- Retorna: `name`, `level`, `experience (XP)`, `streak`, `total_correct`, `total_attempts`, `accuracy`, `achievements`
 
 ---
 
-## 7. Arquitetura do Projeto
+## 7. Interface (Frontend)
 
-### 7.1 Arquitetura Geral
+### 7.1 `templates/chatbot.html`
+- Exibe: **Nível**, **XP**, **Precisão**, **Sequência**
+- Atualiza XP após cada jogada (Foto/Descrição)
+- Mostra `points_earned` retornado pelo backend
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │         templates/chatbot.html                       │   │
-│  │  - Interface interativa                              │   │
-│  │  - Visualização de imagens                           │   │
-│  │  - Chat em tempo real                                │   │
-│  └─────────────────────────────────────────────────────┘   │
-└────────────────────┬────────────────────────────────────────┘
-                     │ HTTP/REST API
-┌────────────────────▼────────────────────────────────────────┐
-│                     Backend (Flask)                         │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │              main.py (Rotas API)                     │   │
-│  │  - /api/process_image                              │   │
-│  │  - /api/compare_visual_similarity                  │   │
-│  │  - /api/photo_game/submit_description              │   │
-│  │  - /api/player_stats                               │   │
-│  └─────────────────────────────────────────────────────┘   │
-└────────────┬───────────────────┬──────────────────────────┘
-             │                   │
-    ┌────────▼────────┐  ┌────────▼────────┐
-    │   Deep Learning │  │   NLP System    │
-    │                 │  │                 │
-    │   models/       │  │   game/          │
-    │   - CNN         │  │   - TF-IDF       │
-    │   - Features    │  │   - Similarity    │
-    └─────────────────┘  └─────────────────┘
-             │                   │
-    ┌────────▼───────────────────▼────────┐
-    │       training/                     │
-    │   - improved_recife_trainer.py       │
-    │   - image_trainer.py                │
-    └──────────────────────────────────────┘
-             │
-    ┌────────▼────────┐
-    │   Gamification  │
-    │                 │
-    │   game/         │
-    │   - Points      │
-    │   - XP/Levels   │
-    │   - Stats       │
-    └─────────────────┘
-```
+### 7.2 `templates/index.html`
+- Dashboard de estatísticas com: **Nível**, **Experiência (XP)**, **Sequência**, **Precisão**
 
-### 7.2 Fluxo de Dados
+### 7.3 Observações sobre o Modelo
 
-```
-┌──────────────┐
-│   Usuário    │
-└──────┬───────┘
-       │
-       ├─── Foto ──→ [CNN] ──→ Identificação ──→ Resposta
-       │
-       ├─── Foto ──→ [Compare] ──→ Similaridade ──→ Pontos
-       │
-       └─── Texto ──→ [NLP] ──→ Similaridade ──→ Pontos
-```
+- O backend carrega automaticamente o arquivo `models/improved_recife_historic_model.pth`.
+- O checkpoint salva a arquitetura usada (`ImprovedCNN` ou `ResNet18`).
+- O carregamento detecta automaticamente a arquitetura correta pelo metadado ou pelas chaves do `state_dict`.
 
-### 7.3 Arquitetura do Modelo CNN
+### 5.3 Treinamento (atualizado)
 
-```
-Input: [1, 3, 224, 224]
-    ↓
-┌─────────────────────┐
-│   CNN Features      │
-│  ┌───────────────┐  │
-│  │ Conv + ReLU    │  │
-│  │ Conv + ReLU    │  │
-│  │ Pool           │  │
-│  │ ...            │  │
-│  └───────────────┘  │
-│   Output: [1,8192] │
-└─────────────────────┘
-    ↓
-┌─────────────────────┐
-│   Classifier        │
-│  ┌───────────────┐  │
-│  │ Linear 8192   │  │
-│  │ → 1024        │  │
-│  │ Linear 1024   │  │
-│  │ → 512         │  │
-│  │ Linear 512    │  │
-│  │ → 256         │  │
-│  │ Linear 256    │  │
-│  │ → 12 classes  │  │
-│  └───────────────┘  │
-└─────────────────────┘
-    ↓
-Output: [1, 12]  → Classe + Confiança
-```
+- Split estratificado (train/val) e métricas de validação a cada época.
+- Early stopping por estagnação na validação.
+- Balanceamento no treino com `WeightedRandomSampler`.
+- Hiperparâmetros ajustáveis (LR menor no backbone e maior na cabeça para Transfer Learning).
 
 ---
 
-## 8. POC/Protótipo da Aplicação
+## 8. Gamificação (Regras)
 
-### 8.1 Interface Principal
-
-**URL**: http://localhost:5000/chatbot
-
-**Características**:
-- Login do jogador
-- Dashboard com estatísticas (XP, Coins, Accuracy, Streak)
-- Chat interativo
-- Área de mensagens com scroll automático
-- Upload de imagens
-
-### 8.2 Funcionalidades Implementadas
-
-#### ✅ Modo Foto (Comparação Visual)
-- Upload de foto do usuário
-- Comparação com foto do desafio usando Deep Learning
-- Similaridade baseada em classificação de local histórico
-- Sistema de pontos por similaridade
-
-#### ✅ Modo Descrição (NLP)
-- Visualização de foto histórica
-- Descrição do usuário
-- Avaliação usando TF-IDF + Cosseno
-- Feedback com similaridade e keywords
-
-#### ✅ Modo Mistério (Identificação)
-- Desafio sem ver foto completa
-- Adivinhação do local histórico
-- Dicas disponíveis
-- Bônus de 2x pontos para acerto
-
-#### ✅ Gamificação
-- Sistema de pontos e XP
-- Níveis de progresso
-- Sequências de acertos (Streak)
-- Estatísticas de performance
-- Conquistas e rankings
-
-### 8.3 Tecnologias Utilizadas
-
-**Backend**:
-- Python 3.x
-- Flask (framework web)
-- PyTorch (Deep Learning)
-- NLTK + sklearn (NLP)
-- PIL (Processamento de imagens)
-
-**Frontend**:
-- HTML5 + CSS3
-- JavaScript (Vanilla)
-- Canvas API (visualização de imagens)
-- LocalStorage (persistência de jogador)
-
-**Modelos**:
-- ImprovedCNN (PyTorch)
-- TF-IDF Vectorizer (sklearn)
-- Cosine Similarity (sklearn)
-
-### 8.4 Dados de Teste
-
-**Dataset**:
-- 12 locais históricos do Recife
-- 28 imagens no total
-- Descrições oficiais completas
-- Keywords para cada local
-
-**Exemplo de Uso**:
-1. Usuário escolhe "Modo Foto"
-2. Sistema mostra foto do Marco Zero
-3. Usuário tira foto do Marco Zero
-4. Sistema compara e dá 95% de similaridade
-5. Usuário ganha 15 pontos
+- Sistema unificado: **apenas XP**
+- Fórmula de nível: `level = int((XP/100) ** 0.5) + 1`
+- Conquistas concedem **XP** (moedas removidas)
+- Streak incrementa em acertos; zera em erro
 
 ---
 
-## 9. Resultados Esperados
+## 9. Execução
 
-### 9.1 Métricas de Sucesso
-
-**Técnicas**:
-- Accuracy do modelo CNN ≥ 85%
-- Similaridade visual: ≥80% para mesmos locais
-- Similaridade visual: ≤30% para locais diferentes
-- Similaridade textual: Correlação com qualidade da descrição
-
-**Educacionais**:
-- Engajamento: Aumento de tempo de estudo
-- Retenção: Melhor memorização de informações históricas
-- Motivação: Sistema de pontos e níveis
-
-### 9.2 Diferenciais do Projeto
-
-1. **Multimodal**: Combina visão (Deep Learning) e linguagem (NLP)
-2. **Gamificação**: Sistema completo de pontos, níveis e conquistas
-3. **Interatividade**: Três modos diferentes de aprendizado
-4. **Tecnologia**: CNN customizada + NLP com TF-IDF
-5. **Português**: Otimizado para língua portuguesa
+1. Inicie o servidor: `python main.py`
+2. Acesse `http://localhost:5000/chatbot`
+3. Crie/obtenha um `player_id` (rotas de criação já existentes na UI)
+4. Jogue nos modos Foto/Descrição — o XP será somado automaticamente
 
 ---
 
-## 10. Conclusão
-
-Este projeto demonstra a aplicação prática de Deep Learning e NLP para educação, criando uma experiência gamificada que torna o aprendizado sobre patrimônio histórico mais envolvente e eficaz. A arquitetura multimodal permite múltiplas formas de interação, enquanto a gamificação mantém o engajamento do usuário.
-
----
-
-## 📁 Estrutura de Arquivos
+## 10. Estrutura de Arquivos
 
 ```
 appDeepLearning/
@@ -452,7 +246,7 @@ appDeepLearning/
 │   └── improved_recife_historic_model.pth  # Modelo treinado
 ├── game/
 │   ├── photo_description_game.py  # Jogo de descrições
-│   └── gamification.py             # Sistema de gamificação
+│   └── gamification.py             # Sistema de gamificação (XP)
 ├── templates/
 │   ├── chatbot.html               # Interface do chatbot
 │   └── index.html                 # Interface original
@@ -462,7 +256,9 @@ appDeepLearning/
 
 ---
 
-**Desenvolvido com**: Python, PyTorch, Flask, NLTK, sklearn  
-**Data**: 2025  
-**Autor**: Sistema de Deep Learning Educacional
+## 11. Observações Finais
+
+- O sistema foi atualizado para remover **moedas** e manter somente **XP**
+- As rotas agora retornam e aplicam `points_earned` diretamente ao XP
+- Documentação e UI atualizadas para refletir essa simplificação
 

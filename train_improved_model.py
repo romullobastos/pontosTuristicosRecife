@@ -15,7 +15,8 @@ def main():
         return
     
     # Inicializar treinador melhorado
-    trainer = ImprovedRecifeHistoricTrainer()
+    # Use Transfer Learning para melhores resultados em dataset pequeno
+    trainer = ImprovedRecifeHistoricTrainer(use_transfer=True)
     
     # Verificar se já existe modelo melhorado
     if trainer.load_model():
@@ -42,16 +43,15 @@ def main():
     print("Iniciando treinamento melhorado...")
     print("Técnicas aplicadas:")
     print("- Data Augmentation avançado")
-    print("- Arquitetura CNN melhorada")
-    print("- Batch Normalization")
-    print("- Dropout e regularização")
-    print("- Learning Rate Scheduler")
+    print("- Transfer Learning (ResNet18 pré-treinada) + Fine-tuning da cabeça")
+    print("- Balanceamento por WeightedRandomSampler")
+    print("- Dropout/Regularização (na cabeça)")
+    print("- Learning Rate Scheduler (ReduceLROnPlateau)")
     print("- Gradient Clipping")
-    print("- Label Smoothing")
-    print("- Xavier/He Weight Initialization")
+    print("- Label Smoothing leve")
     print("- Early Stopping")
     
-    model = trainer.train(epochs=60, batch_size=16)
+    model = trainer.train(epochs=80, batch_size=8)
     
     if model:
         # Salvar modelo melhorado
