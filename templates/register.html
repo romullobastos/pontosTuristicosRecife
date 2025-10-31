@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastrar • Pontos Turísticos Recife</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { background:#fff; border-radius:18px; box-shadow:0 22px 48px rgba(0,0,0,.25); max-width:480px; width:100%; padding:28px; margin:0 auto; overflow:hidden; }
+    h1 { margin:0 0 6px; color:#667eea; font-size:24px; }
+    p.desc { margin:0 0 22px; color:#666; font-size:14px; }
+    .input-group { margin-bottom:16px; }
+    label { display:block; margin-bottom:8px; color:#444; font-weight:600; font-size:14px; }
+    input { width:100%; padding:13px 14px; border:2px solid #e6e6f0; border-radius:12px; font-size:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
+    input:focus { outline:none; border-color:#667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.12); }
+    .btn { width:100%; border:none; border-radius:999px; padding:13px 18px; color:#fff; background:linear-gradient(45deg,#667eea,#764ba2); font-weight:800; cursor:pointer; margin-top:10px; letter-spacing:.3px; }
+    .links { display:flex; gap:20px; justify-content:space-between; margin-top:16px; font-size:14px; padding:0 8px; }
+    a { color:#667eea; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .top { text-align:center; margin-bottom:14px; }
+    .msg { display:none; margin-top:8px; padding:10px 12px; border-radius:10px; font-size:14px; }
+    .msg.error { background:#ffeaea; border:1px solid #f3b5b5; color:#b42323; }
+    .msg.ok { background:#e7f7ec; border:1px solid #b9ebc9; color:#246b3d; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <h1>Criar conta</h1>
+      <p class="desc">Informe seus dados para começar.</p>
+    </div>
+    <form id="registerForm" method="POST" action="/register">
+      <div class="input-group">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" required />
+      </div>
+      <div id="formMsg" class="msg"></div>
+      <button id="submitBtn" class="btn" type="submit">Cadastrar</button>
+    </form>
+    <div class="links">
+      <a href="/login">Entrar</a>
+      <a href="/">Voltar</a>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const form = document.getElementById('registerForm');
+      const msg = document.getElementById('formMsg');
+      const btn = document.getElementById('submitBtn');
+      function showError(text){ msg.className='msg error'; msg.textContent=text; msg.style.display='block'; }
+      function showOk(text){ msg.className='msg ok'; msg.textContent=text; msg.style.display='block'; }
+      form.addEventListener('submit', function(e){
+        // validação cliente
+        const u = document.getElementById('username').value.trim();
+        const em = document.getElementById('email').value.trim();
+        const pw = document.getElementById('password').value;
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        msg.style.display='none';
+        if(u.length < 3){ e.preventDefault(); return showError('O usuário deve ter pelo menos 3 caracteres.'); }
+        if(!emailRe.test(em)){ e.preventDefault(); return showError('Informe um email válido.'); }
+        if(pw.length < 6){ e.preventDefault(); return showError('A senha deve ter pelo menos 6 caracteres.'); }
+        // loading
+        btn.disabled = true; btn.textContent='Cadastrando...';
+      });
+    })();
+  </script>
+</body>
+</html>

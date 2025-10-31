@@ -10,7 +10,8 @@ from PIL import Image
 import json
 import os
 import time
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, render_template, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 import base64
 import io
@@ -414,7 +415,135 @@ class EducationalGame:
 
 # Configuração da aplicação Flask
 app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
+app.secret_key = 'dev-secret-key'  # apenas para desenvolvimento
+
+# ---- Auth storage helpers ----
+import json, os, uuid, datetime
+USERS_PATH = os.path.join('data', 'users.json')
+
+def _load_users():
+    if not os.path.exists(USERS_PATH):
+        return {}
+    try:
+        with open(USERS_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_users(users: dict):
+    os.makedirs(os.path.dirname(USERS_PATH), exist_ok=True)
+    with open(USERS_PATH, 'w', encoding='utf-8') as f:
+        json.dump(users, f, ensure_ascii=False, indent=2)
+
+def _ensure_admin_seed():
+    users = _load_users()
+    username = 'admin'
+    desired_email = 'email@email.com'
+    desired_password = 'senhadoadmin'
+    key_map = {k.lower(): k for k in users.keys()}
+    if 'admin' in key_map:
+        k = key_map['admin']
+        # atualizar email/senha e flags
+        users[k]['email'] = desired_email
+        users[k]['password_hash'] = generate_password_hash(desired_password)
+        users[k]['is_admin'] = True
+        if not users[k].get('player_id'):
+            users[k]['player_id'] = str(uuid.uuid4())
+        # garantir player associado
+        if users[k]['player_id'] not in game.gamification.players:
+            game.gamification.create_player(users[k]['player_id'], username)
+    else:
+        users[username] = {
+            'email': desired_email,
+            'password_hash': generate_password_hash(desired_password),
+            'is_admin': True,
+            'player_id': str(uuid.uuid4()),
+            'created_at': datetime.datetime.utcnow().isoformat()
+        }
+        game.gamification.create_player(users[username]['player_id'], username)
+    try:
+        game.gamification.save_to_file('data/players.json')
+    except Exception:
+        pass
+    _save_users(users)
+
+# Instanciar o jogo e garantir admin seed
+game = EducationalGame()
+_ensure_admin_seed()
+
+# ---- Auth endpoints ----
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username','').strip()
+        password = request.form['password']
+        users = _load_users()
+        # mapear nome informado para chave real (case-insensitive)
+        key_map = {k.lower(): k for k in users.keys()}
+        real_key = key_map.get(username.lower())
+        if real_key and check_password_hash(users[real_key]['password_hash'], password):
+            session['username'] = real_key
+            return redirect(url_for('index'))
+        # inválido: retorna com erro
+        return render_template('login.html', error='Usuário ou senha inválidos')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username','').strip()
+        email = request.form['email']
+        password = request.form['password']
+        users = _load_users()
+        # bloquear duplicatas ignorando maiúsculas/minúsculas
+        if username.lower() not in {k.lower(): k for k in users.keys()}:
+            users[username] = {
+                'email': email,
+                'password_hash': generate_password_hash(password),
+                'is_admin': False,
+                'player_id': str(uuid.uuid4()),
+                'created_at': datetime.datetime.utcnow().isoformat()
+            }
+            # garantir player associado
+            game.gamification.create_player(users[username]['player_id'], username)
+            try:
+                game.gamification.save_to_file('data/players.json')
+            except Exception:
+                pass
+            _save_users(users)
+            return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/reset', methods=['GET', 'POST'])
+def reset():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        new_password = request.form.get('new_password', '')
+        users = _load_users()
+        if username in users:
+            u = users[username]
+            # valida par username+email
+            if u.get('email', '').strip().lower() == email.lower() and new_password:
+                users[username]['password_hash'] = generate_password_hash(new_password)
+                _save_users(users)
+                return redirect(url_for('login'))
+    return render_template('reset.html')
+
+@app.route('/me', methods=['GET'])
+def me():
+    if 'username' in session:
+        users = _load_users()
+        u = users.get(session['username'])
+        if u:
+            return jsonify({'username': session['username'], 'is_admin': bool(u.get('is_admin')), 'player_id': u.get('player_id')})
+        return jsonify({'username': session['username'], 'is_admin': False})
+    return jsonify({}), 401
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('username', None)
+    return jsonify({})
 
 # Instanciar o jogo
 game = EducationalGame()
@@ -422,11 +551,15 @@ game = EducationalGame()
 @app.route('/')
 def index():
     """Página principal do jogo"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('index.html')
 
 @app.route('/chatbot')
 def chatbot():
     """Interface de chatbot interativo"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('chatbot.html')
 
 @app.route('/api/process_image', methods=['POST'])
@@ -437,6 +570,7 @@ def process_image():
         image_data = data.get('image')
         question = data.get('question', 'Que local histórico é este?')
         player_id = data.get('player_id', 'Jogador')
+        no_xp = bool(data.get('no_xp', False))
         
         if not image_data:
             return jsonify({'error': 'Nenhuma imagem fornecida'}), 400
@@ -446,12 +580,34 @@ def process_image():
             image_bytes = base64.b64decode(image_data.split(',')[1])
         else:
             image_bytes = base64.b64decode(image_data)
-        image = Image.open(io.BytesIO(image_bytes))
-        
-        # Processar com o jogo
-        result = game.process_image_and_question(image_data, question, player_id)
-        
-        return jsonify(result)
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+
+        if no_xp:
+            # Caminho leve: apenas identificar e responder sem alterar XP
+            temp_path = 'temp_analysis_image.jpg'
+            image.save(temp_path)
+            try:
+                predicted_class, confidence = game.recife_trainer.predict(temp_path)
+                info = game.recife_trainer.get_location_info(predicted_class)
+                answer = f"Este é o {info.get('nome', predicted_class.replace('_',' ').title())}"
+                explanation = info.get('descricao', '')
+                return jsonify({
+                    'success': True,
+                    'answer': answer,
+                    'explanation': explanation,
+                    'response_time': 'Rápido',
+                    'confidence': f"{confidence:.2f}",
+                })
+            finally:
+                try:
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                except Exception:
+                    pass
+        else:
+            # Processar com o jogo (pode alterar XP)
+            result = game.process_image_and_question(image_data, question, player_id)
+            return jsonify(result)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

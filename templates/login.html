@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar • Pontos Turísticos Recife</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { background:#fff; border-radius:18px; box-shadow:0 22px 48px rgba(0,0,0,.25); max-width:480px; width:100%; padding:28px; margin:0 auto; overflow:hidden; }
+    h1 { margin:0 0 6px; color:#667eea; font-size:24px; }
+    p.desc { margin:0 0 22px; color:#666; font-size:14px; }
+    .input-group { margin-bottom:16px; }
+    label { display:block; margin-bottom:8px; color:#444; font-weight:600; font-size:14px; }
+    input { width:100%; display:block; padding:13px 14px; border:2px solid #e6e6f0; border-radius:12px; font-size:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
+    input:focus { outline:none; border-color:#667eea; box-shadow: inset 0 0 0 2px rgba(102,126,234,0.18); }
+    .btn { width:100%; border:none; border-radius:999px; padding:13px 18px; color:#fff; background:linear-gradient(45deg,#667eea,#764ba2); font-weight:800; cursor:pointer; margin-top:10px; letter-spacing:.3px; }
+    .links { display:flex; gap:20px; justify-content:space-between; margin-top:16px; font-size:14px; padding:0 8px; }
+    a { color:#667eea; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .top { text-align:center; margin-bottom:14px; }
+    .msg { display:block; margin-top:10px; padding:10px 12px; border-radius:10px; font-size:14px; }
+    .msg.error { background:#ffeaea; border:1px solid #f3b5b5; color:#b42323; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <h1>Entrar</h1>
+      <p class="desc">Acesse sua conta para continuar.</p>
+    </div>
+    <form method="POST" action="/login">
+      <div class="input-group">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" required />
+      </div>
+      <button class="btn" type="submit">Entrar</button>
+      {% if error %}
+      <div class="msg error">{{ error }}</div>
+      {% endif %}
+    </form>
+    <div class="links">
+      <a href="/register">Cadastrar</a>
+      <a href="/reset">Recuperar senha</a>
+      <a href="/">Voltar</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -83,7 +83,9 @@
             opacity: 0.9;
         }
 
-        .header .actions { display: none; }
+        .header .actions { margin-top: 10px; display: none; }
+        .logout-btn { background:#fff; color:#5b5f97; border:1px solid #e6e6f0; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; }
+        .reset-btn { background:#ffeff0; color:#c22; border:1px solid #f3b5b5; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; margin-left:8px; display:none; }
 
         .link-btn {
             display: inline-block;
@@ -137,6 +139,7 @@
         .player-setup {
             text-align: center;
             position: relative;
+            margin-bottom: 28px;
         }
 
         .icon-action {
@@ -576,6 +579,10 @@
         <div class="header">
             <h1>Pontos Turísticos Recife</h1>
             <p>Explore os pontos históricos do Recife e desenvolva suas habilidades!</p>
+            <div class="actions" id="headerActions">
+                <button id="resetRankingBtn" class="reset-btn" onclick="resetRanking()">Resetar Ranking</button>
+                <button class="logout-btn" onclick="logoutUser()">Sair</button>
+            </div>
         </div>
 
         <div id="resumeBar" class="resume-bar">
@@ -662,7 +669,7 @@
         // Inicializa player global a partir do localStorage (sem quebrar se indisponível)
         try { window.currentPlayerId = window.currentPlayerId || localStorage.getItem('player_id') || null; } catch (e) { window.currentPlayerId = null; }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const savedId = localStorage.getItem('player_id');
                 const savedName = localStorage.getItem('player_name');
@@ -671,10 +678,46 @@
                     const nm = document.getElementById('resumeName');
                     if (bar) bar.style.display = 'flex';
                     if (nm) nm.textContent = savedName;
+                    // não seta currentPlayerId automaticamente, só oferece continuar
                 }
+                // checar sessão para mostrar botão sair
+                try {
+                    const me = await fetch('/me');
+                    if (me.ok) {
+                        const data = await me.json();
+                        const actions = document.getElementById('headerActions');
+                        const resetBtn = document.getElementById('resetRankingBtn');
+                        if (actions) actions.style.display = 'block';
+                        if (resetBtn) resetBtn.style.display = data.is_admin ? 'inline-block' : 'none';
+                    }
+                } catch (e) {}
             } catch (e) {}
             loadHomeLeaderboard();
         });
+
+        async function logoutUser() {
+            try {
+                await fetch('/logout', { method:'POST' });
+            } catch (e) {}
+            try { localStorage.removeItem('player_id'); localStorage.removeItem('player_name'); } catch (e) {}
+            window.location.href = '/login';
+        }
+
+        async function resetRanking() {
+            const btn = document.getElementById('resetRankingBtn');
+            try {
+                if (btn) { btn.disabled = true; btn.textContent = 'Limpando...'; }
+                const r1 = await fetch('/api/admin/reset_players', { method: 'POST' });
+                await r1.json().catch(() => ({}));
+                // Recarrega dados em memória
+                await fetch('/api/admin/reload_players', { method: 'POST' });
+                await loadHomeLeaderboard();
+            } catch (e) {
+                // noop
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Resetar Ranking'; }
+            }
+        }
 
         function continueAsSaved() {
             try {
@@ -793,8 +836,10 @@
                 // Exibir interfaces
                 const setup = document.getElementById('playerSetup');
                 const game = document.getElementById('gameInterface');
+                const ranking = document.getElementById('homeLeaderboard');
                 if (setup) setup.style.display = 'none';
                 if (game) game.classList.remove('hidden');
+                if (ranking) ranking.style.display = 'none';
                 await loadPlayerStats();
                 const backBtn = document.getElementById('backIndexBtn');
                 if (backBtn) backBtn.style.display = 'inline-block';
@@ -807,9 +852,11 @@
             const setup = document.getElementById('playerSetup');
             const game = document.getElementById('gameInterface');
             const backBtn = document.getElementById('backIndexBtn');
+            const ranking = document.getElementById('homeLeaderboard');
             if (setup) setup.style.display = 'block';
             if (game) game.classList.add('hidden');
             if (backBtn) backBtn.style.display = 'none';
+            if (ranking) ranking.style.display = 'block';
             // limpar resposta e preview
             const responseArea = document.getElementById('responseArea');
             if (responseArea) { responseArea.innerHTML = ''; responseArea.style.display = 'none'; }
@@ -887,7 +934,8 @@
                     },
                     body: JSON.stringify({
                         image: currentImageData,
-                        player_id: window.currentPlayerId
+                        player_id: window.currentPlayerId,
+                        no_xp: true
                     })
                 });
 

@@ -1,0 +1,51 @@
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperar Senha • Pontos Turísticos Recife</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { background:#fff; border-radius:18px; box-shadow:0 22px 48px rgba(0,0,0,.25); max-width:480px; width:100%; padding:28px; margin:0 auto; overflow:hidden; }
+    h1 { margin:0 0 6px; color:#667eea; font-size:24px; }
+    p.desc { margin:0 0 22px; color:#666; font-size:14px; }
+    .input-group { margin-bottom:16px; }
+    label { display:block; margin-bottom:8px; color:#444; font-weight:600; font-size:14px; }
+    input { width:100%; display:block; padding:13px 14px; border:2px solid #e6e6f0; border-radius:12px; font-size:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03); }
+    input:focus { outline:none; border-color:#667eea; box-shadow: inset 0 0 0 2px rgba(102,126,234,0.18); }
+    .btn { width:100%; border:none; border-radius:999px; padding:13px 18px; color:#fff; background:linear-gradient(45deg,#667eea,#764ba2); font-weight:800; cursor:pointer; margin-top:10px; letter-spacing:.3px; }
+    .links { display:flex; gap:20px; justify-content:space-between; margin-top:16px; font-size:14px; padding:0 8px; }
+    a { color:#667eea; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .top { text-align:center; margin-bottom:14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <h1>Recuperar senha</h1>
+      <p class="desc">Informe seu usuário e email para definir uma nova senha.</p>
+    </div>
+    <form method="POST" action="/reset">
+      <div class="input-group">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" required />
+      </div>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+      <div class="input-group">
+        <label for="new_password">Nova senha</label>
+        <input id="new_password" name="new_password" type="password" required />
+      </div>
+      <button class="btn" type="submit">Atualizar senha</button>
+    </form>
+    <div class="links">
+      <a href="/login">Entrar</a>
+      <a href="/">Voltar</a>
+    </div>
+  </div>
+</body>
+</html>

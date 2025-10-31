@@ -1,1 +1,35 @@
-{}
+{
+  "141ed14d-386a-4400-96a3-ac441c0f2026": {
+    "id": "141ed14d-386a-4400-96a3-ac441c0f2026",
+    "name": "Jogador",
+    "level": 1,
+    "experience": 4,
+    "streak": 0,
+    "total_correct": 0,
+    "total_attempts": 1,
+    "achievements": [],
+    "daily_challenges": {}
+  },
+  "a42ce86d-af21-40ee-b5b5-2c71265bbddb": {
+    "id": "a42ce86d-af21-40ee-b5b5-2c71265bbddb",
+    "name": "teste",
+    "level": 1,
+    "experience": 0,
+    "streak": 0,
+    "total_correct": 0,
+    "total_attempts": 0,
+    "achievements": [],
+    "daily_challenges": {}
+  },
+  "f1cc77d4-c6a7-481f-b5ae-c651d43afb08": {
+    "id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
+    "name": "admin",
+    "level": 1,
+    "experience": 0,
+    "streak": 0,
+    "total_correct": 0,
+    "total_attempts": 0,
+    "achievements": [],
+    "daily_challenges": {}
+  }
+}
