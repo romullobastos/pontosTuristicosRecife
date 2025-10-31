@@ -1,10 +1,14 @@
 {
   "admin": {
     "email": "email@email.com",
-    "password_hash": "scrypt:32768:8:1$YELHXrJUVizSntNf$9e8ca1dd7e44cd5ee0419abebf719cf01028e298d38bbe0657abe4fb04969e5f2563a5a375ef66eab3113e5f80b44a260dc23d4e183f4dc0442a127295d674c7",
+    "password_hash": "scrypt:32768:8:1$PFqtyv3PRBHD68jX$fe23849b1232b37bb9643dc5a7f305308b6a4b9f3f69d4fddf50a78243c46e3f5736e2ed7f251ebb2d58781080c731b17dcda9d129cc61644bc2206c52190f1e",
     "is_admin": true,
     "player_id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
-    "created_at": "2025-10-31T19:24:57.642487"
+    "created_at": "2025-10-31T19:24:57.642487",
+    "player_ids": [
+      "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
+      "0d6caf15-ce3e-4d6a-9d5d-1b83daf4ab3f"
+    ]
   },
   "teste": {
     "email": "teste@teste.com",
@@ -18,6 +22,10 @@
     "password_hash": "scrypt:32768:8:1$iIPka8V8Q2niMil3$81ac0adb77d840280754d7a95afd85b6dda1b596521f336453a58737c022e3ccf760fcba67eeaf7269f89c8a4835d9e751fa6504d3406ed777af2a2b135a2a57",
     "is_admin": false,
     "player_id": "3b26f6f2-232c-43af-b7bd-2a50db8b158f",
-    "created_at": "2025-10-31T19:56:14.333112"
+    "created_at": "2025-10-31T19:56:14.333112",
+    "player_ids": [
+      "246f488d-eaec-46ad-a696-149cc40cb47d",
+      "dc065514-9d03-45e5-ab7d-bd52e208459c"
+    ]
   }
 }

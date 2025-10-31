@@ -86,6 +86,7 @@
         .header .actions { margin-top: 10px; display: none; }
         .logout-btn { background:#fff; color:#5b5f97; border:1px solid #e6e6f0; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; }
         .reset-btn { background:#ffeff0; color:#c22; border:1px solid #f3b5b5; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; margin-left:8px; display:none; }
+        .use-btn { background:#e7f7ec; color:#246b3d; border:1px solid #b9ebc9; border-radius:999px; padding:6px 10px; font-weight:700; cursor:pointer; margin-left:8px; font-size:12px; }
 
         .link-btn {
             display: inline-block;
@@ -744,6 +745,24 @@
             if (input) input.focus();
         }
 
+        async function selectMyPlayer(id, name) {
+            try {
+                const chosenId = String(id||'');
+                const chosenName = name || 'Jogador';
+                if (!chosenId) return;
+                try {
+                    localStorage.setItem('player_id', chosenId);
+                    localStorage.setItem('player_name', chosenName);
+                } catch (e) {}
+                const bar = document.getElementById('resumeBar');
+                const nm = document.getElementById('resumeName');
+                if (bar) bar.style.display = 'flex';
+                if (nm) nm.textContent = chosenName;
+                // Ir direto para o chatbot
+                window.location.href = '/chatbot';
+            } catch (e) {}
+        }
+
         // Criar jogador
         async function createPlayer() {
             const name = document.getElementById('playerName').value.trim();
@@ -1200,19 +1219,29 @@
         // Ranking da home (sem precisão)
         async function loadHomeLeaderboard() {
             try {
+                // obter sessão atual
+                let me = null;
+                try { const meResp = await fetch('/me'); if (meResp.ok) me = await meResp.json(); } catch(e){}
+
                 const response = await fetch('/api/leaderboard');
                 const leaderboard = await response.json();
                 const listEl = document.getElementById('leaderboardList');
                 if (!listEl) return;
-                listEl.innerHTML = (Array.isArray(leaderboard) ? leaderboard : []).map(p => `
-                    <div class="leaderboard-item">
-                        <div class="rank">#${p.rank}</div>
-                        <div class="player-info">
-                            <div class="player-name">${p.name}</div>
-                            <div class="player-level">Nível ${p.level} • ${p.experience} XP</div>
+                listEl.innerHTML = (Array.isArray(leaderboard) ? leaderboard : []).map(p => {
+                    const myIds = (me && Array.isArray(me.player_ids)) ? me.player_ids.map(x => String(x)) : [];
+                    const canUse = myIds.includes(String(p.id||''));
+                    const safeName = String(p.name||'').replace(/"/g, '&quot;');
+                    const btn = canUse ? `<button class=\"use-btn\" onclick=\"selectMyPlayer('${String(p.id)}','${safeName}')\">Usar</button>` : '';
+                    return `
+                    <div class=\"leaderboard-item\">
+                        <div class=\"rank\">#${p.rank}</div>
+                        <div class=\"player-info\">
+                            <div class=\"player-name\">${p.name}</div>
+                            <div class=\"player-level\">Nível ${p.level} • ${p.experience} XP</div>
                         </div>
-                    </div>
-                `).join('');
+                        ${btn}
+                    </div>`;
+                }).join('');
             } catch (e) {
                 // silencioso
             }

@@ -449,6 +449,11 @@ def _ensure_admin_seed():
         users[k]['is_admin'] = True
         if not users[k].get('player_id'):
             users[k]['player_id'] = str(uuid.uuid4())
+        # garantir lista de player_ids
+        if not isinstance(users[k].get('player_ids'), list):
+            users[k]['player_ids'] = []
+        if users[k]['player_id'] not in users[k]['player_ids']:
+            users[k]['player_ids'].append(users[k]['player_id'])
         # garantir player associado
         if users[k]['player_id'] not in game.gamification.players:
             game.gamification.create_player(users[k]['player_id'], username)
@@ -458,9 +463,11 @@ def _ensure_admin_seed():
             'password_hash': generate_password_hash(desired_password),
             'is_admin': True,
             'player_id': str(uuid.uuid4()),
+            'player_ids': [],
             'created_at': datetime.datetime.utcnow().isoformat()
         }
         game.gamification.create_player(users[username]['player_id'], username)
+        users[username]['player_ids'].append(users[username]['player_id'])
     try:
         game.gamification.save_to_file('data/players.json')
     except Exception:
@@ -536,7 +543,7 @@ def me():
         users = _load_users()
         u = users.get(session['username'])
         if u:
-            return jsonify({'username': session['username'], 'is_admin': bool(u.get('is_admin')), 'player_id': u.get('player_id')})
+            return jsonify({'username': session['username'], 'is_admin': bool(u.get('is_admin')), 'player_id': u.get('player_id'), 'player_ids': u.get('player_ids', [])})
         return jsonify({'username': session['username'], 'is_admin': False})
     return jsonify({}), 401
 
@@ -679,6 +686,22 @@ def create_player():
         # Salvar estado imediatamente
         try:
             game.gamification.save_to_file('data/players.json')
+        except Exception:
+            pass
+
+        # Se há usuário logado, associar este novo player à conta
+        try:
+            if 'username' in session:
+                users = _load_users()
+                u = users.get(session['username'])
+                if u is not None:
+                    if not isinstance(u.get('player_ids'), list):
+                        u['player_ids'] = []
+                    if player_id not in u['player_ids']:
+                        u['player_ids'].append(player_id)
+                    # manter player_id principal como o mais recente se desejar
+                    users[session['username']] = u
+                    _save_users(users)
         except Exception:
             pass
 

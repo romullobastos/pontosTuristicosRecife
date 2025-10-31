@@ -306,6 +306,7 @@ class GamificationSystem:
         leaderboard = []
         for i, player in enumerate(sorted_players[:limit]):
             leaderboard.append({
+                "id": player.id,
                 "rank": i + 1,
                 "name": player.name,
                 "level": player.level,
