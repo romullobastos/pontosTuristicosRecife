@@ -16,7 +16,6 @@ import base64
 import io
 
 # Importar nossos módulos
-from models.multimodal_model import EducationalMultimodalModel
 from game.gamification import GamificationSystem
 from game.photo_description_game import PhotoDescriptionGame
 import sys
@@ -49,8 +48,7 @@ class EducationalGame:
         else:
             print("Modelo de pontos historicos do Recife carregado com sucesso!")
         
-        # Usar apenas o modelo de pontos históricos (não precisamos do modelo multimodal antigo)
-        self.model = None  # Não vamos usar o modelo multimodal antigo
+        # Usar apenas o modelo de pontos históricos (modelo multimodal legado não é usado)
         
         # Transformações para imagens
         self.transform = transforms.Compose([
@@ -634,15 +632,17 @@ def compare_visual_similarity():
         similarity = game.recife_trainer.compare_images(user_img, target_img)
         
         # Calcular pontos baseado na similaridade
-        # Similaridade de 0.8+ = excelente, 0.6+ = bom, 0.4+ = aceitável
+        # Similaridade de 0.8+ = excelente, 0.6+ = bom, 0.4+ = aceitável, 0.30+ = tentativa
         if similarity >= 0.8:
             points = photo['points']  # Pontos completos
         elif similarity >= 0.6:
             points = int(photo['points'] * 0.7)  # 70% dos pontos
         elif similarity >= 0.4:
             points = int(photo['points'] * 0.5)  # 50% dos pontos
-        else:
+        elif similarity >= 0.3:
             points = int(photo['points'] * 0.3)  # 30% dos pontos
+        else:
+            points = 0  # Abaixo de 30% não gera pontos
         
         # Adicionar pontos ao XP do jogador
         if player_id in game.gamification.players:

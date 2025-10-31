@@ -20,11 +20,12 @@ Usuário interage de 3 formas:
 
 ## 📊 Datasets
 
-- **Imagens**: 28 fotos de 12 locais históricos do Recife
-- **Descrições**: JSON com descrições oficiais e keywords
+- **Imagens (estado atual no filesystem)**: 60 fotos distribuídas em 12 pastas de classes em `data/recife_historic/`.
+- **Classes definidas**: 12 locais históricos (uma pasta por classe)
+- **Descrições**: `data/photo_descriptions.json` com 23 registros (descrições oficiais e keywords)
 - **Locais**: Casa da Cultura, Forte das Cinco Pontas, Igrejas, Marco Zero, etc.
 
-**Estrutura JSON**:
+**Estrutura JSON (photo_descriptions.json)**:
 ```json
 {
   "id": "marco_zero",

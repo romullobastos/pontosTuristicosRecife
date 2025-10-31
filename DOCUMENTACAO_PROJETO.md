@@ -33,10 +33,11 @@ Sistema chatbot gamificado que combina:
 
 ### 3.1 Dataset de Imagens Históricas
 - **Fonte**: `data/recife_historic/`
-- **Estrutura**: 12 locais históricos diferentes
-- **Total de Imagens**: 28 imagens
+- **Estrutura**: 12 classes (uma pasta por local histórico)
+- **Estado atual no filesystem**: 60 imagens distribuídas nas 12 pastas de classes.
 - **Locais**: Casa da Cultura, Forte das Cinco Pontas, Igreja Madre de Deus, Igreja Nossa Senhora do Carmo, Igreja Santo Antônio, Igreja São Pedro dos Clérigos, Marco Zero, Mercado São José, Palácio da Justiça, Rua Aurora, Rua do Bom Jesus, Teatro Santa Isabel
 
+- **Registros**: 23 entradas
 ### 3.2 Dataset de Descrições
 - **Fonte**: `data/photo_descriptions.json`
 - **Formato**: JSON com descrições oficiais e keywords
@@ -95,12 +96,11 @@ Score combinado (60% similaridade + 40% keywords)
 ```
 Foto do Desafio + Foto do Usuário
     ↓
-    ├─→ Classifica Foto do Desafio → Classe A
-    └─→ Classifica Foto do Usuário → Classe B
+Extrai embeddings (backbone da CNN)
     ↓
-Compara Classes:
-    ├─→ A == B: Alta similaridade
-    └─→ A != B: Baixa similaridade
+Calcula similaridade do cosseno entre os embeddings
+    ↓
+Aplica thresholds para pontuação (≥0.8 excelente, ≥0.6 bom, ≥0.4 aceitável)
 ```
 
 ### 4.4 Pipeline de Gamificação (Unificado em XP)
@@ -191,7 +191,7 @@ Score Final: (similarity * 0.6) + (keyword_score * 0.4)
 ## 7. Interface (Frontend)
 
 ### 7.1 `templates/chatbot.html`
-- Exibe: **Nível**, **XP**, **Precisão**, **Sequência**
+- Exibe: **Nível**, **XP**, **Sequência**
 - Atualiza XP após cada jogada (Foto/Descrição)
 - Mostra `points_earned` retornado pelo backend
 

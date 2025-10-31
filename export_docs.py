@@ -86,18 +86,31 @@ def md_to_docx(md_path: Path, docx_path: Path):
     # Evitar caracteres não suportados no console padrão do Windows
     print(f"Gerado: {docx_path}")
 
+    # Tentativa opcional de exportar para PDF se docx2pdf estiver disponível
+    try:
+        from docx2pdf import convert as docx2pdf_convert
+        pdf_path = docx_path.with_suffix('.pdf')
+        # docx2pdf suporta conversão de arquivo individual
+        docx2pdf_convert(str(docx_path), str(pdf_path))
+        print(f"Gerado: {pdf_path}")
+    except Exception as _:
+        # Silenciosamente ignorar se não houver suporte (sem dependência obrigatória)
+        pass
+
 
 def main():
     targets = [
         ('RELATORIO_DEEP_LEARNING.md', 'docs/RELATORIO_DEEP_LEARNING.docx'),
         ('DOCUMENTACAO_PROJETO.md', 'docs/DOCUMENTACAO_PROJETO.docx'),
         ('RELATORIO_JUSTIFICATIVAS.md', 'docs/RELATORIO_JUSTIFICATIVAS.docx'),
+        ('DOC_APRESENTACAO_SIMPLIFICADO.md', 'docs/DOC_APRESENTACAO_SIMPLIFICADO.docx'),
+        ('docs/SLIDE_METRICAS_PRINCIPAIS.md', 'docs/SLIDE_METRICAS_PRINCIPAIS.docx'),
     ]
 
     for src, dst in targets:
         src_path = Path(src)
         if not src_path.exists():
-            print(f"⚠️ Arquivo não encontrado: {src}")
+            print(f"[WARN] Arquivo nao encontrado: {src}")
             continue
         md_to_docx(src_path, Path(dst))
 

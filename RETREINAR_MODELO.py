@@ -18,19 +18,19 @@ def main():
     print("=" * 70)
     
     # Criar treinador
-    print("\nCarregando dataset...")
-    trainer = ImprovedRecifeHistoricTrainer()
+    print("\nCarregando dataset (Transfer Learning: ResNet18)...")
+    trainer = ImprovedRecifeHistoricTrainer(use_transfer=True)
     
     print("\nVerificando modelo antigo...")
     import os
     if os.path.exists('models/improved_recife_historic_model.pth'):
         os.remove('models/improved_recife_historic_model.pth')
-        print("✓ Modelo antigo removido")
+        print("[OK] Modelo antigo removido")
     else:
-        print("✓ Nenhum modelo antigo encontrado (primeiro treinamento)")
+        print("[OK] Nenhum modelo antigo encontrado (primeiro treinamento)")
     
-    print(f"\n✓ Locais encontrados: {trainer.num_classes}")
-    print(f"✓ Total de imagens: {len(trainer.dataset)}")
+    print(f"\n[OK] Locais encontrados: {trainer.num_classes}")
+    print(f"[OK] Total de imagens: {len(trainer.dataset)}")
     print("\n" + "=" * 70)
     print("INICIANDO TREINAMENTO")
     print("=" * 70)
@@ -50,21 +50,21 @@ def main():
         print("SALVANDO MODELO...")
         trainer.save_model()
         print("=" * 70)
-        print("✓ MODELO SALVO COM SUCESSO!")
+        print("[OK] MODELO SALVO COM SUCESSO!")
         print("=" * 70)
         print("\nO aplicativo vai usar automaticamente o novo modelo")
         print("Se o aplicativo estiver rodando, recarregue a pagina")
         print("=" * 70)
     else:
-        print("\n✗ Falha no treinamento")
+        print("\n[ERRO] Falha no treinamento")
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠ Treinamento interrompido pelo usuario")
+        print("\n\n[ATENCAO] Treinamento interrompido pelo usuario")
     except Exception as e:
-        print(f"\n\n✗ ERRO: {e}")
+        print(f"\n\n[ERRO] {e}")
         import traceback
         traceback.print_exc()
 

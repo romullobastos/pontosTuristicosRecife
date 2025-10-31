@@ -272,7 +272,7 @@ class ImprovedRecifeHistoricTrainer:
         self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
         
         print(f"Modelo melhorado criado: {sum(p.numel() for p in self.model.parameters())} parâmetros")
-    
+        
     def _create_dataloaders(self, batch_size=8, val_split=0.2):
         """Cria DataLoaders de treino e validação com split estratificado por classe."""
         if len(self.dataset) == 0:
@@ -471,6 +471,27 @@ class ImprovedRecifeHistoricTrainer:
             return True
         return False
     
+    def _get_embedding(self, pil_image):
+        """Extrai embedding da imagem a partir do backbone (ResNet18 ou ImprovedCNN)."""
+        # Transformar imagem
+        image_tensor = self.val_transform(pil_image).unsqueeze(0).to(self.device)
+        self.model.eval()
+
+        with torch.no_grad():
+            if hasattr(self.model, 'fc'):
+                # ResNet18: usar tudo menos a FC
+                backbone = torch.nn.Sequential(*list(self.model.children())[:-1])
+                feats = backbone(image_tensor)  # shape: [1, 512, 1, 1]
+                emb = feats.view(feats.size(0), -1)  # [1, 512]
+            else:
+                # ImprovedCNN: usar feature extractor e reduzir
+                feats = self.model.features(image_tensor)  # [1, 512, 4, 4]
+                emb = feats.mean(dim=[2,3])  # média espacial -> [1, 512]
+
+            # L2 normalizar
+            emb = emb / (emb.norm(p=2, dim=1, keepdim=True) + 1e-8)
+            return emb.squeeze(0)
+
     def predict(self, image_path):
         """Predição melhorada com técnicas avançadas"""
         self.model.eval()
@@ -498,75 +519,87 @@ class ImprovedRecifeHistoricTrainer:
         location_info = {
             'casa_da_cultura': {
                 'nome': 'Casa da Cultura',
-                'descricao': 'Antiga Casa de Detenção, hoje centro cultural',
-                'historia': 'Construída em 1855, transformada em centro cultural em 1976',
-                'caracteristicas': 'Arquitetura neoclássica, celas transformadas em lojas'
+                'descricao': 'Um antigo presídio que virou um dos lugares mais charmosos da cidade. Cada cela virou uma lojinha com artesanato e delícias típicas.',
+                'historia': 'Construída em 1855 como Casa de Detenção, transformada em centro cultural em 1976.',
+                'caracteristicas': 'Lojas nas antigas celas, artesanato, cultura local',
+                'emoji': '🏛️'
             },
             'forte_das_cinco_pontas': {
                 'nome': 'Forte das Cinco Pontas',
-                'descricao': 'Fortaleza histórica construída pelos holandeses',
-                'historia': 'Construído em 1630, formato pentagonal único',
-                'caracteristicas': 'Arquitetura militar colonial, formato pentagonal'
+                'descricao': 'Forte histórico construído pelos holandeses; hoje abriga um museu com curiosidades do Recife.',
+                'historia': 'Erguido no século XVII pelos holandeses; símbolo da história militar local.',
+                'caracteristicas': 'Arquitetura militar, ângulos marcantes, ótimo para fotos',
+                'emoji': '🏰'
             },
             'igreja_madre_de_deus': {
                 'nome': 'Igreja Madre de Deus',
-                'descricao': 'Igreja histórica no bairro do Recife',
-                'historia': 'Século XVIII, arquitetura barroca',
-                'caracteristicas': 'Fachada barroca, torre alta'
+                'descricao': 'No coração do Recife Antigo, encanta pela beleza e tranquilidade.',
+                'historia': 'Igreja de tradição no centro histórico, com arte barroca.',
+                'caracteristicas': 'Ambiente sereno, detalhes artísticos, pausa entre passeios',
+                'emoji': '⛪'
             },
             'igreja_nossa_senhora_do_carmo': {
                 'nome': 'Igreja Nossa Senhora do Carmo',
-                'descricao': 'Igreja histórica com arquitetura barroca',
-                'historia': 'Importante marco religioso',
-                'caracteristicas': 'Interior ricamente decorado'
+                'descricao': 'Imponente por fora e encantadora por dentro, com altares dourados e azulejos antigos.',
+                'historia': 'Igreja do século XVII, uma das mais lindas da cidade.',
+                'caracteristicas': 'Barroco, tradição pernambucana, interior riquíssimo',
+                'emoji': '⛪'
             },
             'igreja_santo_antonio': {
                 'nome': 'Igreja Santo Antônio',
-                'descricao': 'Igreja histórica do Recife',
-                'historia': 'Século XVIII',
-                'caracteristicas': 'Arquitetura colonial barroca'
+                'descricao': 'Conhecida por abrigar o túmulo do Frei Damião; ponto de fé e devoção.',
+                'historia': 'Importante referência religiosa e cultural do Recife.',
+                'caracteristicas': 'Detalhes acolhedores, espaço de devoção',
+                'emoji': '⛪'
             },
             'igreja_sao_pedro_dos_clerigos': {
                 'nome': 'Igreja de São Pedro dos Clérigos',
-                'descricao': 'Igreja barroca do século XVIII',
-                'historia': 'Construída entre 1728 e 1782',
-                'caracteristicas': 'Torre alta, fachada barroca elaborada'
+                'descricao': 'Uma joia barroca no centro do Recife, ótima para quem ama arquitetura e história.',
+                'historia': 'Construída no século XVIII, com fachada e interior marcantes.',
+                'caracteristicas': 'Barroco, arte, história e beleza arquitetônica',
+                'emoji': '⛪'
             },
             'marco_zero': {
                 'nome': 'Marco Zero',
-                'descricao': 'Praça principal do Recife Antigo, marco histórico da cidade',
-                'historia': 'Local onde a cidade foi fundada em 1537',
-                'caracteristicas': 'Praça ampla, calçada de pedra, vista para o mar'
+                'descricao': 'O coração do Recife Antigo! Ponto inicial da cidade, cheio de arte e energia.',
+                'historia': 'Marco fundacional do Recife, com vista para o mar e o porto.',
+                'caracteristicas': 'Arte urbana, pôr do sol, fotos e passeio à beira-mar',
+                'emoji': '🏙️'
             },
             'mercado_sao_jose': {
                 'nome': 'Mercado São José',
-                'descricao': 'Mercado público histórico',
-                'historia': 'Construído em 1875',
-                'caracteristicas': 'Arquitetura de ferro pré-fabricada'
+                'descricao': 'Colorido e cheio de vida! O mercado mais antigo do Brasil, com temperos, artesanato e comidas típicas.',
+                'historia': 'Patrimônio do Recife, referência da cultura popular.',
+                'caracteristicas': 'Movimento, aromas e sabores, compras e cultura',
+                'emoji': '🛍️'
             },
             'palacio_da_justica': {
                 'nome': 'Palácio da Justiça',
-                'descricao': 'Tribunal de Justiça de Pernambuco',
-                'historia': 'Prédio histórico com arquitetura neoclássica',
-                'caracteristicas': 'Fachada imponente, colunas clássicas'
+                'descricao': 'Arquitetura imponente e elegante; um dos prédios mais bonitos do centro.',
+                'historia': 'Sede do TJPE, com detalhes históricos e estilo clássico.',
+                'caracteristicas': 'Colunas, simetria e interior marcante',
+                'emoji': '⚖️'
             },
             'rua_aurora': {
                 'nome': 'Rua Aurora',
-                'descricao': 'Rua histórica do centro do Recife',
-                'historia': 'Uma das principais ruas do Recife',
-                'caracteristicas': 'Arquitetura eclética, prédios históricos'
+                'descricao': 'Um dos lugares mais fotogênicos! Às margens do Capibaribe, famosa por casarões coloridos.',
+                'historia': 'Cenário clássico do Recife, perfeito para o fim de tarde.',
+                'caracteristicas': 'Casarões, rio, pôr do sol e muitas fotos',
+                'emoji': '🌅'
             },
             'rua_do_bom_jesus': {
                 'nome': 'Rua do Bom Jesus',
-                'descricao': 'Uma das ruas mais antigas do Recife',
-                'historia': 'Localizada no Recife Antigo',
-                'caracteristicas': 'Casas coloridas, arquitetura colonial'
+                'descricao': 'Uma das ruas mais antigas e charmosas! Bares, galerias e a primeira sinagoga das Américas.',
+                'historia': 'Símbolo de história, cultura e diversão no Recife Antigo.',
+                'caracteristicas': 'Casarões coloridos, vida cultural e boêmia',
+                'emoji': '🎨'
             },
             'teatro_santa_isabel': {
                 'nome': 'Teatro Santa Isabel',
-                'descricao': 'Teatro histórico do Recife',
-                'historia': 'Construído em 1850, neoclássico',
-                'caracteristicas': 'Arquitetura neoclássica, fachada imponente'
+                'descricao': 'Um dos teatros mais bonitos do Brasil! Clássico e elegante, palco de grandes espetáculos.',
+                'historia': 'Ícone cultural do Recife, com interior deslumbrante.',
+                'caracteristicas': 'Estilo clássico, charme e tradição',
+                'emoji': '🎭'
             }
         }
         
@@ -580,64 +613,30 @@ class ImprovedRecifeHistoricTrainer:
     def compare_images(self, img1, img2):
         """
         Compara duas imagens retornando similaridade (0-1)
-        Método: Classifica ambas as imagens e verifica se são do MESMO local histórico
+        Método: Similaridade de cosseno entre embeddings do backbone com compressão para reduzir falsos altos
         """
         self.model.eval()
-        
+
         try:
-            # Processar ambas as imagens
-            img1_tensor = self.val_transform(img1).unsqueeze(0).to(self.device)
-            img2_tensor = self.val_transform(img2).unsqueeze(0).to(self.device)
-            
-            with torch.no_grad():
-                # Passar pelo modelo para obter predições
-                output1 = self.model(img1_tensor)
-                output2 = self.model(img2_tensor)
-                
-                # Obter probabilidades
-                probs1 = torch.nn.functional.softmax(output1, dim=1)
-                probs2 = torch.nn.functional.softmax(output2, dim=1)
-                
-                # Pegar as classes preditas
-                _, pred_class1 = torch.max(output1, 1)
-                _, pred_class2 = torch.max(output2, 1)
-                
-                # Pegar as probabilidades das classes preditas
-                confidence1 = probs1[0][pred_class1].item()
-                confidence2 = probs2[0][pred_class2].item()
-                
-                # Verificar se são da MESMA classe (mesmo local histórico)
-                same_location = (pred_class1 == pred_class2).item()
-                
-                if same_location:
-                    # São do mesmo local! Calcular similaridade baseada na média das confianças
-                    similarity = (confidence1 + confidence2) / 2
-                    
-                    # Se as confianças são altas, ambas estão bem classificadas
-                    if confidence1 > 0.7 and confidence2 > 0.7:
-                        similarity = min(0.95, similarity * 1.1)  # Boost para fotos bem classificadas
-                else:
-                    # São de locais diferentes! 
-                    # Calcular dissimilaridade baseada na diferença entre as predições
-                    diff = abs(confidence1 - confidence2)
-                    
-                    # Se uma foto tem confiança alta e a outra é claramente diferente
-                    if confidence1 > 0.8 or confidence2 > 0.8:
-                        similarity = 0.1  # Muito baixa similaridade
-                    else:
-                        # Ambas mal classificadas ou incertas
-                        similarity = 0.3  # Similaridade baixa
-                
-                # Garantir que está entre 0.1 e 0.95
-                similarity = max(0.1, min(0.95, similarity))
-                
-                return similarity
-                
+            # Extrair embeddings normalizados
+            emb1 = self._get_embedding(img1)  # [512]
+            emb2 = self._get_embedding(img2)  # [512]
+
+            # Similaridade de cosseno em [-1,1]
+            cos = torch.nn.functional.cosine_similarity(emb1.unsqueeze(0), emb2.unsqueeze(0)).item()
+            # Zerar valores negativos e comprimir médios: favorece pares realmente próximos
+            positive = max(0.0, cos)
+            similarity = positive * positive  # compressão quadrática
+
+            # Clamp final (mais baixo para casos ruins)
+            similarity = max(0.05, min(0.95, similarity))
+            return similarity
+
         except Exception as e:
-            print(f"Erro ao comparar imagens: {e}")
+            print(f"Erro ao comparar imagens (embeddings): {e}")
             import traceback
             traceback.print_exc()
-            # Retornar uma similaridade mínima em caso de erro
+            # Fallback: mínima similaridade
             return 0.1
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ Este projeto implementa um **sistema de reconhecimento de imagens** especializad
 
 - **PyTorch** - Framework de Deep Learning
 - **Flask** - Servidor web
-- **OpenCV** - Processamento de imagens
+- **scikit-learn** e **NLTK** - NLP (TF-IDF, stopwords, lematização)
 - **Python** - Linguagem principal
 - **HTML/CSS/JavaScript** - Interface frontend
 
@@ -38,6 +38,8 @@ Este projeto implementa um **sistema de reconhecimento de imagens** especializad
 **Arquitetura CNN (Convolutional Neural Network)**
 
 ```
+
+Para comparação visual entre duas imagens (Modo Foto), a aplicação extrai **embeddings** do backbone (ResNet18 ou ImprovedCNN) e calcula a **similaridade de cosseno** entre os vetores, com pequenos ajustes de escala e reforço quando as classes coincidem com alta confiança.
 ImprovedCNN:
 ├── Feature Extractor (Camadas Convolucionais)
 │   ├── Conv2d(3→64) + ReLU
@@ -56,11 +58,14 @@ ImprovedCNN:
 **Características Técnicas:**
 - **Parâmetros**: 13.7 milhões
 - **Classes**: 12 locais históricos
-- **Dataset**: 25+ imagens reais
-- **Acurácia**: 96%
+- **Dataset (estado atual do filesystem)**: 60 imagens distribuídas em 12 pastas de classes em `data/recife_historic/`. O arquivo `data/photo_descriptions.json` possui 23 registros.
+- **Acurácia (conjunto experimental de 25 imagens)**: 96%  
+  Nota: no retreinamento recente com Transfer Learning (ResNet18) obteve-se **ValAcc 100%** no split de validação (12 imagens).
 - **Tempo de Treinamento**: 2-3 minutos
 - **Batch Size**: 2 imagens/época
 - **Learning Rate**: 0.001 (com scheduler)
+
+Nota (último retreinamento): modelo atual treinado via **Transfer Learning (ResNet18)** com 60 imagens (12 classes) obteve **ValAcc de 100%** no split de validação (12 imagens). A comparação visual entre fotos usa agora **embeddings** do backbone com **similaridade do cosseno**.
 
 ### Locais Reconhecidos
 
@@ -162,7 +167,7 @@ Abra o navegador em: **http://localhost:5000**
 2. **Enviar Foto**: Upload de imagem de um ponto histórico
 3. **Fazer Pergunta**: Ex.: "Que local histórico é este?"
 4. **Ver Resposta**: O sistema identifica o local e dá informações históricas
-5. **Ganhar Pontos**: Pontuação baseada em precisão e velocidade
+5. **Ganhar Pontos**: Pontuação baseada em similaridade/score (modos Foto/Descrição)
 
 ## 📊 Relatório Técnico
 
@@ -217,9 +222,11 @@ class ImprovedCNN(nn.Module):
 ### Processo de Treinamento
 
 **Dataset:**
-- 25 imagens reais
+- 60 imagens reais (distribuídas em 12 classes)
 - 12 classes (locais históricos)
 - Data augmentation aplicada
+
+Métrica recente (Transfer Learning ResNet18): ValAcc 100% (validação com 12 imagens).
 
 **Hiperparâmetros:**
 ```python
@@ -400,7 +407,8 @@ Retorna estatísticas do jogador
 
 ## 🎯 Próximas Melhorias
 
-- [ ] Transfer Learning com modelos pré-treinados
+- [x] Transfer Learning com modelos pré-treinados (ResNet18)
+- [x] Comparação visual por embeddings + similaridade do cosseno
 - [ ] Interface mobile responsiva aprimorada
 - [ ] Mais pontos históricos
 - [ ] Modo offline

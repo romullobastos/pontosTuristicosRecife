@@ -3,12 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Jogo Educacional Multimodal</title>
+    <title>Pontos Turisticos Recife</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        .error-msg {
+            margin: 8px 0 12px;
+            color: #d33;
+            background: #ffeaea;
+            border: 1px solid #f3b5b5;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            display: none;
+            text-align: center;
+        }
+
+        .back-index {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ffffff;
+            color: #5b5f97;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
         }
 
         body {
@@ -41,6 +68,32 @@
             opacity: 0.9;
         }
 
+        .header .actions { display: none; }
+
+        .link-btn {
+            display: inline-block;
+            background: #fff;
+            color: #667eea;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .chip {
+            background: #f5f6ff;
+            color: #5b5f97;
+            border: 1px solid #e6e6f0;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        #analyzeBtn { margin-top: 14px; }
+
         .game-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -68,6 +121,23 @@
 
         .player-setup {
             text-align: center;
+            position: relative;
+        }
+
+        .icon-action {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ffffffcc;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
         }
 
         .input-group {
@@ -490,38 +560,29 @@
 </head>
 <body>
     <div class="container">
+        <button class="back-index" id="backIndexBtn" onclick="backToHome()" style="display:none;">⟵ Voltar</button>
         <div class="header">
-            <h1>🎮 Jogo Educacional - Recife Histórico</h1>
+            <h1>Pontos Turísticos Recife</h1>
             <p>Explore os pontos históricos do Recife e desenvolva suas habilidades!</p>
         </div>
 
-        <!-- Painel de Estatísticas -->
-        <div class="stats-panel" id="statsPanel" style="display: none;">
-            <h2>📊 Suas Estatísticas</h2>
-            <div class="stats-grid" id="statsGrid">
-                <!-- Estatísticas serão preenchidas dinamicamente -->
-            </div>
-        </div>
+        
 
         <!-- Setup do Jogador -->
         <div class="card player-setup" id="playerSetup">
+            <button class="icon-action" title="Abrir análise/descrição aqui" onclick="openAnalysis()">⚙️</button>
             <h2>👤 Criar Jogador</h2>
             <div class="input-group">
                 <label for="playerName">Nome do Jogador:</label>
                 <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
             </div>
-            <button class="btn" onclick="createPlayer()">Começar Jogo</button>
+            <div id="nameError" class="error-msg"></div>
+            <button class="btn" style="margin-top: 6px;" onclick="createPlayer()">Começar Jogo</button>
         </div>
 
-        <!-- Abas dos Jogos -->
+        <!-- Interface de Análise de Imagens -->
         <div class="hidden" id="gameInterface">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('imageAnalysis')">🔍 Análise de Imagens</button>
-                <button class="tab" onclick="switchTab('photoDescription')">📝 Descrição de Fotos</button>
-            </div>
-
-            <!-- Aba 1: Análise de Imagens -->
-            <div class="tab-content active" id="imageAnalysis">
+            <div id="imageAnalysis">
                 <div class="game-container">
                     <!-- Upload de Imagem -->
                     <div class="card">
@@ -533,16 +594,11 @@
                             <img id="imagePreview" class="image-preview" style="display: none;">
                         </div>
                         
-                        <div class="question-input">
-                            <label for="questionInput">❓ Sua pergunta sobre a imagem:</label>
-                            <textarea id="questionInput" placeholder="Ex: Que local histórico é este? Que tipo de arquitetura você vê?"></textarea>
-                        </div>
-                        
                         <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 Analisar Imagem</button>
                     </div>
 
                     <!-- Resposta do Sistema -->
-                    <div class="card">
+                    <div class="card response-card">
                         <h2>🤖 Resposta do Sistema</h2>
                         <div class="loading" id="loading">
                             <div class="spinner"></div>
@@ -551,81 +607,31 @@
                         <div id="responseArea" style="display: none;">
                             <!-- Respostas serão preenchidas dinamicamente -->
                         </div>
-                    </div>
-                </div>
-
-                <!-- Painel de Resposta -->
-                <div class="response-panel hidden" id="responsePanel">
-                    <!-- Respostas detalhadas aparecerão aqui -->
-                </div>
-            </div>
-
-            <!-- Aba 2: Descrição de Fotos -->
-            <div class="tab-content" id="photoDescription">
-                <div class="photo-game-container">
-                    <!-- Exibição da Foto -->
-                    <div class="card photo-display">
-                        <h2>📸 Foto Histórica</h2>
-                        <div id="photoContainer">
-                            <p>Clique em "Nova Foto" para começar!</p>
+                        <div class="info" style="margin-top:16px; font-size:0.95em; color:#555;">
+                            <div style="font-weight:700; color:#5b5f97; margin-bottom:6px;">Locais reconhecidos:</div>
+                            <div class="chip-list">
+                                <span class="chip">Marco Zero</span>
+                                <span class="chip">Casa da Cultura</span>
+                                <span class="chip">Forte das Cinco Pontas</span>
+                                <span class="chip">Igreja Madre de Deus</span>
+                                <span class="chip">Igreja Nossa Senhora do Carmo</span>
+                                <span class="chip">Igreja Santo Antônio</span>
+                                <span class="chip">Igreja de São Pedro dos Clérigos</span>
+                                <span class="chip">Mercado São José</span>
+                                <span class="chip">Palácio da Justiça</span>
+                                <span class="chip">Rua Aurora</span>
+                                <span class="chip">Rua do Bom Jesus</span>
+                                <span class="chip">Teatro Santa Isabel</span>
+                            </div>
                         </div>
-                        <div class="photo-info hidden" id="photoInfo">
-                            <div class="photo-name" id="photoName"></div>
-                            <div class="photo-difficulty" id="photoDifficulty"></div>
-                        </div>
-                        <button class="btn" onclick="loadNewPhoto()">🔄 Nova Foto</button>
-                    </div>
-
-                    <!-- Interface de Descrição -->
-                    <div class="card">
-                        <h2>✍️ Sua Descrição</h2>
-                        <div class="description-input">
-                            <label for="descriptionInput">Descreva o que você vê nesta foto histórica:</label>
-                            <textarea id="descriptionInput" placeholder="Ex: Esta é uma praça histórica com calçada de pedra portuguesa e vista para o mar..."></textarea>
-                        </div>
-                        <button class="btn" id="submitDescriptionBtn" onclick="submitDescription()" disabled>📤 Enviar Descrição</button>
                     </div>
                 </div>
 
-                <!-- Estatísticas do Jogo de Descrições -->
-                <div class="game-stats hidden" id="photoGameStats">
-                    <h3>📊 Estatísticas do Jogo</h3>
-                    <div class="stats-row">
-                        <span class="stats-label">Tentativas:</span>
-                        <span class="stats-value" id="totalAttempts">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span class="stats-label">Acertos:</span>
-                        <span class="stats-value" id="totalCorrect">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span class="stats-label">Precisão:</span>
-                        <span class="stats-value" id="accuracy">0%</span>
-                    </div>
-                    <div class="stats-row">
-                        <span class="stats-label">Sequência Atual:</span>
-                        <span class="stats-value" id="currentStreak">0</span>
-                    </div>
-                    <div class="stats-row">
-                        <span class="stats-label">Melhor Sequência:</span>
-                        <span class="stats-value" id="bestStreak">0</span>
-                    </div>
-                </div>
-
-                <!-- Painel de Resultado -->
-                <div class="result-panel hidden" id="resultPanel">
-                    <!-- Resultados aparecerão aqui -->
-                </div>
+                
             </div>
         </div>
 
-        <!-- Ranking -->
-        <div class="leaderboard">
-            <h2>🏆 Ranking</h2>
-            <div id="leaderboardList">
-                <!-- Ranking será preenchido dinamicamente -->
-            </div>
-        </div>
+        
     </div>
 
     <script>
@@ -636,10 +642,28 @@
         // Criar jogador
         async function createPlayer() {
             const name = document.getElementById('playerName').value.trim();
+            const nameError = document.getElementById('nameError');
+            if (nameError) { nameError.style.display = 'none'; nameError.textContent = ''; }
             if (!name) {
-                alert('Por favor, digite um nome!');
+                if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
                 return;
             }
+
+            if (name.length < 3) {
+                if (nameError) { nameError.textContent = 'O nome deve ter pelo menos 3 caracteres.'; nameError.style.display = 'block'; }
+                return;
+            }
+
+            // Verificar unicidade do nome (username)
+            try {
+                const lb = await fetch('/api/leaderboard');
+                const list = await lb.json();
+                const taken = Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase());
+                if (taken) {
+                    if (nameError) { nameError.textContent = 'Este nome já está em uso. Escolha outro.'; nameError.style.display = 'block'; }
+                    return;
+                }
+            } catch (e) { /* se falhar, segue */ }
 
             try {
                 const response = await fetch('/api/create_player', {
@@ -654,19 +678,68 @@
                 
                 if (result.success) {
                     currentPlayerId = result.player_id;
-                    document.getElementById('playerSetup').style.display = 'none';
-                    document.getElementById('gameInterface').classList.remove('hidden');
-                    document.getElementById('statsPanel').style.display = 'block';
-                    
-                    // Carregar estatísticas iniciais
-                    loadPlayerStats();
-                    loadLeaderboard();
+                    // Persistir para o chatbot
+                    try {
+                        localStorage.setItem('player_id', result.player_id);
+                        localStorage.setItem('player_name', name);
+                    } catch (e) {}
+                    // Redirecionar para o Chatbot
+                    window.location.href = '/chatbot';
                 } else {
-                    alert('Erro ao criar jogador: ' + result.error);
+                    if (nameError) { nameError.textContent = 'Erro ao criar jogador: ' + (result.error || 'desconhecido'); nameError.style.display = 'block'; }
                 }
             } catch (error) {
-                alert('Erro de conexão: ' + error.message);
+                if (nameError) { nameError.textContent = 'Erro de conexão: ' + error.message; nameError.style.display = 'block'; }
             }
+        }
+
+        // Abrir análise/descrição nesta página (sem redirecionar)
+        async function openAnalysis() {
+            try {
+                if (!currentPlayerId) {
+                    const nameInput = document.getElementById('playerName');
+                    const name = (nameInput && nameInput.value.trim()) || 'Jogador';
+                    const resp = await fetch('/api/create_player', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name })
+                    });
+                    const result = await resp.json();
+                    if (!result.success) {
+                        alert('Erro ao criar jogador: ' + (result.error || 'desconhecido'));
+                        return;
+                    }
+                    currentPlayerId = result.player_id;
+                    try { localStorage.setItem('player_id', result.player_id); localStorage.setItem('player_name', name); } catch (e) {}
+                }
+
+                // Exibir interfaces
+                const setup = document.getElementById('playerSetup');
+                const game = document.getElementById('gameInterface');
+                if (setup) setup.style.display = 'none';
+                if (game) game.classList.remove('hidden');
+                await loadPlayerStats();
+                const backBtn = document.getElementById('backIndexBtn');
+                if (backBtn) backBtn.style.display = 'inline-block';
+            } catch (e) {
+                alert('Erro ao abrir análise: ' + e.message);
+            }
+        }
+
+        function backToHome() {
+            const setup = document.getElementById('playerSetup');
+            const game = document.getElementById('gameInterface');
+            const backBtn = document.getElementById('backIndexBtn');
+            if (setup) setup.style.display = 'block';
+            if (game) game.classList.add('hidden');
+            if (backBtn) backBtn.style.display = 'none';
+            // limpar resposta e preview
+            const responseArea = document.getElementById('responseArea');
+            if (responseArea) { responseArea.innerHTML = ''; responseArea.style.display = 'none'; }
+            const imgPrev = document.getElementById('imagePreview');
+            if (imgPrev) { imgPrev.src = ''; imgPrev.style.display = 'none'; }
+            const input = document.getElementById('imageInput');
+            if (input) input.value = '';
         }
 
         // Upload de imagem
@@ -723,8 +796,6 @@
                 alert('Por favor, carregue uma imagem e crie um jogador primeiro!');
                 return;
             }
-
-            const question = document.getElementById('questionInput').value.trim() || 'O que você vê nesta imagem?';
             
             // Mostrar loading
             document.getElementById('loading').style.display = 'block';
@@ -739,7 +810,6 @@
                     },
                     body: JSON.stringify({
                         image: currentImageData,
-                        question: question,
                         player_id: currentPlayerId
                     })
                 });
@@ -748,8 +818,6 @@
                 
                 if (result.success) {
                     displayResponse(result);
-                    loadPlayerStats(); // Atualizar estatísticas
-                    loadLeaderboard(); // Atualizar ranking
                 } else {
                     alert('Erro ao processar imagem: ' + result.error);
                 }
@@ -764,7 +832,6 @@
         // Exibir resposta
         function displayResponse(result) {
             const responseArea = document.getElementById('responseArea');
-            const responsePanel = document.getElementById('responsePanel');
             
             responseArea.innerHTML = `
                 <div class="response-item">
@@ -775,22 +842,9 @@
                     <div class="response-label">Explicação:</div>
                     <div>${result.explanation}</div>
                 </div>
-                <div class="response-item">
-                    <div class="response-label">Tempo de Resposta:</div>
-                    <div>${result.response_time}</div>
-                </div>
-                <div class="response-item">
-                    <div class="response-label">Confiança:</div>
-                    <div>${result.confidence}</div>
-                </div>
-                <div class="response-item">
-                    <div class="response-label">Pontuação:</div>
-                    <div>${result.score} pontos</div>
-                </div>
             `;
             
             responseArea.style.display = 'block';
-            responsePanel.classList.remove('hidden');
             
             // Mostrar conquistas se houver
             if (result.game_result && result.game_result.new_achievements) {
@@ -826,8 +880,9 @@
                 const response = await fetch(`/api/player_stats/${currentPlayerId}`);
                 const stats = await response.json();
                 
-                if (!stats.error) {
-                    document.getElementById('statsGrid').innerHTML = `
+                const grid = document.getElementById('statsGrid');
+                if (!stats.error && grid) {
+                    grid.innerHTML = `
                         <div class="stat-item">
                             <div class="stat-value">${stats.level}</div>
                             <div class="stat-label">Nível</div>
@@ -841,10 +896,6 @@
                             <div class="stat-label">Sequência</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">${(stats.accuracy * 100).toFixed(1)}%</div>
-                            <div class="stat-label">Precisão</div>
-                        </div>
-                        <div class="stat-item">
                             <div class="stat-value">${stats.achievements}</div>
                             <div class="stat-label">Conquistas</div>
                         </div>
@@ -856,29 +907,7 @@
         }
 
         // Carregar ranking
-        async function loadLeaderboard() {
-            try {
-                const response = await fetch('/api/leaderboard');
-                const leaderboard = await response.json();
-                
-                const leaderboardList = document.getElementById('leaderboardList');
-                leaderboardList.innerHTML = leaderboard.map((player, index) => `
-                    <div class="leaderboard-item">
-                        <div class="rank">#${player.rank}</div>
-                        <div class="player-info">
-                            <div class="player-name">${player.name}</div>
-                            <div class="player-level">Nível ${player.level} • ${player.experience} XP</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: bold; color: #667eea;">${(player.accuracy * 100).toFixed(1)}%</div>
-                            <div style="font-size: 0.9em; color: #666;">Precisão</div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Erro ao carregar ranking:', error);
-            }
-        }
+        // Removido leaderboard/XP desta página
 
         // Funções para o jogo de descrições de fotos
         async function loadNewPhoto() {
@@ -1043,8 +1072,9 @@
             document.getElementById(tabName).classList.add('active');
         }
 
-        // Carregar ranking inicial
-        loadLeaderboard();
+        // Nenhum ranking/leaderboard nesta página
+        // Fallback defensivo caso alguma chamada antiga persista no cache
+        function loadLeaderboard() { /* removido desta página */ }
     </script>
 </body>
 </html>

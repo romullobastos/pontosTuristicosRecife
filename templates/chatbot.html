@@ -21,6 +21,21 @@
             padding: 20px;
         }
 
+        .back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ffffff;
+            color: #5b5f97;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
+        }
+
         .chat-container {
             max-width: 1400px;
             width: 100%;
@@ -390,21 +405,124 @@
                 max-height: 200px;
             }
         }
+
+        /* Login (player-setup) */
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+
+        .player-setup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            width: 100%;
+        }
+
+        .player-hero {
+            background: linear-gradient(135deg, #6A78FF, #A17FE0);
+            color: #fff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .player-hero .badge {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .player-hero h1 {
+            font-size: 28px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .player-hero p {
+            opacity: 0.95;
+        }
+
+        .player-form {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .player-form .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .player-form .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e6e6f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color .2s;
+        }
+
+        .player-form .input-group input:focus {
+            outline: none;
+            border-color: #6A78FF;
+        }
+
+        .login-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(118,75,162,0.25);
+        }
+
+        .btn-secondary {
+            background: #f5f6ff;
+            color: #5b5f97;
+        }
+
+        @media (max-width: 820px) {
+            .player-setup {
+                grid-template-columns: 1fr;
+            }
+            .player-hero {
+                align-items: center;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Tela de Login -->
-    <div class="card player-setup" id="loginScreen" style="max-width: 400px; margin: auto;">
-        <h2 style="text-align: center; margin-bottom: 30px;">👤 Entrar no Jogo</h2>
-        <div class="input-group">
-            <label for="playerName">Nome do Jogador:</label>
-            <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
-        </div>
-        <button class="btn" style="width: 100%; margin-top: 20px;" onclick="createPlayer()">Iniciar Chatbot</button>
-    </div>
+    
 
     <!-- Interface Principal do Chatbot -->
-    <div class="chat-container hidden" id="chatbotScreen">
+    <button class="back-home" onclick="window.location.href='/'">⟵ Voltar</button>
+    <div class="chat-container" id="chatbotScreen">
         <!-- Sidebar Esquerda -->
         <div class="sidebar">
             <div class="profile-header">
@@ -416,10 +534,6 @@
             <div class="stats-item">
                 <span class="stats-label">XP:</span>
                 <span class="stats-value" id="playerXP">0</span>
-            </div>
-            <div class="stats-item">
-                <span class="stats-label">Precisão:</span>
-                <span class="stats-value" id="playerAccuracy">0%</span>
             </div>
             <div class="stats-item">
                 <span class="stats-label">Sequência:</span>
@@ -438,7 +552,7 @@
         <div class="chat-area">
             <div class="chat-header">
                 <div>
-                    <h2>🤖 Assistente Educacional</h2>
+                    <h2>🤖 Pontos Turísticos do Recife - Bot</h2>
                     <div class="chat-status">
                         <span class="status-dot"></span>
                         <span>Online</span>
@@ -456,7 +570,7 @@
                 </div>
                 <div class="input-container">
                     <input type="file" id="imageInput" class="file-input" accept="image/*">
-                    <button class="image-upload-btn" onclick="document.getElementById('imageInput').click()">📷</button>
+                    <button class="image-upload-btn" onclick="openImagePicker()">📷</button>
                     <textarea id="chatInput" placeholder="Digite sua mensagem ou faça uma pergunta..." rows="1"></textarea>
                     <button id="sendBtn" onclick="sendMessage()">📤</button>
                 </div>
@@ -473,11 +587,11 @@
             <div class="section-title" style="margin-top: 30px;">✨ Dicas Rápidas</div>
             <div class="activity-item">
                 <span class="activity-icon">💡</span>
-                Envie uma foto de um local histórico do Recife para identificá-lo
+                Envie uma foto do local. Similaridade &lt; 30% não gera pontos.
             </div>
             <div class="activity-item">
                 <span class="activity-icon">📝</span>
-                Descreva o que você vê para ganhar pontos
+                Descreva o que você vê. No texto, o score combina similaridade e keywords.
             </div>
             <div class="activity-item">
                 <span class="activity-icon">🎯</span>
@@ -490,6 +604,61 @@
         let currentPlayerId = null;
         let currentImageData = null;
         let currentPhoto = null;
+
+        // Atualizar avatar com inicial do nome
+        function updateAvatar(name) {
+            const avatar = document.getElementById('playerAvatar');
+            if (!avatar) return;
+            const initial = (name || 'J').trim().charAt(0).toUpperCase();
+            avatar.textContent = initial;
+        }
+
+        // Garante que o player_id do localStorage existe no backend; se não existir, cria um novo
+        async function ensurePlayerExists(id, name) {
+            try {
+                const res = await fetch(`/api/player_stats/${id}`);
+                if (res.status === 200) return id; // existe
+            } catch (e) { /* continua e cria */ }
+            // criar novo jogador
+            const resp = await fetch('/api/create_player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name || 'Jogador' })
+            });
+            const result = await resp.json();
+            if (result.success) {
+                try { localStorage.setItem('player_id', result.player_id); localStorage.setItem('player_name', name || 'Jogador'); } catch (e) {}
+                return result.player_id;
+            }
+            return null;
+        }
+
+        // Bootstrap: recuperar jogador do localStorage, garantir existência no backend e iniciar experiência
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const storedId = window.localStorage ? localStorage.getItem('player_id') : null;
+                const storedName = window.localStorage ? (localStorage.getItem('player_name') || 'Jogador') : 'Jogador';
+
+                let effectiveId = storedId;
+                if (!effectiveId) {
+                    effectiveId = await ensurePlayerExists(null, 'Jogador');
+                } else {
+                    effectiveId = await ensurePlayerExists(effectiveId, storedName);
+                }
+
+                if (effectiveId) {
+                    currentPlayerId = effectiveId;
+                    const nameEl = document.getElementById('playerNameDisplay');
+                    if (nameEl) nameEl.textContent = storedName || 'Jogador';
+                    updateAvatar(storedName || 'Jogador');
+                    addBotMessage("Olá! Eu sou seu assistente educacional! 🤖\n\nEstou aqui para te guiar pelos pontos históricos do Recife através de desafios interativos!\n\nVamos começar?");
+                    setTimeout(() => startGamifiedExperience(), 800);
+                    loadPlayerStats();
+                }
+            } catch (e) {
+                console.error('Falha ao inicializar jogador:', e);
+            }
+        });
 
         // Criar jogador
         async function createPlayer() {
@@ -542,9 +711,18 @@
                 currentImageData = e.target.result;
                 document.getElementById('imagePreview').src = currentImageData;
                 document.getElementById('imagePreviewContainer').style.display = 'block';
+                // Permitir escolher o mesmo arquivo novamente depois
+                document.getElementById('imageInput').value = '';
             };
             reader.readAsDataURL(file);
         });
+
+        // Abrir seletor de arquivos garantindo que o mesmo arquivo possa ser escolhido novamente
+        function openImagePicker() {
+            const input = document.getElementById('imageInput');
+            input.value = '';
+            input.click();
+        }
 
         // Adicionar mensagem do usuário
         function addUserMessage(text, image = null) {
@@ -618,6 +796,15 @@
 
             if (!message && !hasImage) return;
 
+            // Validação: só permitir envio de imagem quando o Modo Foto estiver ativo
+            if (hasImage && currentGameMode !== 'identification') {
+                addSystemMessage('Para enviar uma foto, ative o Modo Foto no desafio (clique no botão de Modo Foto).');
+                // Limpar preview para evitar confusão
+                currentImageData = null;
+                document.getElementById('imagePreviewContainer').style.display = 'none';
+                return;
+            }
+
             // Limpar input
             input.value = '';
             
@@ -650,6 +837,9 @@
                 removeTypingIndicator();
                 currentImageData = null;
                 document.getElementById('imagePreviewContainer').style.display = 'none';
+                // Limpar o input de arquivo para permitir reenvio do mesmo arquivo
+                const fi = document.getElementById('imageInput');
+                if (fi) fi.value = '';
             }
         }
 
@@ -738,7 +928,7 @@
                         ${emoji} ${statusText}<br><br>
                         
                         <strong>💰 Pontos Ganhos:</strong> <strong>${points_earned} pontos</strong><br>
-                        <strong>📍 Local do Desafio:</strong> ${currentChallenge.name}<br><br>
+                        ${visualSimilarity < 0.3 ? '<span style="color:#d33; font-weight:600;">Menos de 30% de similaridade não gera pontos.</span><br>' : ''}
                         
                         <small>💡 Quanto maior a similaridade, mais pontos você ganha!</small><br><br>
                         

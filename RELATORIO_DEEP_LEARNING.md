@@ -9,15 +9,18 @@
 
 ## 📋 Sumário Executivo
 
-Este relatório documenta a implementação de um sistema de **Deep Learning** para reconhecimento de pontos históricos do Recife. O sistema utiliza **Redes Neurais Convolucionais (CNNs)** treinadas do zero, alcançando **96% de acurácia** com dataset de 25 imagens reais. A gamificação foi simplificada para um sistema único de **XP** (Experiência), removendo o conceito de moedas.
+Este relatório documenta a implementação de um sistema de **Deep Learning** para reconhecimento de pontos históricos do Recife. O sistema utiliza **Redes Neurais Convolucionais (CNNs)** treinadas do zero, alcançando **96% de acurácia** com o conjunto experimental (25 imagens). No estado atual do projeto, o filesystem possui **60 imagens** distribuídas em **12 pastas de classes** em `data/recife_historic/`, e **23 descrições** em `photo_descriptions.json`. A gamificação foi simplificada para um sistema único de **XP** (Experiência), removendo o conceito de moedas.
 
 ### Métricas Principais
 
 - **Acurácia**: 96% (após 89 épocas)
-- **Dataset**: 25 imagens, 12 classes
+- **Dataset (conjunto experimental)**: 25 imagens, 12 classes
+- **Estado atual do filesystem**: 60 imagens (12 pastas de classes), 23 descrições no JSON
 - **Tempo de Treinamento**: ~3 minutos
 - **Parâmetros**: 13.7 milhões
 - **Modelo**: CNN customizada (ImprovedCNN) e opção de Transfer Learning (ResNet18)
+
+Nota (retreinamento mais recente): Transfer Learning com ResNet18 usando 60 imagens (12 classes) alcançou ValAcc de 100% no conjunto de validação (12 imagens). A comparação visual passou a usar embeddings + similaridade do cosseno calibrada (ver seção de calibração abaixo).
 
 ---
 
@@ -174,18 +177,28 @@ nn.Dropout(p=0.3)
 ### 3.1 Dataset
 
 **Características:**
-- **Tamanho**: 25 imagens
+- **Tamanho (conjunto experimental)**: 25 imagens
+- **Estado atual do filesystem**: 60 imagens (12 classes)
 - **Classes**: 12 locais históricos
-- **Distribuição**: ~2 imagens por local
 - **Formato**: RGB (224×224)
 
-**Organização:**
+Métrica recente (Transfer Learning ResNet18): ValAcc 100% (validação com 12 imagens)
+
+**Organização (pastas de classes definidas):**
 ```
 data/recife_historic/
-├── marco_zero/         [2 imagens]
-├── casa_da_cultura/     [3 imagens]
-├── forte_das_cinco_pontas/ [1 imagem]
-└── ... (outros locais)
+├── casa_da_cultura/         [6 imagens]
+├── forte_das_cinco_pontas/  [5 imagens]
+├── igreja_madre_de_deus/    [5 imagens]
+├── igreja_nossa_senhora_do_carmo/ [3 imagens]
+├── igreja_santo_antonio/    [4 imagens]
+├── igreja_sao_pedro_dos_clerigos/ [5 imagens]
+├── marco_zero/              [6 imagens]
+├── mercado_sao_jose/        [5 imagens]
+├── palacio_da_justica/      [6 imagens]
+├── rua_aurora/              [5 imagens]
+├── rua_do_bom_jesus/        [5 imagens]
+└── teatro_santa_isabel/     [5 imagens]
 ```
 
 ### 3.2 Pipeline de Treinamento
@@ -419,21 +432,17 @@ optimizer.step()
 
 ### 6.1 Transfer Learning vs Treinar do Zero
 
-**Transfer Learning** (não usado):
-- Usa modelo pré-treinado (ImageNet)
-- Fine-tuning nas últimas camadas
-- Vantagem: Converge mais rápido
-- Desvantagem: Não específico para arquitetura histórica
+**Transfer Learning** (USADO atualmente):
+- Modelo pré-treinado (ResNet18/ImageNet) com cabeça ajustada para 12 classes.
+- Fine-tuning com LR menor no backbone e maior na cabeça.
+- Vantagens: convergência mais rápida e estabilidade com dataset pequeno.
 
-**Treinar do Zero** (nossa abordagem):
-- Toda rede aprende do zero
-- Vantagem: Especializado para nosso domínio
-- Desvantagem: Precisa de mais dados
+**Treinar do Zero** (usado nas primeiras versões):
+- Rede `ImprovedCNN` dedicada ao domínio.
+- Funciona, porém menos estável com poucos dados.
 
-**Decisão:**
-- Dataset pequeno (25 imagens)
-- Transfer Learning seria melhor
-- Mas treinar do zero funciona e é educativo
+**Decisão atual:**
+- Adotado Transfer Learning (ResNet18) como padrão para produção.
 
 ### 6.2 Arquiteturas Alternativas
 
@@ -530,6 +539,17 @@ optimizer.step()
 - Pontos ganhos nos modos Foto/Descrição viram **XP**
 - Level up baseado em XP: `level = int((XP/100) ** 0.5) + 1`
 - Conquistas concedem XP adicional (sem moedas)
+
+### 10.3 Calibração da Similaridade Visual (Modo Foto)
+
+- Similaridade por embeddings (ResNet18/ImprovedCNN) + cosseno.
+- Mapeamento atual: `similarity = max(0, cos)^2` com clamp `[0.05, 0.95]`.
+- Conversão para pontos (XP) na rota `/api/compare_visual_similarity`:
+  - ≥ 80% → 100% dos pontos
+  - ≥ 60% → 70%
+  - ≥ 40% → 50%
+  - ≥ 30% → 30%
+  - < 30% → **0 pontos**
 
 ---
 
