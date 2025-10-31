@@ -488,6 +488,24 @@ def get_leaderboard():
     """Retorna o ranking de jogadores"""
     return jsonify(game.gamification.get_leaderboard())
 
+# Admin: resetar jogadores/ranking em runtime
+@app.route('/api/admin/reset_players', methods=['POST'])
+def admin_reset_players():
+    try:
+        game.gamification.reset_players('data/players.json')
+        return jsonify({'success': True, 'message': 'Jogadores resetados'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Admin: recarregar jogadores do arquivo
+@app.route('/api/admin/reload_players', methods=['POST'])
+def admin_reload_players():
+    try:
+        ok = game.gamification.load_from_file('data/players.json')
+        return jsonify({'success': bool(ok)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/create_player', methods=['POST'])
 def create_player():
     """Cria um novo jogador"""
@@ -502,6 +520,12 @@ def create_player():
         # Criar jogador no sistema de gamificação
         player = game.gamification.create_player(player_id, player_name)
         
+        # Salvar estado imediatamente
+        try:
+            game.gamification.save_to_file('data/players.json')
+        except Exception:
+            pass
+
         return jsonify({
             'success': True,
             'player_id': player_id,
@@ -663,6 +687,11 @@ def compare_visual_similarity():
             level_up = new_level > player.level
             if level_up:
                 player.level = new_level
+            # Persistir alteração
+            try:
+                game.gamification.save_to_file('data/players.json')
+            except Exception:
+                pass
         
         return jsonify({
             'success': True,
@@ -722,6 +751,11 @@ def submit_description():
                 result['new_level'] = player.level
             
             result['total_xp'] = player.experience
+            # Persistir alteração
+            try:
+                game.gamification.save_to_file('data/players.json')
+            except Exception:
+                pass
         
         return jsonify(result)
         

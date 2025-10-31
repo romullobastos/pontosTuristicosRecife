@@ -42,6 +42,11 @@ class GamificationSystem:
         self.players: Dict[str, Player] = {}
         self.achievements = self._load_achievements()
         self.daily_challenges = self._generate_daily_challenges()
+        # Persistência simples em JSON
+        try:
+            self.load_from_file('data/players.json')
+        except Exception:
+            pass
         
     def _load_achievements(self) -> List[Achievement]:
         """Carrega as conquistas disponíveis"""
@@ -130,6 +135,55 @@ class GamificationSystem:
         player = Player(id=player_id, name=name)
         self.players[player_id] = player
         return player
+
+    # ---- Persistência ----
+    def save_to_file(self, file_path: str):
+        import os, json
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        data = {
+            pid: {
+                'id': p.id,
+                'name': p.name,
+                'level': p.level,
+                'experience': p.experience,
+                'streak': p.streak,
+                'total_correct': p.total_correct,
+                'total_attempts': p.total_attempts,
+                'achievements': p.achievements,
+                'daily_challenges': p.daily_challenges,
+            } for pid, p in self.players.items()
+        }
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    def load_from_file(self, file_path: str):
+        import os, json
+        if not os.path.exists(file_path):
+            return False
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        self.players = {}
+        for pid, obj in data.items():
+            self.players[pid] = Player(
+                id=obj.get('id', pid),
+                name=obj.get('name', 'Jogador'),
+                level=obj.get('level', 1),
+                experience=obj.get('experience', 0),
+                streak=obj.get('streak', 0),
+                total_correct=obj.get('total_correct', 0),
+                total_attempts=obj.get('total_attempts', 0),
+                achievements=obj.get('achievements', []),
+                daily_challenges=obj.get('daily_challenges', {})
+            )
+        return True
+
+    def reset_players(self, file_path: str = 'data/players.json'):
+        """Remove todos os jogadores da memória e persiste arquivo vazio."""
+        self.players = {}
+        try:
+            self.save_to_file(file_path)
+        except Exception:
+            pass
     
     def get_player(self, player_id: str) -> Optional[Player]:
         """Retorna um jogador pelo ID"""

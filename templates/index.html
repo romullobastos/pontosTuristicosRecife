@@ -11,6 +11,21 @@
             box-sizing: border-box;
         }
 
+        .resume-bar {
+            display: none;
+            background: #f5f6ff;
+            border: 1px solid #e6e6f0;
+            color: #333;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .resume-actions { display: flex; gap: 8px; }
+        .btn-light { background: #fff; color: #5b5f97; border: 1px solid #e6e6f0; }
+
         .error-msg {
             margin: 8px 0 12px;
             color: #d33;
@@ -217,22 +232,19 @@
         }
 
         .question-input {
-            margin-top: 20px;
-        }
 
-        .question-input textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            resize: vertical;
-            min-height: 80px;
-        }
+.question-input textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
 
-        .question-input textarea:focus {
-            outline: none;
-            border-color: #667eea;
+.stats-panel {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+}
         }
 
         .stats-panel {
@@ -566,7 +578,13 @@
             <p>Explore os pontos históricos do Recife e desenvolva suas habilidades!</p>
         </div>
 
-        
+        <div id="resumeBar" class="resume-bar">
+            <div>Você já tem um jogador salvo: <strong id="resumeName"></strong></div>
+            <div class="resume-actions">
+                <button class="btn" onclick="continueAsSaved()">Continuar</button>
+                <button class="btn btn-light" onclick="switchPlayer()">Trocar</button>
+            </div>
+        </div>
 
         <!-- Setup do Jogador -->
         <div class="card player-setup" id="playerSetup">
@@ -578,6 +596,12 @@
             </div>
             <div id="nameError" class="error-msg"></div>
             <button class="btn" style="margin-top: 6px;" onclick="createPlayer()">Começar Jogo</button>
+        </div>
+
+        <!-- Ranking -->
+        <div class="card leaderboard" id="homeLeaderboard">
+            <h2>🏆 Ranking</h2>
+            <div id="leaderboardList"></div>
         </div>
 
         <!-- Interface de Análise de Imagens -->
@@ -635,9 +659,47 @@
     </div>
 
     <script>
-        let currentPlayerId = null;
-        let currentImageData = null;
-        let currentPhoto = null;
+        // Inicializa player global a partir do localStorage (sem quebrar se indisponível)
+        try { window.currentPlayerId = window.currentPlayerId || localStorage.getItem('player_id') || null; } catch (e) { window.currentPlayerId = null; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const savedId = localStorage.getItem('player_id');
+                const savedName = localStorage.getItem('player_name');
+                if (savedId && savedName) {
+                    const bar = document.getElementById('resumeBar');
+                    const nm = document.getElementById('resumeName');
+                    if (bar) bar.style.display = 'flex';
+                    if (nm) nm.textContent = savedName;
+                }
+            } catch (e) {}
+            loadHomeLeaderboard();
+        });
+
+        function continueAsSaved() {
+            try {
+                const savedId = localStorage.getItem('player_id');
+                const savedName = localStorage.getItem('player_name');
+                if (savedId && savedName) {
+                    window.location.href = '/chatbot';
+                }
+            } catch (e) {}
+        }
+
+        function switchPlayer() {
+            try {
+                localStorage.removeItem('player_id');
+                localStorage.removeItem('player_name');
+            } catch (e) {}
+            const bar = document.getElementById('resumeBar');
+            if (bar) bar.style.display = 'none';
+            const setup = document.getElementById('playerSetup');
+            const game = document.getElementById('gameInterface');
+            if (setup) setup.style.display = 'block';
+            if (game) game.classList.add('hidden');
+            const input = document.getElementById('playerName');
+            if (input) input.focus();
+        }
 
         // Criar jogador
         async function createPlayer() {
@@ -677,7 +739,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    currentPlayerId = result.player_id;
+                    window.currentPlayerId = result.player_id;
                     // Persistir para o chatbot
                     try {
                         localStorage.setItem('player_id', result.player_id);
@@ -696,9 +758,24 @@
         // Abrir análise/descrição nesta página (sem redirecionar)
         async function openAnalysis() {
             try {
-                if (!currentPlayerId) {
+                if (!window.currentPlayerId) {
                     const nameInput = document.getElementById('playerName');
-                    const name = (nameInput && nameInput.value.trim()) || 'Jogador';
+                    const nameError = document.getElementById('nameError');
+                    const name = (nameInput && nameInput.value.trim()) || '';
+                    if (!name) {
+                        if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
+                        return;
+                    }
+                    // Verificar unicidade do nome antes de criar (evita duplicados)
+                    try {
+                        const lb = await fetch('/api/leaderboard');
+                        const list = await lb.json();
+                        const taken = Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase());
+                        if (taken) {
+                            if (nameError) { nameError.textContent = 'Este nome já está em uso. Escolha outro.'; nameError.style.display = 'block'; }
+                            return;
+                        }
+                    } catch (e) { /* se falhar, segue */ }
                     const resp = await fetch('/api/create_player', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -709,7 +786,7 @@
                         alert('Erro ao criar jogador: ' + (result.error || 'desconhecido'));
                         return;
                     }
-                    currentPlayerId = result.player_id;
+                    window.currentPlayerId = result.player_id;
                     try { localStorage.setItem('player_id', result.player_id); localStorage.setItem('player_name', name); } catch (e) {}
                 }
 
@@ -792,7 +869,7 @@
 
         // Analisar imagem
         async function analyzeImage() {
-            if (!currentImageData || !currentPlayerId) {
+            if (!currentImageData || !window.currentPlayerId) {
                 alert('Por favor, carregue uma imagem e crie um jogador primeiro!');
                 return;
             }
@@ -810,7 +887,7 @@
                     },
                     body: JSON.stringify({
                         image: currentImageData,
-                        player_id: currentPlayerId
+                        player_id: window.currentPlayerId
                     })
                 });
 
@@ -1072,9 +1149,26 @@
             document.getElementById(tabName).classList.add('active');
         }
 
-        // Nenhum ranking/leaderboard nesta página
-        // Fallback defensivo caso alguma chamada antiga persista no cache
-        function loadLeaderboard() { /* removido desta página */ }
+        // Ranking da home (sem precisão)
+        async function loadHomeLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const leaderboard = await response.json();
+                const listEl = document.getElementById('leaderboardList');
+                if (!listEl) return;
+                listEl.innerHTML = (Array.isArray(leaderboard) ? leaderboard : []).map(p => `
+                    <div class="leaderboard-item">
+                        <div class="rank">#${p.rank}</div>
+                        <div class="player-info">
+                            <div class="player-name">${p.name}</div>
+                            <div class="player-level">Nível ${p.level} • ${p.experience} XP</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                // silencioso
+            }
+        }
     </script>
 </body>
 </html>
