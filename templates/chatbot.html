@@ -116,14 +116,22 @@
         }
 
         .achievement-badge {
-            display: inline-block;
+            display: block;
             background: linear-gradient(45deg, #ffd700, #ffed4e);
             color: #333;
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 8px 12px;
+            border-radius: 12px;
             font-size: 0.85em;
-            margin: 5px;
+            margin: 6px 0;
             font-weight: bold;
+            box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+            transition: transform 0.2s;
+            cursor: help;
+        }
+        
+        .achievement-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5);
         }
 
         /* ÁREA CENTRAL - Chat */
@@ -927,6 +935,8 @@
                         <strong>📊 Similaridade Visual:</strong> ${(visualSimilarity * 100).toFixed(1)}%<br>
                         ${emoji} ${statusText}<br><br>
                         
+                        ${visualSimilarity >= 0.8 ? `<strong>🎯 Local do Desafio:</strong> ${currentChallenge.name}<br><br>` : ''}
+                        
                         <strong>💰 Pontos Ganhos:</strong> <strong>${points_earned} pontos</strong><br>
                         ${visualSimilarity < 0.3 ? '<span style="color:#d33; font-weight:600;">Menos de 30% de similaridade não gera pontos.</span><br>' : ''}
                         
@@ -1090,19 +1100,137 @@
                 const stats = await response.json();
                 
                 if (!stats.error) {
-                    document.getElementById('playerXP').textContent = stats.experience || 0;
-                    
+                    const xpEl = document.getElementById('playerXP');
+                    if (xpEl) xpEl.textContent = stats.experience || 0;
+
                     // Calcular precisão
                     const accuracy = stats.total_attempts > 0 ? 
                         (stats.total_correct / stats.total_attempts) * 100 : 0;
-                    document.getElementById('playerAccuracy').textContent = accuracy.toFixed(1) + '%';
+                    const accEl = document.getElementById('playerAccuracy');
+                    if (accEl) accEl.textContent = accuracy.toFixed(1) + '%';
+
+                    const streakEl = document.getElementById('playerStreak');
+                    if (streakEl) streakEl.textContent = stats.streak || 0;
+                    const lvlEl = document.getElementById('playerLevel');
+                    if (lvlEl) lvlEl.textContent = stats.level || 1;
                     
-                    document.getElementById('playerStreak').textContent = stats.streak || 0;
-                    document.getElementById('playerLevel').textContent = stats.level || 1;
+                    // Carregar conquistas
+                    loadAchievements(stats.achievements_details || []);
+                    
+                    // Carregar atividades recentes
+                    loadRecentActivities(stats.recent_activities || []);
                 }
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
             }
+        }
+        
+        // Função para carregar e exibir atividades recentes
+        function loadRecentActivities(activities) {
+            const recentActivity = document.getElementById('recentActivity');
+            if (!recentActivity) {
+                return;
+            }
+            
+            if (!activities || activities.length === 0) {
+                recentActivity.innerHTML = '<p style="color: #999; font-size: 0.9em;">Suas atividades aparecerão aqui...</p>';
+                return;
+            }
+            
+            let html = '';
+            activities.forEach((activity, index) => {
+                const icon = activity.icon || '🎯';
+                const name = activity.name || 'Atividade';
+                const isCorrect = activity.is_correct !== undefined ? activity.is_correct : true;
+                const points = activity.points || 0;
+                const levelUp = activity.level_up || false;
+                const streak = activity.streak || 0;
+                
+                // Formatar timestamp
+                let timeText = 'Agora';
+                if (activity.timestamp) {
+                    try {
+                        const timestamp = new Date(activity.timestamp);
+                        const now = new Date();
+                        const diffMs = now - timestamp;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        
+                        if (diffMins < 1) {
+                            timeText = 'Agora';
+                        } else if (diffMins < 60) {
+                            timeText = `${diffMins} min atrás`;
+                        } else {
+                            const diffHours = Math.floor(diffMins / 60);
+                            timeText = `${diffHours}h atrás`;
+                        }
+                    } catch (e) {
+                        timeText = 'Recentemente';
+                    }
+                }
+                
+                // Cor baseada no resultado
+                const bgColor = isCorrect ? '#e7f7ec' : '#ffe7e7';
+                const borderColor = isCorrect ? '#b9ebc9' : '#ffb3b3';
+                const textColor = isCorrect ? '#1f4d33' : '#8b2635';
+                
+                html += `
+                    <div class="activity-item" style="background: ${bgColor}; border-left: 3px solid ${borderColor};">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                            <span class="activity-icon" style="font-size: 1.2em;">${icon}</span>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: ${textColor}; font-size: 0.95em;">${name}</div>
+                                <div style="font-size: 0.75em; color: #999; margin-top: 2px;">${timeText}</div>
+                            </div>
+                            ${isCorrect ? '<span style="color: #28a745; font-weight: bold;">✓</span>' : '<span style="color: #dc3545;">✗</span>'}
+                        </div>
+                        ${points > 0 ? `<div style="font-size: 0.85em; color: #667eea; font-weight: bold;">+${points} XP</div>` : ''}
+                        ${levelUp ? `<div style="font-size: 0.8em; color: #ffd700; margin-top: 3px;">🎉 Level Up!</div>` : ''}
+                        ${streak > 1 ? `<div style="font-size: 0.75em; color: #ff6b6b; margin-top: 2px;">🔥 Sequência: ${streak}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            recentActivity.innerHTML = html || '<p style="color: #999; font-size: 0.9em;">Suas atividades aparecerão aqui...</p>';
+        }
+        
+        // Função para carregar e exibir conquistas
+        function loadAchievements(achievementsDetails) {
+            const achievementsList = document.getElementById('achievementsList');
+            if (!achievementsList) {
+                return;
+            }
+            
+            if (!achievementsDetails || achievementsDetails.length === 0) {
+                achievementsList.innerHTML = '<p style="color: #999; font-size: 0.9em;">Complete desafios para ganhar conquistas!</p>';
+                return;
+            }
+            
+            // Ordenar por ordem de desbloqueio (mais recentes primeiro) ou por nome
+            const sorted = [...achievementsDetails].sort((a, b) => {
+                // Mostrar as 5 mais recentes ou todas se houver menos de 5
+                return 0;
+            });
+            
+            // Pegar as 5 mais recentes
+            const recentAchievements = sorted.slice(0, 5);
+            
+            let html = '';
+            recentAchievements.forEach(achievement => {
+                const description = achievement.description || '';
+                const icon = achievement.icon || '🏆';
+                const name = achievement.name || achievement.id || 'Conquista';
+                html += `
+                    <div class="achievement-badge" title="${description}">
+                        ${icon} ${name}
+                    </div>
+                `;
+            });
+            
+            if (achievementsDetails.length > 5) {
+                html += `<p style="color: #999; font-size: 0.8em; margin-top: 10px;">+${achievementsDetails.length - 5} mais</p>`;
+            }
+            
+            achievementsList.innerHTML = html || '<p style="color: #999; font-size: 0.9em;">Complete desafios para ganhar conquistas!</p>';
         }
 
         // Mostrar estatísticas detalhadas
@@ -1147,6 +1275,7 @@
             `);
         }
 
+        // Iniciar próximo desafio (sem revelar foto ou nome)
         async function startNextChallenge() {
             try {
                 const response = await fetch('/api/photo_game/random_photo');
@@ -1155,15 +1284,39 @@
                 if (result.success) {
                     currentChallenge = result.photo;
                     challengesCompleted++;
+                    // Evitar dicas antigas do desafio anterior
+                    currentHints = null;
+                    shownHints = { year: false, type: false, location: false };
+                    currentPhotoDisplayed = false;
+                    // Mesclar dados do dataset (se disponível) antes de qualquer dica
+                    try {
+                        const ds = await loadPhotoDataset();
+                        if (ds && ds[currentChallenge.id]) {
+                            currentChallenge = Object.assign({}, ds[currentChallenge.id], currentChallenge);
+                        }
+                    } catch (e) { /* segue */ }
+                    // Carregar dados completos (inclui hints) para já disponibilizar dicas específicas
+                    try {
+                        const fullInfo = await getPhotoInfo(currentChallenge.id);
+                        if (fullInfo && typeof fullInfo === 'object') {
+                            currentChallenge = Object.assign({}, currentChallenge, fullInfo);
+                        }
+                    } catch (e) { /* segue sem bloquear */ }
+                    // Se ainda não houver hints, tentar por pasta (folder) a partir do dataset
+                    try {
+                        const folder = deriveLocationKeyFromPath(currentChallenge.image_path || '');
+                        if ((!currentChallenge.hints || (!currentChallenge.hints.year && !currentChallenge.hints.type && !currentChallenge.hints.location)) && photoHintsByFolder && photoHintsByFolder[folder]) {
+                            currentChallenge = Object.assign({}, currentChallenge, { hints: photoHintsByFolder[folder] });
+                        }
+                    } catch (e) { /* ignore */ }
                     
                     addBotMessage(`
-                        <strong>🏛️ Desafio #${challengesCompleted}: ${currentChallenge.name}</strong><br><br>
+                        <strong>🏛️ Desafio #${challengesCompleted}</strong><br><br>
                         
                         <strong>Escolha como quer interagir:</strong><br><br>
-                        
                         1️⃣ <strong>Modo Foto</strong> - Tire uma foto do mesmo local e compare comigo<br>
                         2️⃣ <strong>Modo Descrição</strong> - Descreva o que você vê nesta foto<br>
-                        3️⃣ <strong>Modo Mistério</strong> - Descubra o local sem dicas!<br><br>
+                        3️⃣ <strong>Modo Mistério</strong> - Descubra o local sem ver a foto!<br><br>
                         
                         <div class="quick-buttons">
                             <button class="quick-btn" onclick="startIdentificationMode()">📷 Foto</button>
@@ -1171,17 +1324,13 @@
                             <button class="quick-btn" onclick="startMysteryMode()">❓ Mistério</button>
                         </div>
                     `);
-                    
-                    // Mostrar foto
-                    if (currentChallenge.image_data) {
-                        addUserMessage('📷 [Foto do desafio]', currentChallenge.image_data);
-                    }
                 }
             } catch (error) {
                 addBotMessage("❌ Erro ao iniciar desafio. Tente novamente.");
             }
         }
 
+        // Modo Foto (comparação visual). Aqui o nome pode aparecer por ser parte do desafio.
         async function startIdentificationMode() {
             if (!currentChallenge) {
                 addBotMessage("❌ Nenhum desafio ativo.");
@@ -1190,30 +1339,29 @@
 
             currentGameMode = 'identification';
             
-            // Pegar keywords da descrição para identificar o local
             const photoInfo = await getPhotoInfo(currentChallenge.id);
+            
+            // Mostrar a foto de referência também no Modo Foto
+            if (currentChallenge.image_data) {
+                addUserMessage('📷 [Foto do desafio - Modo Foto]', currentChallenge.image_data);
+            }
             
             addBotMessage(`
                 <strong>📷 Modo Foto Ativado!</strong><br><br>
-                
                 <strong>Desafio:</strong><br>
-                📍 Tire uma foto do local: <strong>${currentChallenge.name}</strong><br><br>
-                
+                📍 Tire uma foto do mesmo local do desafio (compare comigo!)<br><br>
                 <strong>Como funciona:</strong><br>
                 📷 Você tira uma foto do mesmo local<br>
                 📤 Envie usando o botão 📷 ao lado do campo de mensagem<br>
                 🤖 Comparo sua foto com a foto do desafio usando Deep Learning<br>
                 📊 Sua pontuação será baseada na similaridade visual!<br><br>
-                
                 <strong>🎁 Recompensas por Similaridade:</strong><br>
                 🏆 ≥80%: ${currentChallenge.points * 1.5} pontos<br>
                 🥈 ≥60%: ${currentChallenge.points} pontos<br>
                 🥉 ≥40%: ${Math.floor(currentChallenge.points * 0.5)} pontos<br><br>
-                
                 <em>💡 Envie sua foto usando o botão 📷</em>
             `);
             
-            // Atualizar placeholder do input
             document.getElementById('chatInput').placeholder = 'Clique em 📷 para enviar sua foto do local...';
         }
 
@@ -1222,20 +1370,250 @@
             try {
                 const response = await fetch(`/api/photo_game/get_photo/${photoId}`);
                 const result = await response.json();
-                return result.photo || null;
+                // Tolerar ambos formatos: { photo: {...} } ou objeto direto
+                if (result && typeof result === 'object') {
+                    if (result.photo && typeof result.photo === 'object') return result.photo;
+                    // Se for objeto direto, mas sem hints, tentar fallback ao dataset estático
+                    if (result.id && (result.hints && (result.hints.year || result.hints.type || result.hints.location))) {
+                        return result;
+                    }
+                }
+                // Fallback: buscar do dataset estático (tentar múltiplos caminhos)
+                const candidates = [
+                    'data/photo_descriptions.json',
+                    '/data/photo_descriptions.json',
+                    '/static/data/photo_descriptions.json'
+                ];
+                for (const url of candidates) {
+                    try {
+                        const ds = await fetch(url);
+                        if (ds.ok) {
+                            const all = await ds.json();
+                            if (Array.isArray(all)) {
+                                const found = all.find(p => p.id === photoId);
+                                if (found) return found;
+                            }
+                        }
+                    } catch (e) { /* tenta próximo */ }
+                }
+                return null;
             } catch (error) {
                 console.error('Erro ao buscar info:', error);
                 return null;
             }
         }
 
+        // ========= Hints Dinâmicas por Local =========
+        let currentHints = null; // cache por desafio atual
+        const locationHintsCache = {}; // cache compartilhado por local (várias fotos)
+        let photoDatasetById = null; // mapa id -> foto completa (inclui hints)
+        let photoHintsByFolder = null; // mapa folder -> {year,type,location}
+        let shownHints = { year: false, type: false, location: false }; // controle de rotação de dicas por desafio
+        let currentPhotoDisplayed = false; // se a foto do desafio já foi mostrada no chat
+
+        async function loadPhotoDataset() {
+            if (photoDatasetById) return photoDatasetById;
+            const candidates = [
+                'data/photo_descriptions.json',
+                '/data/photo_descriptions.json',
+                '/static/data/photo_descriptions.json'
+            ];
+            for (const url of candidates) {
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const arr = await res.json();
+                    if (Array.isArray(arr)) {
+                        photoDatasetById = {};
+                        photoHintsByFolder = {};
+                        for (const p of arr) {
+                            if (p && p.id) photoDatasetById[p.id] = p;
+                            // Agregar hints por pasta (folder)
+                            try {
+                                const parts = (p.image_path || '').split(/[\\\/]+/);
+                                const idx = parts.findIndex(q => q === 'recife_historic');
+                                const folder = (idx >= 0 && parts[idx+1]) ? parts[idx+1] : null;
+                                if (folder && p.hints && (p.hints.year || p.hints.type || p.hints.location)) {
+                                    if (!photoHintsByFolder[folder]) {
+                                        photoHintsByFolder[folder] = {
+                                            year: p.hints.year || '—',
+                                            type: p.hints.type || '—',
+                                            location: p.hints.location || '—'
+                                        };
+                                    }
+                                }
+                            } catch (e) { /* ignore */ }
+                        }
+                        break;
+                    }
+                } catch (e) { /* tenta próximo */ }
+            }
+            return photoDatasetById;
+        }
+
+        function deriveLocationKeyFromPath(imagePath) {
+            // Ex.: data/recife_historic/marco_zero/arquivo.jpg -> "marco_zero"
+            try {
+                const parts = (imagePath || '').split(/[\\\/]+/);
+                const idx = parts.findIndex(p => p === 'recife_historic');
+                if (idx >= 0 && parts[idx+1]) return parts[idx+1];
+            } catch (e) {}
+            // fallback: usar prefixo do id antes do último underscore
+            try {
+                const id = (currentChallenge && currentChallenge.id) || '';
+                const m = id.match(/^(.*)_\d+$/);
+                if (m) return m[1];
+            } catch (e) {}
+            return (currentChallenge && currentChallenge.name) || 'default';
+        }
+
+
+        function extractYearOrCentury(text, keywords) {
+            const pool = [];
+            if (Array.isArray(keywords)) pool.push(keywords.join(' '));
+            if (typeof text === 'string') pool.push(text);
+            const joined = pool.join(' ').toLowerCase();
+            // Século
+            const centuryMatch = joined.match(/século\s+(xvi{0,3}|ix|iv|v?i{0,3})/i);
+            if (centuryMatch) {
+                return `Século ${centuryMatch[1].toUpperCase()}`;
+            }
+            // Ano (4 dígitos plausível)
+            const yearMatch = joined.match(/\b(1[5-9]\d{2}|20\d{2})\b/);
+            if (yearMatch) {
+                return yearMatch[1];
+            }
+            return null;
+        }
+
+        function extractArchitectureType(keywords) {
+            const set = new Set((keywords || []).map(k => k.toLowerCase()));
+            if (Array.from(set).some(k => k.includes('barroc'))) return 'Barroco';
+            if (Array.from(set).some(k => k.includes('colonial'))) return 'Colonial';
+            if (Array.from(set).some(k => k.includes('neocl'))) return 'Neoclássico';
+            if (Array.from(set).some(k => k.includes('militar') || k.includes('forte'))) return 'Arquitetura militar';
+            if (Array.from(set).some(k => k.includes('igreja') || k.includes('religios'))) return 'Religiosa';
+            return null;
+        }
+
+        function extractLocation(name, keywords) {
+            const text = `${(name||'')} ${(keywords||[]).join(' ')}`.toLowerCase();
+            // Específicos primeiro
+            if (text.includes('marco zero')) return 'Praça do Marco Zero';
+            if (text.includes('casa da cultura')) return 'Casa da Cultura (antiga detenção)';
+            if (text.includes('cinco pontas') || text.includes('forte')) return 'Forte das Cinco Pontas';
+            if (text.includes('rua da aurora')) return 'Rua da Aurora';
+            if (text.includes('rua do bom jesus')) return 'Rua do Bom Jesus';
+            if (text.includes('palácio da justiça')) return 'Região do Palácio da Justiça';
+            if (text.includes('rio capibaribe')) return 'Margens do Rio Capibaribe';
+            // Genéricos por último
+            if (text.includes('recife antigo')) return 'Recife Antigo';
+            if (text.includes('centro histórico') || text.includes('centro')) return 'Centro Histórico do Recife';
+            return null;
+        }
+
+        async function ensureHints() {
+            if (!currentChallenge) return null;
+            if (currentHints && currentHints.photoId === currentChallenge.id) return currentHints;
+            let photo = currentChallenge;
+            const locationKey = deriveLocationKeyFromPath((photo && photo.image_path) || '');
+
+            // 0) Consultar dataset pré-carregado por id
+            try {
+                const ds = await loadPhotoDataset();
+                if (ds && ds[currentChallenge.id]) {
+                    const full = ds[currentChallenge.id];
+                    photo = Object.assign({}, full, photo);
+                    if (full.hints && (full.hints.year || full.hints.type || full.hints.location)) {
+                        currentHints = {
+                            photoId: currentChallenge.id,
+                            year: full.hints.year || '—',
+                            type: full.hints.type || '—',
+                            location: full.hints.location || '—'
+                        };
+                        if (locationKey) {
+                            locationHintsCache[locationKey] = { year: currentHints.year, type: currentHints.type, location: currentHints.location };
+                        }
+                        // Atualizar currentChallenge para refletir hints locais
+                        currentChallenge = photo;
+                        return currentHints;
+                    }
+                    // Se não houver hints no item, tentar por pasta no agregador
+                    if ((!photo.hints || (!photo.hints.year && !photo.hints.type && !photo.hints.location))) {
+                        const folder = deriveLocationKeyFromPath(photo.image_path || '');
+                        if (folder && photoHintsByFolder && photoHintsByFolder[folder]) {
+                            const agg = photoHintsByFolder[folder];
+                            currentHints = {
+                                photoId: currentChallenge.id,
+                                year: agg.year || '—',
+                                type: agg.type || '—',
+                                location: agg.location || '—'
+                            };
+                            if (locationKey) {
+                                locationHintsCache[locationKey] = { year: currentHints.year, type: currentHints.type, location: currentHints.location };
+                            }
+                            currentChallenge = Object.assign({}, photo, { hints: agg });
+                            return currentHints;
+                        }
+                    }
+                }
+            } catch (e) { /* ignora e continua */ }
+
+            // 1) Se o item atual já tem hints explícitos, usa-os e ATUALIZA o cache
+            if (photo && photo.hints && (photo.hints.year || photo.hints.type || photo.hints.location)) {
+                currentHints = {
+                    photoId: currentChallenge.id,
+                    year: photo.hints.year || '—',
+                    type: photo.hints.type || '—',
+                    location: photo.hints.location || '—'
+                };
+                if (locationKey) {
+                    locationHintsCache[locationKey] = { year: currentHints.year, type: currentHints.type, location: currentHints.location };
+                }
+                return currentHints;
+            }
+
+            // 2) Buscar info completa (pode trazer hints)
+            if (!photo || !photo.keywords || !photo.official_description || !photo.hints) {
+                const full = await getPhotoInfo(currentChallenge.id);
+                if (full) photo = Object.assign({}, photo, full);
+            }
+            if (photo && photo.hints && (photo.hints.year || photo.hints.type || photo.hints.location)) {
+                currentHints = {
+                    photoId: currentChallenge.id,
+                    year: photo.hints.year || '—',
+                    type: photo.hints.type || '—',
+                    location: photo.hints.location || '—'
+                };
+                if (locationKey) {
+                    locationHintsCache[locationKey] = { year: currentHints.year, type: currentHints.type, location: currentHints.location };
+                }
+                return currentHints;
+            }
+
+            // 3) Sem hints explícitos: usar cache por pasta se existir
+            if (locationKey && locationHintsCache[locationKey]) {
+                currentHints = Object.assign({ photoId: currentChallenge.id }, locationHintsCache[locationKey]);
+                return currentHints;
+            }
+
+            // 4) Fallback: sem hints -> retornar placeholders (NÃO usar heurísticas para evitar generalizações)
+            currentHints = {
+                photoId: currentChallenge.id,
+                year: '—',
+                type: '—',
+                location: '—'
+            };
+            return currentHints;
+        }
+
+        // Analisar a foto do próprio desafio (auxiliar)
         async function analyzeChallengePhoto() {
             if (!currentChallenge || !currentChallenge.image_data) {
                 addBotMessage("❌ Erro ao processar foto.");
                 return;
             }
 
-            // Usar a foto do desafio para análise
             addTypingIndicator();
             
             try {
@@ -1254,24 +1632,19 @@
                 if (result.success) {
                     addBotMessage(`
                         <strong>🔍 Análise Completa!</strong><br><br>
-                        
                         <strong>🎯 Local Identificado:</strong><br>
                         ${result.answer}<br><br>
-                        
                         <strong>📖 História e Importância:</strong><br>
                         ${result.explanation}<br><br>
-                        
                         <strong>✅ Desafio Completado!</strong><br>
                         💰 Pontos ganhos: <strong>${currentChallenge.points} pontos</strong><br>
                         🎖️ Confiança do modelo: ${result.confidence}<br>
                         ⏱️ Tempo de resposta: ${result.response_time}<br><br>
-                        
                         <div class="quick-buttons">
                             <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
                             <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
                         </div>
                     `);
-                    
                     loadPlayerStats();
                 } else {
                     addBotMessage("❌ Erro ao analisar foto. Tente novamente.");
@@ -1284,6 +1657,40 @@
             }
         }
 
+        // Ajuda/Regras
+        function showHelp() {
+            addBotMessage(`
+                <strong>📖 Regras do Jogo</strong><br><br>
+                <strong>Objetivo:</strong><br>
+                Explore os principais pontos históricos do Recife através de desafios interativos!<br><br>
+                <strong>Três Modos de Jogo:</strong><br><br>
+                📷 <strong>Modo Foto:</strong><br>
+                - Você tira uma foto do mesmo local<br>
+                - Sistema compara as duas fotos visualmente<br>
+                - Sua pontuação baseada na similaridade<br>
+                - Quanto mais parecida, mais pontos!<br><br>
+                ✍️ <strong>Modo Descrição:</strong><br>
+                - Veja uma foto histórica<br>
+                - Descreva o que você observa<br>
+                - Sistema avalia com IA/NLP<br>
+                - Pontos baseados na qualidade!<br><br>
+                ❓ <strong>Modo Mistério:</strong><br>
+                - Desafio sem ver a foto completa<br>
+                - Adivinhe o local histórico<br>
+                - Use dicas para ajudar<br>
+                - Bônus de pontos se acertar!<br><br>
+                <strong>Sistema de Pontos:</strong><br>
+                💰 Ganhe pontos por cada desafio<br>
+                🎖️ Suba de nível acumulando XP<br>
+                🔥 Mantenha sequências para bônus<br>
+                🏆 Desbloqueie conquistas!<br><br>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="startNextChallenge()">🚀 Começar Jogo</button>
+                </div>
+            `);
+        }
+
+        // Modo Descrição: mostrar a foto e instruções para o usuário descrever
         async function startDescriptionMode() {
             if (!currentChallenge) {
                 addBotMessage("❌ Nenhum desafio ativo.");
@@ -1291,6 +1698,19 @@
             }
 
             currentGameMode = 'description';
+
+            // Garantir que a foto do desafio esteja disponível e visível
+            if (!currentChallenge.image_data) {
+                const info = await getPhotoInfo(currentChallenge.id);
+                if (info && info.image_data) {
+                    currentChallenge.image_data = info.image_data;
+                }
+            }
+            if (currentChallenge.image_data) {
+                addUserMessage('📷 [Foto do desafio - Modo Descrição]', currentChallenge.image_data);
+            } else {
+                addSystemMessage('⚠️ Não foi possível carregar a imagem do desafio agora.');
+            }
 
             addBotMessage(`
                 <strong>✍️ Modo Descrição Ativado!</strong><br><br>
@@ -1302,13 +1722,11 @@
                 • Características históricas (português, holandês, século)<br>
                 • Localização e contexto<br><br>
                 
-                <strong>🎁 Recompensas:</strong><br>
-                🏆 Alta similaridade (≥80%): <strong>${currentChallenge.points * 1.5} pontos</strong><br>
-                🥈 Boa descrição (≥60%): <strong>${currentChallenge.points} pontos</strong><br>
-                🥉 Tentativa (≥40%): <strong>${Math.floor(currentChallenge.points * 0.5)} pontos</strong><br><br>
-                
                 <em>Digite sua descrição no campo abaixo 👇</em>
             `);
+
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.placeholder = 'Descreva a foto histórica...';
         }
 
         // Processar resposta do modo descrição
@@ -1326,7 +1744,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         description,
-                        photo_id: currentChallenge.id,  // ID da foto do desafio
+                        photo_id: currentChallenge.id,
                         player_id: currentPlayerId
                     })
                 });
@@ -1341,6 +1759,7 @@
                         <strong>📊 Resultados:</strong><br>
                         📈 Similaridade: ${(result.similarity_score * 100).toFixed(1)}%<br>
                         🎯 Keywords encontradas: ${(result.keyword_score * 100).toFixed(1)}%<br>
+                        ${result.similarity_score >= 0.8 ? `<strong>🎯 Local do Desafio:</strong> ${currentChallenge ? currentChallenge.name : ''}<br><br>` : ''}
                         💰 <strong>Pontos ganhos: ${result.points_earned}</strong><br><br>
                         
                         <div class="quick-buttons">
@@ -1366,14 +1785,16 @@
             }
 
             currentGameMode = 'mystery';
+            // resetar controle de dicas para este modo
+            shownHints = { year: false, type: false, location: false };
             
             addBotMessage(`
                 <strong>❓ Modo Mistério!</strong><br><br>
-                Você precisa descobrir QUAL local histórico é este SEM ver a foto completa!<br><br>
+                Veja a foto e descubra QUAL é o local histórico!<br><br>
                 
                 <strong>Regras:</strong><br>
-                🔐 A foto está oculta<br>
-                💬 Digite o nome do local que você acha que é<br>
+                🖼️ A foto é mostrada, mas o nome está oculto<br>
+                💬 Digite o nome do local que você acha que é
                 🎁 Bônus de 2x pontos se acertar!<br><br>
                 
                 <strong>Dicas disponíveis:</strong><br>
@@ -1381,26 +1802,37 @@
                 🏛️ Tipo de arquitetura<br>
                 📍 Localização<br><br>
                 
-                <em>Digite seu palpite no campo abaixo!</em><br><br>
-                
-                <div class="quick-buttons">
-                    <button class="quick-btn" onclick="requestHint('year')">📅 Dica 1: Ano</button>
-                    <button class="quick-btn" onclick="requestHint('type')">🏛️ Dica 2: Tipo</button>
-                    <button class="quick-btn" onclick="requestHint('location')">📍 Dica 3: Localização</button>
-                </div>
+                <em>Digite sua descrição no campo abaixo 👇</em>
             `);
+
+            // Mostrar a foto do desafio no modo mistério
+            if (currentChallenge.image_data) {
+                addUserMessage('📷 [Foto do desafio - Modo Mistério]', currentChallenge.image_data);
+                currentPhotoDisplayed = true;
+            }
         }
 
         async function requestHint(type) {
             if (!currentChallenge) return;
-
-            const hints = {
-                'year': "Dica de ano: Este local foi construído no século XVIII ou XIX",
-                'type': "Dica de tipo: É um prédio religioso ou cultural do Recife Antigo",
-                'location': "Dica de localização: Fica no centro histórico do Recife, próximo ao Marco Zero"
-            };
-
-            addBotMessage(hints[type] || "Sem dicas disponíveis.");
+            const hints = await ensureHints();
+            if (!hints) { addBotMessage('Sem dicas disponíveis no momento.'); return; }
+            // Se nenhum tipo especificado, rotacionar entre os que ainda não foram mostrados
+            if (!type) {
+                const order = ['year', 'type', 'location'];
+                type = order.find(k => !shownHints[k]) || order[0];
+            }
+            if (type === 'year') {
+                addBotMessage(`📅 Dica (Ano/Século): ${hints.year}`);
+                shownHints.year = true;
+            } else if (type === 'type') {
+                addBotMessage(`🏛️ Dica (Arquitetura): ${hints.type}`);
+                shownHints.type = true;
+            } else if (type === 'location') {
+                addBotMessage(`📍 Dica (Localização): ${hints.location}`);
+                shownHints.location = true;
+            } else {
+                addBotMessage('Sem dicas disponíveis.');
+            }
         }
 
         // Processar palpite do modo mistério
@@ -1413,113 +1845,203 @@
             const guessLower = guess.toLowerCase();
             const correctName = currentChallenge.name.toLowerCase();
             
-            // Verificar se acertou (comparação flexível)
+            // Verificar se acertou (usando NLP para tolerância)
             let isCorrect = false;
             let actualSimilarity = 0;
+
+            // Pré-checagem: igualdade/containment com normalização (case/acentos/pontuação) e remoção de prefixos genéricos
+            function normalizeText(t) {
+                return (t || '')
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remover acentos
+                    .replace(/[^a-z0-9\s]/g, ' ') // remover pontuação
+                    .replace(/\s+/g, ' ') // colapsar espaços
+                    .trim();
+            }
+            function stripGenericPrefixes(t) {
+                // remove artigos/preposições comuns e tipos genéricos de lugar
+                const stop = /\b(da|de|do|das|dos|del|di|du|the|of|and|e)\b/g;
+                const types = /\b(igreja|igreja de|igreja do|igreja da|bas\w*lica|palacio|rua|mercado|forte|teatro|concatedral|museu)\b/g;
+                return t.replace(stop, ' ').replace(types, ' ').replace(/\s+/g, ' ').trim();
+            }
+            const gNorm = stripGenericPrefixes(normalizeText(guess));
+            const nNorm = stripGenericPrefixes(normalizeText(currentChallenge.name));
+            let frontendPrecheck = false;
+            if (gNorm && nNorm) {
+                // Igualdade direta
+                if (gNorm === nNorm) {
+                    frontendPrecheck = true;
+                }
+                // Contém (em qualquer direção) para nomes com múltiplas palavras
+                if (!frontendPrecheck) {
+                    if (gNorm.length >= 3 && (gNorm.includes(nNorm) || nNorm.includes(gNorm))) {
+                        frontendPrecheck = true;
+                    }
+                }
+                // Coincidência por tokens (mínimo 2 tokens relevantes em comum)
+                if (!frontendPrecheck) {
+                    const gTokens = Array.from(new Set(gNorm.split(' ').filter(x => x.length >= 3)));
+                    const nTokens = Array.from(new Set(nNorm.split(' ').filter(x => x.length >= 3)));
+                    const common = gTokens.filter(x => nTokens.includes(x));
+                    if (common.length >= 2 || (common.length === 1 && nTokens.length === 1)) {
+                        frontendPrecheck = true;
+                    }
+                }
+            }
             
-            // Comparação usando NLP (mesmo sistema de descrição)
+            // Sempre chamar o backend do Modo Mistério para registrar XP/estatísticas
+            let backendPlayerStats = null;
+            let backendPointsEarned = 0;
+            // Contar quantas dicas foram usadas
+            const hintsUsedCount = (shownHints.year ? 1 : 0) + (shownHints.type ? 1 : 0) + (shownHints.location ? 1 : 0);
             try {
-                const response = await fetch('/api/photo_game/submit_description', {
+                const response = await fetch('/api/photo_game/mystery_guess', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        description: guess,
-                        challenge_mode: true
+                        guess: guess,
+                        photo_id: currentChallenge.id,
+                        player_id: currentPlayerId || null,
+                        hints_used: hintsUsedCount
                     })
                 });
-                
                 const result = await response.json();
-                if (result.success) {
-                    actualSimilarity = result.final_score;
-                    // Considera acerto se similaridade >= 50%
-                    isCorrect = actualSimilarity >= 0.5;
+                if (result && result.success) {
+                    actualSimilarity = typeof result.final_score === 'number' ? result.final_score : actualSimilarity;
+                    // Resultado final: seguir a verdade do backend
+                    isCorrect = !!result.is_correct;
+                    backendPlayerStats = result.player_stats || null;
+                    backendPointsEarned = typeof result.points_earned === 'number' ? result.points_earned : 0;
+                    // Se o backend retornar nome ajustado da foto, atualizar exibição
+                    if (result.photo_name) {
+                        try { currentChallenge.name = result.photo_name; } catch (e) {}
+                    }
+                    // Verificar novas conquistas desbloqueadas
+                    if (result.new_achievements && result.new_achievements.length > 0) {
+                        // Mostrar notificação de novas conquistas
+                        let achievementsHtml = result.new_achievements.map(ach => 
+                            `<div style="margin: 5px 0;">
+                                <span style="font-size: 20px;">${ach.icon || '🏆'}</span> 
+                                <strong>${ach.name}</strong> - ${ach.description || ''}
+                            </div>`
+                        ).join('');
+                        addBotMessage(`
+                            <div style="background: linear-gradient(135deg, #fff9e6, #ffe4b5); border: 2px solid #ffd700; color: #856404; padding: 15px; border-radius: 12px; margin-top: 10px;">
+                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">🏆 Novas Conquistas Desbloqueadas!</div>
+                                ${achievementsHtml}
+                            </div>
+                        `);
+                        // Recarregar lista de conquistas
+                        if (backendPlayerStats && backendPlayerStats.achievements_details) {
+                            loadAchievements(backendPlayerStats.achievements_details);
+                        } else {
+                            await loadPlayerStats();
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Erro ao processar palpite:', error);
             }
             
-            // Feedback
             if (isCorrect) {
-                // Duplicar pontos para modo mistério
-                const bonusPoints = currentChallenge.points * 2;
+                // Usar o XP real retornado pelo backend (não calcular 2x fictício)
+                const xpEarned = backendPointsEarned || 0;
+                const hintsUsedCount = (shownHints.year ? 1 : 0) + (shownHints.type ? 1 : 0) + (shownHints.location ? 1 : 0);
+                const hintPenalty = hintsUsedCount * 5;
+                
+                // Mensagem sobre dicas usadas
+                let hintInfo = '';
+                if (hintsUsedCount > 0) {
+                    hintInfo = `<div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:10px 12px; margin-top:8px;">
+                        <div style="font-size:12px; color:#856404;">💡 ${hintsUsedCount} dica${hintsUsedCount > 1 ? 's' : ''} usada${hintsUsedCount > 1 ? 's' : ''} (-${hintPenalty} XP)</div>
+                    </div>`;
+                }
                 
                 addBotMessage(`
-                    <strong>🎉 ACERTOU!!!</strong><br><br>
-                    É o <strong>${currentChallenge.name}</strong>!<br><br>
-                    Parabéns! Você identificou corretamente o local histórico!<br>
-                    
-                    <strong>🎁 Recompensas:</strong><br>
-                    ✅ Bônus de 2x pontos: <strong>${bonusPoints} pontos</strong><br>
-                    🏆 Modo mistério completado!<br><br>
-                `);
-                
-                // Mostrar foto completa
-                addUserMessage('📷 [Foto revelada]', currentChallenge.image_data);
-                
-                // Próximo desafio
-                setTimeout(() => {
-                    addBotMessage(`
-                        <div class="quick-buttons">
+                    <div style="background: linear-gradient(135deg, #e7f7ec, #d9f2e3); border: 1px solid #b9ebc9; color: #1f4d33; padding: 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                            <div style="font-size:26px;">🎉</div>
+                            <div style="font-weight:800; letter-spacing:.3px;">VOCÊ ACERTOU!</div>
+                        </div>
+                        <div style="font-size:22px; font-weight:800; color:#0f3a28; margin: 4px 0 12px;">${currentChallenge.name}</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+                            <div style="background:#fff; border:1px solid #b9ebc9; border-radius:12px; padding:10px 12px; min-width:160px;">
+                                <div style="font-size:12px; color:#1f4d33; opacity:.8;">Modo</div>
+                                <div style="font-size:18px; font-weight:800; color:#106b43;">🔮 Mistério</div>
+                            </div>
+                            <div style="background:#fff; border:1px solid #b9ebc9; border-radius:12px; padding:10px 12px; min-width:160px;">
+                                <div style="font-size:12px; color:#1f4d33; opacity:.8;">XP Ganho</div>
+                                <div style="font-size:18px; font-weight:800; color:#106b43;">+${xpEarned} XP</div>
+                            </div>
+                        </div>
+                        ${hintInfo}
+                        <div class="quick-buttons" style="margin-top: 8px;">
                             <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
                             <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
                         </div>
-                    `);
-                }, 1500);
-            } else {
-                addBotMessage(`
-                    <strong>❌ Não foi desta vez...</strong><br><br>
-                    Sua resposta: "${guess}"<br>
-                    Resposta correta: <strong>${currentChallenge.name}</strong><br><br>
-                    Não desista! Tente novamente ou peça mais dicas!<br><br>
-                    
-                    <div class="quick-buttons">
-                        <button class="quick-btn" onclick="requestHint('location')">📍 Pedir Mais Dicas</button>
-                        <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
                     </div>
                 `);
+                if (!currentPhotoDisplayed && currentChallenge.image_data) {
+                    addUserMessage('📷 [Foto revelada]', currentChallenge.image_data);
+                    currentPhotoDisplayed = true;
+                }
+                // Atualizar estatísticas do jogador (XP/nível) após ganho no modo mistério
+                try {
+                    if (backendPlayerStats && !backendPlayerStats.error) {
+                        // Usar os stats retornados pelo backend (fonte confiável)
+                        const xpEl = document.getElementById('playerXP');
+                        const lvlEl = document.getElementById('playerLevel');
+                        const streakEl = document.getElementById('playerStreak');
+                        // Garantir que experience seja um número válido
+                        const xpValue = parseInt(backendPlayerStats.experience) || 0;
+                        if (xpEl) xpEl.textContent = xpValue;
+                        if (lvlEl) lvlEl.textContent = backendPlayerStats.level || 1;
+                        if (streakEl) streakEl.textContent = backendPlayerStats.streak || 0;
+                        
+                        // Atualizar conquistas se disponíveis
+                        if (backendPlayerStats.achievements_details) {
+                            loadAchievements(backendPlayerStats.achievements_details);
+                        }
+                        
+                        // Atualizar atividades recentes se disponíveis
+                        if (backendPlayerStats.recent_activities) {
+                            loadRecentActivities(backendPlayerStats.recent_activities);
+                        }
+                    } else {
+                        // Fallback: recarregar stats do servidor (não usar points_earned pois não reflete o XP real)
+                        await loadPlayerStats();
+                    }
+                } catch (e) {
+                    console.error('Erro ao atualizar stats após Mystery Mode:', e);
+                }
+                currentGameMode = null;
+            } else {
+                // Se a pré-checagem local indicou um possível acerto, mas o backend não aprovou
+                if (frontendPrecheck) {
+                    addBotMessage(`
+                        <strong>⚠️ Quase lá!</strong><br><br>
+                        Sua resposta: "${guess}"<br>
+                        Similaridade: ${(actualSimilarity * 100).toFixed(1)}% (precisa melhorar um pouco para contar como acerto)<br><br>
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="requestHint()">📍 Pedir Dica</button>
+                            <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
+                        </div>
+                    `);
+                } else {
+                    addBotMessage(`
+                        <strong>❌ Não foi desta vez...</strong><br><br>
+                        Sua resposta: "${guess}"<br>
+                        Tente novamente ou peça uma dica!<br><br>
+                        
+                        <div class="quick-buttons">
+                            <button class="quick-btn" onclick="requestHint()">📍 Pedir Dica</button>
+                            <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
+                        </div>
+                    `);
+                }
+                // Mantém o modo mistério ativo para novas tentativas
+                return;
             }
-            
-            // Limpar modo
-            currentGameMode = null;
-        }
-
-        function showHelp() {
-            addBotMessage(`
-                <strong>📖 Regras do Jogo</strong><br><br>
-                
-                <strong>Objetivo:</strong><br>
-                Explore os principais pontos históricos do Recife através de desafios interativos!<br><br>
-                
-                <strong>Três Modos de Jogo:</strong><br><br>
-                
-                📷 <strong>Modo Foto:</strong><br>
-                - Você tira uma foto do mesmo local<br>
-                - Sistema compara as duas fotos visualmente<br>
-                - Sua pontuação baseada na similaridade<br>
-                - Quanto mais parecida, mais pontos!<br><br>
-                
-                ✍️ <strong>Modo Descrição:</strong><br>
-                - Veja uma foto histórica<br>
-                - Descreva o que você observa<br>
-                - Sistema avalia com IA/NLP<br>
-                - Pontos baseados na qualidade!<br><br>
-                
-                ❓ <strong>Modo Mistério:</strong><br>
-                - Desafio sem ver a foto completa<br>
-                - Adivinhe o local histórico<br>
-                - Use dicas para ajudar<br>
-                - Bônus de pontos se acertar!<br><br>
-                
-                <strong>Sistema de Pontos:</strong><br>
-                💰 Ganhe pontos por cada desafio<br>
-                🎖️ Suba de nível acumulando XP<br>
-                🔥 Mantenha sequências para bônus<br>
-                🏆 Desbloqueie conquistas!<br><br>
-                
-                <div class="quick-buttons">
-                    <button class="quick-btn" onclick="startNextChallenge()">🚀 Começar Jogo</button>
-                </div>
-            `);
         }
 
         // Enter para enviar
@@ -1535,6 +2057,14 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
+
+        // Expor funções no escopo global para uso em atributos onclick criados dinamicamente
+        window.startNextChallenge = startNextChallenge;
+        window.startIdentificationMode = startIdentificationMode;
+        window.startDescriptionMode = startDescriptionMode;
+        window.startMysteryMode = startMysteryMode;
+        window.requestHint = requestHint;
+        window.showHelp = showHelp;
     </script>
 </body>
 </html>

@@ -23,15 +23,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# PyTorch
-*.pth
-*.pt
-models/*.pth
-!models/.gitkeep
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
 # IDE
 .vscode/
 .idea/
@@ -55,12 +46,7 @@ temp_*.jpg
 .env
 .env.local
 
-# Data (incluir fotos)
-# data/recife_historic/*/
-# !data/recife_historic/.gitkeep
-
 # Training artifacts
 *.pkl
 *.h5
-checkpoints/
 

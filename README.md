@@ -6,10 +6,30 @@ Sistema educacional gamificado que utiliza **Deep Learning** para reconhecimento
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Tecnologias e Modelos](#tecnologias-e-modelos)
+- [Estrutura do Projeto](#estrutura-do-projeto)
 - [Instalação](#instalação)
-- [Treinamento do Modelo](#treinamento-do-modelo)
 - [Como Usar](#como-usar)
+- [Manutenção](#manutenção)
 - [Relatório Técnico](#relatório-técnico)
+- [Contribuição](#contribuiçãocontribuição)
+
+> 📖 **Para pessoas sem conhecimento técnico:** Consulte o [GUIA_LEIGO.md](GUIA_LEIGO.md) que explica o projeto de forma simples e acessível!
+
+## 🎮 Como Jogar
+
+1. **Modo Identificação**: 
+   - Envie uma foto de um ponto turístico do Recife
+   - O sistema identificará o local e fornecerá informações históricas
+   
+2. **Modo Mistério**:
+   - Tente adivinhar qual é o local histórico mostrado na imagem
+   - Use as dicas disponíveis para ajudar na identificação
+   - Ganhe pontos por acertos consecutivos
+
+3. **Sistema de Pontuação**:
+   - Acertos consecutivos aumentam sua pontuação
+   - Dicas utilizadas reduzem a pontuação final
+   - Desafios diários com recompensas especiais
 
 ## 🎯 Sobre o Projeto
 
@@ -32,6 +52,18 @@ Este projeto implementa um **sistema de reconhecimento de imagens** especializad
 - **scikit-learn** e **NLTK** - NLP (TF-IDF, stopwords, lematização)
 - **Python** - Linguagem principal
 - **HTML/CSS/JavaScript** - Interface frontend
+
+### Dependências Principais
+
+O projeto utiliza apenas as dependências essenciais:
+
+- `torch` e `torchvision` - Deep Learning
+- `transformers` - Modelos de linguagem (multimodal)
+- `flask` e `flask-cors` - Servidor web
+- `scikit-learn` e `nltk` - Processamento de linguagem natural
+- `matplotlib` e `seaborn` - Visualização (treinamento)
+- `Pillow` e `numpy` - Processamento de imagens
+- `python-docx` - Exportação de documentos
 
 ### Modelo de Deep Learning
 
@@ -58,16 +90,23 @@ ImprovedCNN:
 **Características Técnicas:**
 - **Parâmetros**: 13.7 milhões
 - **Classes**: 12 locais históricos
-- **Dataset (estado atual do filesystem)**: 60 imagens distribuídas em 12 pastas de classes em `data/recife_historic/`. O arquivo `data/photo_descriptions.json` possui 23 registros.
+- **Dataset**: 60 imagens de alta qualidade distribuídas em 12 pastas de classes em `data/recife_historic/`. O arquivo `data/photo_descriptions.json` contém 60 entradas, cada uma com metadados completos, incluindo descrições, dicas e informações históricas.
 - **Acurácia (conjunto experimental de 25 imagens)**: 96%  
   Nota: no retreinamento recente com Transfer Learning (ResNet18) obteve-se **ValAcc 100%** no split de validação (12 imagens).
 - **Tempo de Treinamento**: 2-3 minutos
 - **Batch Size**: 2 imagens/época
 - **Learning Rate**: 0.001 (com scheduler)
 
-Nota (último retreinamento): modelo atual treinado via **Transfer Learning (ResNet18)** com 60 imagens (12 classes) obteve **ValAcc de 100%** no split de validação (12 imagens). A comparação visual entre fotos usa agora **embeddings** do backbone com **similaridade do cosseno**.
+**Atualização Recente (01/11/2024)**: 
+- Corrigidos os caminhos das imagens no `photo_descriptions.json` para garantir carregamento consistente
+- Padronização dos caminhos para iniciar com `data/`
+- Verificação de integridade de todas as 60 imagens do dataset
 
-### Locais Reconhecidos
+Nota: modelo atual treinado via **Transfer Learning (ResNet18)** com 60 imagens (12 classes) obteve **ValAcc de 100%** no split de validação (12 imagens). A comparação visual entre fotos usa **embeddings** do backbone com **similaridade do cosseno**.
+
+### 🏛️ Locais Históricos Reconhecidos
+
+O sistema agora inclui um total de **60 imagens** distribuídas entre os seguintes pontos turísticos:
 
 O modelo identifica **12 pontos históricos do Recife**:
 
@@ -84,6 +123,26 @@ O modelo identifica **12 pontos históricos do Recife**:
 11. 🛣️ **Rua do Bom Jesus** - Uma das mais antigas do Recife
 12. 🎭 **Teatro Santa Isabel** - Teatro neoclássico
 
+## 🛠️ Estrutura do Projeto
+
+```
+appDeepLearning/
+├── data/
+│   ├── recife_historic/      # Imagens dos pontos turísticos
+│   │   ├── casa_da_cultura/
+│   │   ├── forte_das_cinco_pontas/
+│   │   └── ...
+│   ├── photo_descriptions.json  # Metadados das imagens
+│   ├── players.json         # Dados dos jogadores
+│   └── users.json           # Dados de usuários
+├── game/
+│   ├── gamification.py      # Lógica de gamificação
+│   └── photo_description_game.py  # Jogo de descrição de fotos
+├── templates/               # Templates HTML
+├── main.py                 # Aplicação principal
+└── README.md               # Documentação
+```
+
 ## 🚀 Instalação
 
 ### Requisitos
@@ -92,16 +151,27 @@ O modelo identifica **12 pontos históricos do Recife**:
 - 4GB RAM mínimo
 - Espaço em disco: 500MB
 
-### Instalação Passo a Passo
+### 📥 Instalação Passo a Passo
 
 ```bash
-# 1. Clone o repositório ou navegue até o diretório
+# 1. Clone o repositório
+git clone [URL_DO_REPOSITORIO]
 cd appDeepLearning
 
-# 2. Instale as dependências
+# 2. Crie e ative um ambiente virtual (recomendado)
+python -m venv venv
+# No Windows:
+.\venv\Scripts\activate
+# No Linux/Mac:
+source venv/bin/activate
+
+# 3. Instale as dependências
 pip install -r requirements.txt
 
-# 3. (Opcional) Verifique se as fotos estão organizadas
+# 4. Baixe recursos do NLTK (necessário apenas na primeira execução)
+python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
+
+# 5. (Opcional) Verifique se as fotos estão organizadas
 # Estrutura esperada:
 # data/recife_historic/
 #   ├── marco_zero/
@@ -168,6 +238,39 @@ Abra o navegador em: **http://localhost:5000**
 3. **Fazer Pergunta**: Ex.: "Que local histórico é este?"
 4. **Ver Resposta**: O sistema identifica o local e dá informações históricas
 5. **Ganhar Pontos**: Pontuação baseada em similaridade/score (modos Foto/Descrição)
+
+## 🔧 Manutenção
+
+### Limpeza de Código Realizada
+
+O projeto foi otimizado com as seguintes melhorias:
+
+- ✅ **Dependências desnecessárias removidas**: `datasets`, `accelerate`, `tensorboard`, `opencv-python`, `pandas`, `wandb`, `gradio`, `spacy`
+- ✅ **Código legado removido**: Funções não utilizadas (`_generate_answer`, `_generate_explanation`, `_analyze_image_features`)
+- ✅ **Rotas duplicadas removidas**: Endpoints `/api/photo_game/*` duplicados foram limpos
+- ✅ **Console.log removidos**: Logs de debug desnecessários removidos do frontend
+- ✅ **Imports não utilizados**: Limpeza de imports desnecessários
+
+### Atualizando o Dataset
+
+Para adicionar novas imagens ao dataset:
+
+1. Adicione as imagens na pasta `data/recife_historic/[nome_do_local]`
+2. Execute o script de atualização:
+   ```bash
+   python update_photo_descriptions.py
+   ```
+3. Verifique se todos os caminhos estão corretos:
+   ```bash
+   python fix_photo_paths.py
+   ```
+
+### Solução de Problemas Comuns
+
+- **Imagens não carregando**: Verifique se os caminhos no `photo_descriptions.json` começam com `data/`
+- **Erros de classificação**: Verifique se as imagens estão nas pastas corretas
+- **Problemas de desempenho**: Reduza o tamanho das imagens ou aumente os recursos do servidor
+- **Erro ao importar NLTK**: Execute `python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"`
 
 ## 📊 Relatório Técnico
 

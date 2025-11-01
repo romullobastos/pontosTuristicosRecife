@@ -55,6 +55,36 @@ Sistema chatbot gamificado que combina:
 - **Lemmatization**: WordNet (português)
 - **Tokenization**: Regex-based (mais robusta que NLTK para português)
 
+### 3.4 Dependências do Projeto (Atualizado)
+
+O projeto utiliza apenas as dependências essenciais, após otimização realizada:
+
+**Deep Learning:**
+- `torch>=2.0.0` - Framework principal
+- `torchvision>=0.15.0` - Visão computacional
+- `transformers>=4.30.0` - Modelos de linguagem
+
+**Backend:**
+- `flask>=2.3.0` - Servidor web
+- `flask-cors>=4.0.0` - CORS para API
+
+**Processamento:**
+- `Pillow>=9.5.0` - Processamento de imagens
+- `numpy>=1.24.0` - Operações numéricas
+- `scikit-learn>=1.3.0` - Machine Learning (TF-IDF, similaridade)
+- `nltk>=3.8.0` - Processamento de linguagem natural
+
+**Visualização (Treinamento):**
+- `matplotlib>=3.7.0` - Gráficos
+- `seaborn>=0.12.0` - Visualização estatística
+- `tqdm>=4.65.0` - Barras de progresso
+
+**Utilitários:**
+- `python-docx>=0.8.11` - Exportação de documentos
+
+**Dependências Removidas (não utilizadas no código):**
+- `datasets`, `accelerate`, `tensorboard`, `opencv-python`, `pandas`, `wandb`, `gradio`, `spacy`
+
 ---
 
 ## 4. Pipeline/ETL
@@ -256,9 +286,56 @@ appDeepLearning/
 
 ---
 
-## 11. Observações Finais
+## 11. Melhorias e Otimizações Recentes
+
+### Limpeza de Código (Última Atualização)
+
+O projeto foi otimizado para remover código desnecessário e melhorar a manutenibilidade:
+
+#### Dependências Removidas
+- `datasets` - Não utilizado no código
+- `accelerate` - Não utilizado no código
+- `tensorboard` - Não utilizado no código
+- `opencv-python` - Não utilizado no código
+- `pandas` - Não utilizado no código
+- `wandb` - Não utilizado no código
+- `gradio` - Não utilizado no código
+- `spacy` - Substituído por NLTK que já estava em uso
+
+#### Código Removido
+- Funções legadas não utilizadas:
+  - `_generate_answer()` - Referências a outputs inexistentes
+  - `_generate_explanation()` - Referências a outputs inexistentes
+  - `_analyze_image_features()` - Nunca chamada
+- Variáveis não utilizadas:
+  - `self.tokenizer` - Inicializado mas nunca usado
+  - `self.transform` - Inicializado mas nunca usado
+  - `self.image_cache` - Cache desabilitado, código relacionado removido
+- Imports desnecessários:
+  - `torch.nn as nn` - Não utilizado em main.py
+  - `send_from_directory` - Não utilizado
+  - `SimpleTokenizer`, `EducationalDataset` - Não utilizados
+  - `torchvision.transforms` - Não utilizado
+
+#### Rotas Duplicadas Removidas
+- `/api/photo_game/random_photo` - Mantida versão otimizada
+- `/api/photo_game/get_photo/<photo_id>` - Mantida versão otimizada
+- `/api/photo_game/submit_description` - Removida duplicata
+
+#### Frontend Otimizado
+- Removidos `console.log()` de debug desnecessários
+- Mantidos apenas `console.error()` para erros críticos
+
+#### Resultado
+- **~200 linhas de código removidas**
+- **8 dependências desnecessárias removidas**
+- **Código mais limpo e mantível**
+- **Melhor performance** (menos imports e código não utilizado)
+
+## 12. Observações Finais
 
 - O sistema foi atualizado para remover **moedas** e manter somente **XP**
 - As rotas agora retornam e aplicam `points_earned` diretamente ao XP
 - Documentação e UI atualizadas para refletir essa simplificação
+- **Código otimizado**: Dependências e código desnecessário removidos para melhor performance e manutenibilidade
 

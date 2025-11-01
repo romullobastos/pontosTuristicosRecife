@@ -1,35 +1,64 @@
 {
-  "0d6caf15-ce3e-4d6a-9d5d-1b83daf4ab3f": {
-    "id": "0d6caf15-ce3e-4d6a-9d5d-1b83daf4ab3f",
+  "6a4bc15b-b038-4141-ab84-d0c20a965196": {
+    "id": "6a4bc15b-b038-4141-ab84-d0c20a965196",
     "name": "Jogador",
-    "level": 1,
-    "experience": 0,
-    "streak": 0,
-    "total_correct": 0,
-    "total_attempts": 0,
-    "achievements": [],
-    "daily_challenges": {}
+    "level": 3,
+    "experience": 708,
+    "streak": 5,
+    "total_correct": 22,
+    "total_attempts": 34,
+    "achievements": [
+      "first_image",
+      "detective_novice",
+      "perfect_streak",
+      "history_expert",
+      "speed_demon"
+    ],
+    "daily_challenges": {
+      "daily_images": 31,
+      "daily_accuracy": 22,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
+    "historic_locations_identified": 22,
+    "fastest_time": 1.5548408031463623,
+    "recent_activities": []
   },
-  "246f488d-eaec-46ad-a696-149cc40cb47d": {
-    "id": "246f488d-eaec-46ad-a696-149cc40cb47d",
-    "name": "Jogador22",
-    "level": 1,
-    "experience": 0,
-    "streak": 0,
-    "total_correct": 0,
-    "total_attempts": 0,
-    "achievements": [],
-    "daily_challenges": {}
-  },
-  "dc065514-9d03-45e5-ab7d-bd52e208459c": {
-    "id": "dc065514-9d03-45e5-ab7d-bd52e208459c",
-    "name": "Jogador33",
-    "level": 1,
-    "experience": 0,
-    "streak": 0,
-    "total_correct": 0,
-    "total_attempts": 0,
-    "achievements": [],
-    "daily_challenges": {}
+  "f1cc77d4-c6a7-481f-b5ae-c651d43afb08": {
+    "id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
+    "name": "admin",
+    "level": 2,
+    "experience": 362,
+    "streak": 2,
+    "total_correct": 2,
+    "total_attempts": 2,
+    "achievements": [
+      "first_image",
+      "speed_demon"
+    ],
+    "daily_challenges": {
+      "daily_images": 2,
+      "daily_accuracy": 2,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
+    "historic_locations_identified": 2,
+    "fastest_time": 1.5567224025726318,
+    "recent_activities": [
+      {
+        "timestamp": "2025-11-01T02:10:21.000812",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 32,
+        "level_up": true,
+        "streak": 2
+      }
+    ]
   }
 }

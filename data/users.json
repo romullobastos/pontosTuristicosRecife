@@ -1,13 +1,14 @@
 {
   "admin": {
     "email": "email@email.com",
-    "password_hash": "scrypt:32768:8:1$PFqtyv3PRBHD68jX$fe23849b1232b37bb9643dc5a7f305308b6a4b9f3f69d4fddf50a78243c46e3f5736e2ed7f251ebb2d58781080c731b17dcda9d129cc61644bc2206c52190f1e",
+    "password_hash": "scrypt:32768:8:1$ICQGmjFzB2RGDy8h$166d5280670515c94b59555af1424b4016127cfb05b2019159cf30f51866baca6aad60939721463a951f48abbdb883988e29d521405cecd9efff4bb57ed07a5b",
     "is_admin": true,
     "player_id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
     "created_at": "2025-10-31T19:24:57.642487",
     "player_ids": [
       "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
-      "0d6caf15-ce3e-4d6a-9d5d-1b83daf4ab3f"
+      "0d6caf15-ce3e-4d6a-9d5d-1b83daf4ab3f",
+      "6a4bc15b-b038-4141-ab84-d0c20a965196"
     ]
   },
   "teste": {

@@ -72,6 +72,7 @@ Arquitetura: ImprovedCNN
 - 3 camadas fully connected (1024, 512, 256)
 - Output: 12 classes (locais históricos)
 - Parâmetros: 13.7 milhões
+- Transfer Learning: ResNet18 (opcional, melhor acurácia)
 ```
 
 **Como compara fotos**:
@@ -92,6 +93,25 @@ Score: (similaridade * 0.6) + (keywords * 0.4)
 - Similaridade: 85% → Score: 70%
 
 ---
+
+## 🚀 Otimizações Recentes
+
+### Limpeza de Código
+- ✅ **8 dependências removidas**: `datasets`, `accelerate`, `tensorboard`, `opencv-python`, `pandas`, `wandb`, `gradio`, `spacy`
+- ✅ **~200 linhas de código removidas**: Funções legadas e código não utilizado
+- ✅ **Rotas duplicadas removidas**: Endpoints `/api/photo_game/*` otimizados
+- ✅ **Console.log removidos**: Logs de debug desnecessários removidos do frontend
+- ✅ **Imports limpos**: Apenas dependências realmente utilizadas
+
+### Dependências Atuais (Essenciais)
+```
+torch, torchvision, transformers  # Deep Learning
+flask, flask-cors                 # Backend
+scikit-learn, nltk               # NLP
+Pillow, numpy                     # Imagens
+matplotlib, seaborn, tqdm        # Visualização
+python-docx                       # Exportação
+```
 
 ## 📈 Avaliação
 

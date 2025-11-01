@@ -5,16 +5,17 @@ Desenvolvido do zero sem modelos pré-treinados
 """
 
 import torch
-import torch.nn as nn
 from PIL import Image
 import json
 import os
 import time
-from flask import Flask, request, jsonify, send_from_directory, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 import base64
 import io
+import mimetypes
+import re
 
 # Importar nossos módulos
 from game.gamification import GamificationSystem
@@ -22,8 +23,6 @@ from game.photo_description_game import PhotoDescriptionGame
 import sys
 sys.path.append('training')
 from improved_recife_trainer import ImprovedRecifeHistoricTrainer
-from training.trainer import SimpleTokenizer, EducationalDataset
-import torchvision.transforms as transforms
 
 class EducationalGame:
     """
@@ -35,7 +34,6 @@ class EducationalGame:
         print(f"Usando device: {self.device}")
         
         # Inicializar componentes
-        self.tokenizer = SimpleTokenizer()
         self.gamification = GamificationSystem()
         self.photo_description_game = PhotoDescriptionGame()
         
@@ -48,18 +46,6 @@ class EducationalGame:
             print("Execute o treinamento melhorado primeiro: python train_improved_model.py")
         else:
             print("Modelo de pontos historicos do Recife carregado com sucesso!")
-        
-        # Usar apenas o modelo de pontos históricos (modelo multimodal legado não é usado)
-        
-        # Transformações para imagens
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-        
-        # Cache para melhorar consistência das respostas
-        self.image_cache = {}
         
         print("Jogo inicializado com sucesso!")
     
@@ -125,10 +111,6 @@ class EducationalGame:
                 'location_info': location_info
             }
             
-            # Cache desabilitado completamente
-            # if image_hash:
-            #     self.image_cache[image_hash] = result
-            
             # Limpar arquivo temporário
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -138,28 +120,6 @@ class EducationalGame:
         except Exception as e:
             print(f"Erro ao processar imagem: {e}")
             return {'success': False, 'error': f"Erro ao processar imagem: {e}"}
-    
-    def _analyze_image_features(self, image):
-        """Análise de características visuais de pontos históricos"""
-        import random
-        import numpy as np
-        
-        # Converter imagem para análise básica
-        img_array = np.array(image)
-        
-        # Analisar características arquitetônicas
-        features = {
-            "has_stone": random.random() < 0.8,        # 80% chance de ter pedra (arquitetura histórica)
-            "has_colonial_style": random.random() < 0.7, # 70% chance de estilo colonial
-            "has_blue_sky": random.random() < 0.6,      # 60% chance de céu azul
-            "has_water": random.random() < 0.4,         # 40% chance de ter água (mar/rio)
-            "has_people": random.random() < 0.5,        # 50% chance de ter pessoas
-            "has_vegetation": random.random() < 0.5,    # 50% chance de ter vegetação
-            "has_old_walls": random.random() < 0.7,     # 70% chance de ter paredes antigas
-            "is_historic": True                         # Sempre é histórico
-        }
-        
-        return features
     
     def _analyze_image_content(self, image):
         """Análise usando modelo treinado para pontos históricos do Recife"""
@@ -227,166 +187,6 @@ class EducationalGame:
             "model_trained": False,
             "dominant_color": dominant_color
         }
-    
-    def _classify_image_content(self, features):
-        """Classificação usando modelo treinado para pontos históricos do Recife"""
-        
-        # Se temos resultado do modelo treinado, usar ele
-        if features.get("model_trained", False):
-            predicted_class = features.get("predicted_class", "local não identificado")
-            confidence = features.get("confidence", 0.0)
-            location_info = features.get("location_info", {})
-            
-            print(f"Modelo treinado: {location_info.get('nome', predicted_class)} (confianca: {confidence:.2f})")
-            
-            # Se a confiança é alta, usar a predição
-            if confidence > 0.3:
-                return predicted_class
-            else:
-                print("Confianca baixa, usando fallback")
-        
-        # Fallback para análise básica
-        dominant_color = features.get("dominant_color", "unknown")
-        
-        # Lógica simples baseada na cor dominante para pontos históricos
-        if dominant_color == "brown":
-            return "marco_zero"  # Marco Zero tem calçada de pedra marrom
-        elif dominant_color == "yellow":
-            return "praia_boa_viagem"  # Praia tem areia amarelada
-        elif dominant_color == "gray":
-            return "casa_da_cultura"  # Casa da Cultura é de pedra cinza
-        elif dominant_color == "blue":
-            return "praia_boa_viagem"  # Praia tem mar azul
-        elif dominant_color == "green":
-            return "praça_do_arsenal"  # Praças têm vegetação verde
-        else:
-            return "local não identificado"
-    
-    def _generate_answer(self, outputs, question, image_hash=None, image=None):
-        """Gera resposta baseada nas saídas do modelo"""
-        # Implementação melhorada com análise de palavras-chave
-        answer_logits = outputs['answer_logits']
-        _, predicted = torch.max(answer_logits, 1)
-        
-        # Analisar a pergunta para dar resposta mais específica
-        question_lower = question.lower()
-        
-        # Se temos a imagem, fazer análise completa do conteúdo
-        if image is not None:
-            # Verificar cache primeiro
-            if image_hash and image_hash in self.image_cache:
-                cached_answer = self.image_cache[image_hash]
-                return cached_answer
-            
-            # Análise completa da imagem
-            features = self._analyze_image_content(image)
-            classification = self._classify_image_content(features)
-            
-            # Debug: mostrar análise da imagem
-            print(f"Analise da Imagem:")
-            if features.get("model_trained", False):
-                print(f"  Modelo treinado: {features.get('predicted_class', 'unknown')}")
-                print(f"  Confianca: {features.get('confidence', 0.0):.2f}")
-            else:
-                print(f"  Cor dominante: {features.get('dominant_color', 'unknown')}")
-                print(f"  Usando analise basica (fallback)")
-            
-            print(f"Classificacao final: {classification}")
-            
-            # Gerar resposta baseada na classificação
-            if classification != "local não identificado":
-                # Obter informações do local
-                location_info = features.get("location_info", {})
-                if location_info:
-                    answer = f"Este é o {location_info.get('nome', classification)}"
-                else:
-                    answer = f"Este é o {classification.replace('_', ' ').title()}"
-                # Salvar no cache
-                if image_hash:
-                    self.image_cache[image_hash] = answer
-                return answer
-        
-        # Detectar tipo de pergunta sobre pontos históricos
-        if "onde" in question_lower or "local" in question_lower or "histórico" in question_lower:
-            # Verificar se já temos uma resposta em cache para esta imagem
-            if image_hash and image_hash in self.image_cache:
-                cached_answer = self.image_cache[image_hash]
-                return cached_answer
-            
-            # Retornar resposta genérica sobre pontos históricos do Recife
-            import random
-            historic_locations = [
-                "Este é o Marco Zero do Recife",
-                "Este é a Casa da Cultura",
-                "Este é o Forte das Cinco Pontas",
-                "Este é o Teatro Santa Isabel",
-                "Esta é a Igreja de Nossa Senhora do Carmo",
-                "Esta é a Rua do Bom Jesus"
-            ]
-            answer = random.choice(historic_locations)
-            # Salvar no cache
-            if image_hash:
-                self.image_cache[image_hash] = answer
-            return answer
-        
-        else:
-            # Resposta genérica sobre pontos históricos
-            historic_responses = [
-                "Este é um ponto histórico do Recife",
-                "Este é um monumento histórico",
-                "Este é um local turístico do Recife",
-                "Este é um prédio histórico da cidade"
-            ]
-            import random
-            return random.choice(historic_responses)
-    
-    def _generate_explanation(self, outputs, question, answer=None):
-        """Gera explicação educativa sobre pontos históricos do Recife"""
-        explanation_logits = outputs['explanation_logits']
-        _, predicted = torch.max(explanation_logits, 1)
-        
-        # Se temos uma resposta específica, gerar explicação baseada nela
-        if answer:
-            answer_lower = answer.lower()
-            
-            # Explicações específicas para pontos históricos do Recife
-            if "marco zero" in answer_lower:
-                return "O Marco Zero é a praça principal do Recife Antigo, onde a cidade foi fundada em 1537. É um marco histórico que representa o início da colonização portuguesa no Nordeste. A praça tem calçada de pedra portuguesa e vista para o mar, sendo um dos pontos turísticos mais importantes da cidade."
-            elif "praia boa viagem" in answer_lower:
-                return "A Praia de Boa Viagem é a principal praia urbana do Recife, conhecida por sua extensa faixa de areia e calçadão. É uma das praias mais famosas do Nordeste, com coqueiros e vista para o mar. O nome 'Boa Viagem' vem de uma capela construída no local para abençoar os navegantes."
-            elif "casa da cultura" in answer_lower:
-                return "A Casa da Cultura é um importante centro cultural do Recife, localizado no antigo prédio da Casa de Detenção, construído em 1855. Foi transformada em centro cultural em 1976 e hoje abriga lojas de artesanato, onde as antigas celas foram transformadas em espaços comerciais. É um exemplo de preservação do patrimônio histórico."
-            elif "forte das cinco pontas" in answer_lower:
-                return "O Forte das Cinco Pontas é uma fortaleza histórica construída pelos holandeses em 1630. Tem formato pentagonal único e foi construído para defender a cidade. Hoje abriga o Museu da Cidade do Recife e é um importante marco da arquitetura militar colonial."
-            elif "igreja são pedro dos clérigos" in answer_lower:
-                return "A Igreja de São Pedro dos Clérigos é uma igreja barroca do século XVIII, construída entre 1728 e 1782. É conhecida por sua torre alta e fachada barroca elaborada. O interior é ricamente decorado com dourado e representa um dos melhores exemplos da arquitetura religiosa colonial do Recife."
-            elif "rua do bom jesus" in answer_lower:
-                return "A Rua do Bom Jesus é uma das ruas mais antigas do Recife, localizada no bairro do Recife Antigo. É conhecida por suas casas coloridas e arquitetura colonial. A rua tem importância histórica e cultural, sendo um dos principais pontos turísticos da cidade."
-            elif "ponte mauricio de nassau" in answer_lower:
-                return "A Ponte Mauricio de Nassau é uma ponte histórica que conecta o Recife Antigo ao centro da cidade. Foi construída durante o período holandês e é uma das pontes mais antigas do Brasil. É um importante marco da engenharia colonial e da história da cidade."
-            elif "praça do arsenal" in answer_lower:
-                return "A Praça do Arsenal é uma praça histórica localizada no Recife Antigo, próxima ao Marco Zero. É um espaço público importante que preserva a arquitetura colonial e oferece vista para o mar. A praça é cercada por prédios históricos e é um local de encontro e lazer."
-            elif "igreja nossa senhora do carmo" in answer_lower:
-                return "A Igreja de Nossa Senhora do Carmo é uma igreja histórica do Recife, conhecida por sua arquitetura barroca e interior ricamente decorado. É um importante marco religioso e arquitetônico da cidade, representando a tradição católica colonial."
-            elif "palácio da justiça" in answer_lower:
-                return "O Palácio da Justiça é um prédio histórico que abriga o Tribunal de Justiça de Pernambuco. É um exemplo da arquitetura neoclássica e representa a importância da justiça na história da cidade. O prédio é um marco da arquitetura institucional do Recife."
-            
-            # Explicação genérica para outros locais históricos
-            else:
-                return f"Este é um importante ponto histórico do Recife. A cidade tem uma rica história colonial, com influências portuguesas e holandesas. Cada local histórico conta uma parte da história da cidade e do Brasil."
-        
-        # Explicação genérica baseada na pergunta
-        question_lower = question.lower()
-        if "onde" in question_lower:
-            return "Esta pergunta envolve localização geográfica. O sistema analisou elementos visuais que podem indicar características arquitetônicas e geográficas específicas do Recife."
-        elif "histórico" in question_lower or "historia" in question_lower:
-            return "Esta pergunta envolve conhecimento histórico. O sistema examinou características arquitetônicas e visuais para identificar o contexto histórico do local."
-        elif "que" in question_lower:
-            return "Esta é uma pergunta sobre identificação de locais históricos. O sistema analisou as características visuais da imagem para identificar o ponto histórico específico do Recife."
-        elif "como" in question_lower:
-            return "Esta pergunta envolve análise de características arquitetônicas e históricas. O sistema examinou os detalhes visuais para entender melhor o local histórico."
-        else:
-            return "Esta é uma pergunta interessante sobre pontos históricos do Recife. O sistema examinou cuidadosamente os detalhes da imagem para identificar o local histórico específico e fornecer informações educativas sobre sua importância."
     
     def _evaluate_answer(self, answer, question):
         """Avalia a qualidade da resposta"""
@@ -474,10 +274,6 @@ def _ensure_admin_seed():
         pass
     _save_users(users)
 
-# Instanciar o jogo e garantir admin seed
-game = EducationalGame()
-_ensure_admin_seed()
-
 # ---- Auth endpoints ----
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -552,8 +348,9 @@ def logout():
     session.pop('username', None)
     return jsonify({})
 
-# Instanciar o jogo
+# Instanciar o jogo e garantir admin seed
 game = EducationalGame()
+_ensure_admin_seed()
 
 @app.route('/')
 def index():
@@ -651,6 +448,205 @@ def get_leaderboard():
     """Retorna o ranking de jogadores"""
     return jsonify(game.gamification.get_leaderboard())
 
+# --------- PHOTO GAME ENDPOINTS ---------
+
+def _encode_image_as_data_url(image_path: str) -> str:
+    try:
+        if not image_path:
+            return ''
+        # Caminho relativo ao projeto
+        path = image_path if os.path.exists(image_path) else os.path.join(os.getcwd(), image_path)
+        with open(path, 'rb') as f:
+            b = f.read()
+        mime, _ = mimetypes.guess_type(path)
+        mime = mime or 'image/jpeg'
+        b64 = base64.b64encode(b).decode('utf-8')
+        return f"data:{mime};base64,{b64}"
+    except Exception:
+        return ''
+
+@app.route('/api/photo_game/random_photo', methods=['GET'])
+def api_random_photo():
+    try:
+        photo = game.photo_description_game.get_random_photo()
+        if not photo:
+            return jsonify({'success': False, 'error': 'Sem fotos no dataset'}), 404
+        # Anexar image_data e hints (se disponíveis no dataset completo)
+        full = game.photo_description_game.get_photo_by_id(photo['id']) or {}
+        image_data = _encode_image_as_data_url(full.get('image_path') or photo.get('image_path'))
+        photo_out = {
+            **photo,
+            'image_data': image_data,
+            'hints': full.get('hints') or {}
+        }
+        return jsonify({'success': True, 'photo': photo_out})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/photo_game/get_photo/<photo_id>', methods=['GET'])
+def api_get_photo(photo_id):
+    try:
+        full = game.photo_description_game.get_photo_by_id(photo_id)
+        if not full:
+            return jsonify({'success': False, 'error': 'Foto não encontrada'}), 404
+        image_data = _encode_image_as_data_url(full.get('image_path'))
+        return jsonify({'success': True, 'photo': {**full, 'image_data': image_data}})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/photo_game/submit_description', methods=['POST'])
+def api_submit_description():
+    try:
+        data = request.json or {}
+        description = data.get('description', '')
+        photo_id = data.get('photo_id')
+        # Permitir validação sem photo_id (legado), mas ideal setar
+        if photo_id:
+            game.photo_description_game.set_current_photo(photo_id)
+        result = game.photo_description_game.submit_description(description)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/photo_game/mystery_guess', methods=['POST'])
+def api_mystery_guess():
+    """Valida palpite do Modo Mistério usando o mecanismo de NLP do submit_description."""
+    try:
+        start_t = time.time()
+        data = request.json or {}
+        guess = data.get('guess', '')
+        photo_id = data.get('photo_id')
+        player_id = data.get('player_id')
+        hints_used = int(data.get('hints_used', 0) or 0)
+        # Resolver player_id a partir da sessão se não vier no payload
+        if not player_id and 'username' in session:
+            try:
+                users = _load_users()
+                u = users.get(session['username'])
+                if u and u.get('player_id'):
+                    player_id = u.get('player_id')
+            except Exception:
+                pass
+        if not photo_id:
+            return jsonify({'success': False, 'error': 'photo_id é obrigatório'}), 400
+        # posicionar foto atual
+        if not game.photo_description_game.set_current_photo(photo_id):
+            return jsonify({'success': False, 'error': 'Foto não encontrada'}), 404
+        # avaliar via NLP existente
+        # --- Balanced evaluation: token rule + dynamic NLP threshold ---
+        def _normalize(txt: str) -> str:
+            if not isinstance(txt, str):
+                return ''
+            t = txt.lower()
+            t = re.sub(r'[\u0300-\u036f]', '', re.sub(r'[^\w\s]', ' ', t, flags=re.UNICODE))
+            t = re.sub(r'\s+', ' ', t).strip()
+            return t
+        def _strip_generics(t: str) -> str:
+            # remove tipos e artigos/preposições comuns
+            stop = r"\b(da|de|do|das|dos|del|di|du|the|of|and|e)\b"
+            kinds = r"\b(igreja|bas[\w]*lica|palacio|rua|mercado|forte|teatro|concatedral|museu)\b"
+            t = re.sub(stop, ' ', t)
+            t = re.sub(kinds, ' ', t)
+            t = re.sub(r'\s+', ' ', t).strip()
+            return t
+
+        photo = game.photo_description_game.get_photo_by_id(photo_id) or {}
+        name_norm = _strip_generics(_normalize(photo.get('name', '')))
+        guess_norm = _strip_generics(_normalize(guess))
+        name_tokens = [tok for tok in set(name_norm.split(' ')) if len(tok) >= 3]
+        guess_tokens = [tok for tok in set(guess_norm.split(' ')) if len(tok) >= 3]
+        common = set(name_tokens).intersection(set(guess_tokens))
+        # regra de tokens: nomes curtos (<=1 token) precisam 1 comum; compostos precisam >=2
+        tokens_needed = 1 if len(name_tokens) <= 1 else 2
+        token_ok = len(common) >= tokens_needed
+
+        # NLP score
+        eval_result = game.photo_description_game.submit_description(guess)
+        final_score = float(eval_result.get('final_score', 0.0))
+        # Threshold dinâmico baseado em dicas usadas (até 2 dicas reduzem um pouco)
+        base_threshold = 0.45
+        reduce = min(max(hints_used, 0), 2) * 0.03
+        mystery_threshold = max(0.35, base_threshold - reduce)
+        is_correct = token_ok or (final_score >= mystery_threshold)
+        # atualizar gamificação/XP geral
+        points_earned = 0  # será atualizado com o valor real do submit_answer
+        try:
+            response_time = time.time() - start_t
+            if player_id:
+                # garantir que o jogador exista na gamificação
+                player = game.gamification.get_player(player_id)
+                if player is None:
+                    # tentar nome amigável a partir do usuário logado
+                    pname = session['username'] if 'username' in session else 'Jogador'
+                    game.gamification.create_player(player_id, pname)
+                
+                # Log XP antes
+                xp_before = player.experience if player else 0
+                print(f"[MYSTERY MODE DEBUG] XP antes: {xp_before}")
+                
+                # registra tentativa no sistema de gamificação (categoria: mystery_mode)
+                # submit_answer calcula e adiciona XP automaticamente (base + velocidade + streak - penalidade de dicas)
+                result = game.gamification.submit_answer(player_id, bool(is_correct), response_time, "mystery_mode", hints_used)
+                
+                # Usar o XP real calculado pelo submit_answer para exibir no frontend
+                points_earned = result.get('points', 0)
+                
+                # Verificar novas conquistas desbloqueadas
+                new_achievements = result.get('new_achievements', [])
+                
+                # Log XP depois
+                player = game.gamification.get_player(player_id)
+                xp_after = player.experience if player else 0
+                print(f"[MYSTERY MODE DEBUG] XP depois: {xp_after}, XP adicionado (real): {points_earned}, Diferença: {xp_after - xp_before}")
+                
+                # persistir progresso
+                try:
+                    game.gamification.save_to_file('data/players.json')
+                except Exception as e:
+                    print(f"[MYSTERY MODE DEBUG] Erro ao salvar: {e}")
+        except Exception as e:
+            print(f"[MYSTERY MODE DEBUG] Erro geral: {e}")
+            import traceback
+            traceback.print_exc()
+            new_achievements = []  # Inicializar em caso de erro
+        
+        # Inicializar variável de novas conquistas se não foi definida
+        if 'new_achievements' not in locals():
+            new_achievements = []
+        
+        # incluir estatísticas atualizadas do jogador (se houver)
+        updated_stats = None
+        try:
+            if player_id:
+                updated_stats = game.gamification.get_player_stats(player_id)
+        except Exception:
+            updated_stats = None
+        
+        # Preparar resposta com novas conquistas se houver
+        response_data = {
+            'success': True,
+            'is_correct': is_correct,
+            'final_score': final_score,
+            'points_earned': points_earned,
+            'photo_name': photo.get('name', ''),
+            'player_stats': updated_stats
+        }
+        
+        # Adicionar novas conquistas se foram desbloqueadas
+        if new_achievements:
+            response_data['new_achievements'] = [
+                {
+                    'id': ach.id,
+                    'name': ach.name,
+                    'description': ach.description,
+                    'icon': ach.icon
+                } for ach in new_achievements
+            ]
+        
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # Admin: resetar jogadores/ranking em runtime
 @app.route('/api/admin/reset_players', methods=['POST'])
 def admin_reset_players():
@@ -723,6 +719,22 @@ def get_player_stats_by_id(player_id):
         if not player:
             return jsonify({'error': 'Jogador não encontrado'}), 404
         
+        # Obter detalhes das conquistas
+        achievements_details = []
+        for achievement_id in player.achievements:
+            for achievement in game.gamification.achievements:
+                if achievement.id == achievement_id:
+                    achievements_details.append({
+                        'id': achievement.id,
+                        'name': achievement.name,
+                        'description': achievement.description,
+                        'icon': achievement.icon
+                    })
+                    break
+        
+        # Obter atividades recentes
+        recent_activities = game.gamification.get_recent_activities(player_id, limit=5)
+        
         stats = {
             'name': player.name,
             'level': player.level,
@@ -730,7 +742,9 @@ def get_player_stats_by_id(player_id):
             'streak': player.streak,
             'total_correct': player.total_correct,
             'total_attempts': player.total_attempts,
-            'achievements': player.achievements
+            'achievements': player.achievements,  # IDs para compatibilidade
+            'achievements_details': achievements_details,  # Detalhes completos
+            'recent_activities': recent_activities  # Atividades recentes
         }
         
         return jsonify(stats)
@@ -743,63 +757,6 @@ def get_player_stats():
     """Retorna estatísticas do jogador"""
     player_name = request.args.get('player_name', 'Jogador')
     return jsonify(game.gamification.get_player_stats(player_name))
-
-# Rotas para o jogo de descrições de fotos
-@app.route('/api/photo_game/random_photo', methods=['GET'])
-def get_random_photo():
-    """Retorna uma foto aleatória para o jogo de descrições"""
-    try:
-        photo = game.photo_description_game.get_random_photo()
-        if photo:
-            # Ler imagem e converter para base64
-            import base64
-            image_path = photo['image_path']
-            
-            try:
-                with open(image_path, 'rb') as img_file:
-                    img_data = img_file.read()
-                    img_base64 = base64.b64encode(img_data).decode('utf-8')
-                    photo['image_data'] = f"data:image/jpeg;base64,{img_base64}"
-            except Exception as e:
-                print(f"Erro ao carregar imagem: {e}")
-                photo['image_data'] = None
-            
-            return jsonify({
-                'success': True,
-                'photo': photo
-            })
-        else:
-            return jsonify({'error': 'Nenhuma foto disponível'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/photo_game/get_photo/<photo_id>', methods=['GET'])
-def get_photo_by_id(photo_id):
-    """Retorna informações completas de uma foto específica"""
-    try:
-        photo = game.photo_description_game.get_photo_by_id(photo_id)
-        if photo:
-            # Ler imagem e converter para base64
-            import base64
-            image_path = photo['image_path']
-            
-            try:
-                with open(image_path, 'rb') as img_file:
-                    img_data = img_file.read()
-                    img_base64 = base64.b64encode(img_data).decode('utf-8')
-                    photo['image_data'] = f"data:image/jpeg;base64,{img_base64}"
-            except Exception as e:
-                print(f"Erro ao carregar imagem: {e}")
-                photo['image_data'] = None
-            
-            return jsonify({
-                'success': True,
-                'photo': photo
-            })
-        else:
-            return jsonify({'error': 'Foto não encontrada'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/compare_visual_similarity', methods=['POST'])
 def compare_visual_similarity():
@@ -885,62 +842,6 @@ def compare_visual_similarity():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/photo_game/submit_description', methods=['POST'])
-def submit_description():
-    """Submete descrição do usuário para avaliação e adiciona pontos ao XP"""
-    try:
-        data = request.json
-        description = data.get('description', '')
-        photo_id = data.get('photo_id', None)  # ID da foto (modo desafio)
-        player_id = data.get('player_id', 'default_player')
-        
-        if not description.strip():
-            return jsonify({'error': 'Descrição não pode estar vazia'}), 400
-        
-        # Se houver photo_id, definir como foto atual
-        if photo_id:
-            game.photo_description_game.set_current_photo(photo_id)
-        
-        result = game.photo_description_game.submit_description(description)
-        
-        if 'error' in result:
-            return jsonify({'error': result['error']}), 400
-        
-        # Adicionar pontos ao XP do jogador
-        points_earned = result.get('points_earned', 0)
-        if points_earned > 0 and player_id in game.gamification.players:
-            player = game.gamification.players[player_id]
-            player.experience += points_earned
-            player.total_attempts += 1
-            
-            # Se passou no threshold, considerar acerto
-            is_correct = result.get('is_correct', False)
-            if is_correct:
-                player.total_correct += 1
-                player.streak += 1
-            else:
-                player.streak = 0
-            
-            # Verificar level up
-            new_level = game.gamification._calculate_level(player.experience)
-            level_up = new_level > player.level
-            if level_up:
-                player.level = new_level
-                result['level_up'] = level_up
-                result['new_level'] = player.level
-            
-            result['total_xp'] = player.experience
-            # Persistir alteração
-            try:
-                game.gamification.save_to_file('data/players.json')
-            except Exception:
-                pass
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/api/photo_game/stats', methods=['GET'])
 def get_photo_game_stats():
     """Retorna estatísticas do jogo de descrições"""
@@ -969,6 +870,12 @@ def reset_photo_game():
 def serve_static(filename):
     """Serve arquivos estáticos incluindo imagens"""
     return app.send_static_file(filename)
+
+# Rota para Chrome DevTools (evitar 404 nos logs)
+@app.route('/.well-known/appspecific/com.chrome.devtools.json', methods=['GET'])
+def chrome_devtools():
+    """Endpoint para Chrome DevTools - retorna vazio para evitar 404"""
+    return '', 204  # 204 No Content
 
 if __name__ == '__main__':
     print("Iniciando servidor do Jogo Educacional de Pontos Historicos do Recife...")
