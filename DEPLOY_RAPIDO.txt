@@ -1,0 +1,87 @@
+╔═══════════════════════════════════════════════════════════════╗
+║  🚀 DEPLOY RÁPIDO NA VM - PASSO A PASSO                       ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📋 PRÉ-REQUISITOS
+─────────────────────────────────────────────────────────────────
+1. Ubuntu/Debian
+2. Python 3.8+
+3. Node.js + PM2
+4. Git
+
+╔═══════════════════════════════════════════════════════════════╗
+║  COMANDOS PARA EXECUTAR NA VM                                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+# 1️⃣ ATUALIZAR SISTEMA
+sudo apt update && sudo apt upgrade -y
+
+# 2️⃣ INSTALAR PYTHON
+sudo apt install -y python3 python3-pip python3-venv git
+
+# 3️⃣ INSTALAR NODE.JS
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# 4️⃣ INSTALAR PM2
+sudo npm install -g pm2
+
+# 5️⃣ LIBERAR PORTA
+sudo ufw allow 5000/tcp
+sudo ufw reload
+
+# 6️⃣ CLONAR PROJETO
+cd ~
+git clone https://github.com/romullobastos/pontosTuristicosRecife.git
+cd pontosTuristicosRecife
+
+# 7️⃣ CRIAR AMBIENTE VIRTUAL
+python3 -m venv venv
+source venv/bin/activate
+
+# 8️⃣ INSTALAR DEPENDÊNCIAS
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install gunicorn
+
+# 9️⃣ CONFIGURAR NLTK
+python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
+
+# 🔟 EXECUTAR DEPLOY
+chmod +x deploy.sh
+./deploy.sh
+
+╔═══════════════════════════════════════════════════════════════╗
+║  ACESSAR APLICAÇÃO                                            ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Local:  http://localhost:5000
+Remoto: http://IP-DA-VM:5000
+
+Exemplo: http://192.168.1.100:5000
+
+╔═══════════════════════════════════════════════════════════════╗
+║  COMANDOS PM2 ÚTEIS                                           ║
+╚═══════════════════════════════════════════════════════════════╝
+
+pm2 status              # Ver status
+pm2 logs recife-ia      # Ver logs
+pm2 restart recife-ia   # Reiniciar
+pm2 stop recife-ia      # Parar
+pm2 delete recife-ia    # Remover
+
+╔═══════════════════════════════════════════════════════════════╗
+║  ATUALIZAR APLICAÇÃO                                          ║
+╚═══════════════════════════════════════════════════════════════╝
+
+cd ~/pontosTuristicosRecife
+source venv/bin/activate
+git pull origin main
+pip install -r requirements.txt
+pm2 restart recife-ia
+
+╔═══════════════════════════════════════════════════════════════╗
+║  PORTA DO PROJETO: 5000                                       ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎉 Pronto! Aplicação rodando com PM2!
