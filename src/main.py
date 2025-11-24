@@ -4,10 +4,20 @@ Jogo Educacional com Chatbot Multimodal
 Desenvolvido do zero sem modelos pré-treinados
 """
 
+import sys
+import os
+
+# Adicionar diretório raiz ao path para imports funcionarem
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+sys.path.append(os.path.join(ROOT_DIR, 'training'))
+
+# Mudar para diretório raiz para paths relativos funcionarem
+os.chdir(ROOT_DIR)
+
 import torch
 from PIL import Image
 import json
-import os
 import time
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,8 +30,6 @@ import re
 # Importar nossos módulos
 from game.gamification import GamificationSystem
 from game.photo_description_game import PhotoDescriptionGame
-import sys
-sys.path.append('training')
 from improved_recife_trainer import ImprovedRecifeHistoricTrainer
 
 class EducationalGame:
@@ -214,7 +222,10 @@ class EducationalGame:
         return min(score, 5)  # Máximo de 5 pontos
 
 # Configuração da aplicação Flask
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, 
+            template_folder=os.path.join(ROOT_DIR, 'templates'),
+            static_folder=ROOT_DIR, 
+            static_url_path='')
 app.secret_key = 'dev-secret-key'  # apenas para desenvolvimento
 
 # ---- Auth storage helpers ----
