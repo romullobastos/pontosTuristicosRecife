@@ -60,5 +60,108 @@
         "streak": 2
       }
     ]
+  },
+  "be7b9be7-3b80-4c1c-8a15-462bd1dd1b98": {
+    "id": "be7b9be7-3b80-4c1c-8a15-462bd1dd1b98",
+    "name": "afonso",
+    "level": 1,
+    "experience": 0,
+    "streak": 0,
+    "total_correct": 0,
+    "total_attempts": 0,
+    "achievements": [],
+    "daily_challenges": {},
+    "historic_locations_identified": 0,
+    "fastest_time": 999.0,
+    "recent_activities": []
+  },
+  "46846a29-343e-451d-a18f-523dbba14e6a": {
+    "id": "46846a29-343e-451d-a18f-523dbba14e6a",
+    "name": "afonso",
+    "level": 1,
+    "experience": 0,
+    "streak": 0,
+    "total_correct": 0,
+    "total_attempts": 0,
+    "achievements": [],
+    "daily_challenges": {},
+    "historic_locations_identified": 0,
+    "fastest_time": 999.0,
+    "recent_activities": []
+  },
+  "54ee5e7c-36c2-478f-8722-64b03e65302d": {
+    "id": "54ee5e7c-36c2-478f-8722-64b03e65302d",
+    "name": "codebyafonso",
+    "level": 3,
+    "experience": 332,
+    "streak": 1,
+    "total_correct": 2,
+    "total_attempts": 5,
+    "achievements": [
+      "first_image",
+      "speed_demon"
+    ],
+    "daily_challenges": {
+      "daily_images": 5,
+      "daily_accuracy": 2,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
+    "historic_locations_identified": 2,
+    "fastest_time": 0.0039975643157958984,
+    "recent_activities": [
+      {
+        "timestamp": "2025-11-24T15:13:28.767016",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 16,
+        "level_up": false,
+        "streak": 1
+      },
+      {
+        "timestamp": "2025-11-24T15:12:30.813524",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": false,
+        "points": 0,
+        "level_up": false,
+        "streak": 0
+      },
+      {
+        "timestamp": "2025-11-24T15:11:36.133382",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 16,
+        "level_up": false,
+        "streak": 1
+      },
+      {
+        "timestamp": "2025-11-24T15:11:15.528186",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": false,
+        "points": 0,
+        "level_up": false,
+        "streak": 0
+      },
+      {
+        "timestamp": "2025-11-24T15:10:46.229525",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": false,
+        "points": 0,
+        "level_up": false,
+        "streak": 0
+      }
+    ]
   }
 }

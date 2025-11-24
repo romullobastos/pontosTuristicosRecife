@@ -1,7 +1,7 @@
 {
   "admin": {
     "email": "email@email.com",
-    "password_hash": "scrypt:32768:8:1$ICQGmjFzB2RGDy8h$166d5280670515c94b59555af1424b4016127cfb05b2019159cf30f51866baca6aad60939721463a951f48abbdb883988e29d521405cecd9efff4bb57ed07a5b",
+    "password_hash": "scrypt:32768:8:1$A8JXOPW4bZYz1suy$3fdb6a44d55e0e91b2233833115ddd5cc197d9d9deaabb034eac55631d253dcd11fa85baa71809097371277d6b52c15192aa1766122d616093d027dde87d1ca7",
     "is_admin": true,
     "player_id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
     "created_at": "2025-10-31T19:24:57.642487",
@@ -27,6 +27,16 @@
     "player_ids": [
       "246f488d-eaec-46ad-a696-149cc40cb47d",
       "dc065514-9d03-45e5-ab7d-bd52e208459c"
+    ]
+  },
+  "afonso": {
+    "email": "afonsoesteva04@gmail.com",
+    "password_hash": "scrypt:32768:8:1$V0yuqULZjaVwB6Gz$1e7eadf1cdbec0da18a9acb1994b40587ef67faa0fc1af6714b761fc4cb2cba249e163a54123617adaa840fa66d7f720fbca15280543deb86fc91bb6f6ae821b",
+    "is_admin": false,
+    "player_id": "46846a29-343e-451d-a18f-523dbba14e6a",
+    "created_at": "2025-11-24T18:06:27.234263",
+    "player_ids": [
+      "54ee5e7c-36c2-478f-8722-64b03e65302d"
     ]
   }
 }
