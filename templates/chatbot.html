@@ -2,13 +2,20 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>🤖 Chatbot Educacional - Recife Histórico</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            overflow-x: hidden;
         }
 
         body {
@@ -180,11 +187,13 @@
         .chat-messages {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
             background: #f8f9ff;
+            -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
         }
 
         .message {
@@ -407,10 +416,156 @@
             .chat-container {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
+                height: auto;
+                min-height: 90vh;
             }
 
             .sidebar, .activity-sidebar {
-                max-height: 200px;
+                display: none; /* Esconder sidebars em tablets */
+            }
+
+            .chat-area {
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            .back-home {
+                top: 10px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .chat-container {
+                max-width: 100%;
+                height: 100vh;
+                gap: 0;
+                border-radius: 0;
+            }
+
+            .sidebar, .activity-sidebar {
+                display: none;
+            }
+
+            .chat-area {
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-header h2 {
+                font-size: 1.1em;
+            }
+
+            .chat-status {
+                font-size: 0.8em;
+            }
+
+            .chat-messages {
+                padding: 15px 10px;
+            }
+
+            .message {
+                max-width: 85%;
+                padding: 12px 15px;
+                font-size: 0.95em;
+            }
+
+            .chat-input-area {
+                padding: 10px;
+            }
+
+            .input-container {
+                gap: 8px;
+            }
+
+            .image-upload-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3em;
+            }
+
+            #chatInput {
+                padding: 12px 15px;
+                font-size: 16px; /* Evita zoom no iOS */
+            }
+
+            #sendBtn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3em;
+            }
+
+            .quick-buttons {
+                gap: 8px;
+            }
+
+            .quick-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .image-preview img {
+                max-height: 150px;
+            }
+
+            /* Login mobile */
+            .player-setup {
+                grid-template-columns: 1fr;
+            }
+
+            .player-hero {
+                padding: 30px 20px;
+                align-items: center;
+                text-align: center;
+            }
+
+            .player-hero h1 {
+                font-size: 24px;
+            }
+
+            .player-form {
+                padding: 30px 20px;
+            }
+
+            .login-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Mobile pequeno */
+        @media (max-width: 480px) {
+            .chat-header h2 {
+                font-size: 1em;
+            }
+
+            .message {
+                max-width: 90%;
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+
+            .image-upload-btn, #sendBtn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            #chatInput {
+                padding: 10px 12px;
+                font-size: 16px;
             }
         }
 
