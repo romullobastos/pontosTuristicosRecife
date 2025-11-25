@@ -92,14 +92,15 @@
   "54ee5e7c-36c2-478f-8722-64b03e65302d": {
     "id": "54ee5e7c-36c2-478f-8722-64b03e65302d",
     "name": "codebyafonso",
-    "level": 3,
-    "experience": 332,
-    "streak": 1,
-    "total_correct": 2,
-    "total_attempts": 5,
+    "level": 6,
+    "experience": 2565,
+    "streak": 7,
+    "total_correct": 7,
+    "total_attempts": 7,
     "achievements": [
       "first_image",
-      "speed_demon"
+      "speed_demon",
+      "perfect_streak"
     ],
     "daily_challenges": {
       "daily_images": 5,
