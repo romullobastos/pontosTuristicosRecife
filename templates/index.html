@@ -7,722 +7,456 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <title>Recife Turístico - App</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
             color: #fff;
-            position: relative;
         }
 
-        /* Animated background */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: 
                 radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(234, 102, 182, 0.1) 0%, transparent 40%);
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 30px 20px;
-            position: relative;
-            z-index: 1;
-        }
+        .dashboard { display: flex; flex-direction: column; height: 100vh; position: relative; z-index: 1; }
 
         /* Header */
         .header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.6s ease;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .header-brand { display: flex; align-items: center; gap: 12px; }
+        .header-brand .logo {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
         }
-
-        .header-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.85em;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2.8em;
-            margin-bottom: 12px;
+        .header-brand h1 {
+            font-size: 1.4em;
             background: linear-gradient(135deg, #fff 0%, #a8b4ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.8;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .header .actions {
-            margin-top: 15px;
-            display: none;
-        }
-
-        .logout-btn {
+        .header-actions { display: flex; gap: 10px; }
+        .header-btn {
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            padding: 8px 16px;
+            border-radius: 10px;
+            padding: 10px 18px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 14px;
         }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .header-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .header-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
         }
-
-        .reset-btn {
-            background: rgba(255, 100, 100, 0.2);
+        .header-btn.primary:hover { box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .header-btn.danger {
+            background: rgba(255, 100, 100, 0.15);
+            border-color: rgba(255, 100, 100, 0.3);
             color: #ff9999;
-            border: 1px solid rgba(255, 100, 100, 0.3);
-            border-radius: 50px;
-            padding: 8px 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: 10px;
             display: none;
-            transition: all 0.3s ease;
         }
 
-        .reset-btn:hover {
-            background: rgba(255, 100, 100, 0.3);
-        }
-
-        /* Glass Card */
-        .glass-card {
+        .user-greeting {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            padding: 10px 16px;
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .user-greeting strong {
+            color: #a8b4ff;
+        }
+
+        /* Content */
+        .content { flex: 1; overflow-y: auto; padding: 30px; }
+        .content::-webkit-scrollbar { width: 6px; }
+        .content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        .content::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.4); border-radius: 10px; }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 30px;
             margin-bottom: 25px;
-            animation: fadeInUp 0.6s ease;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeInUp 0.5s ease;
         }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .welcome-text h2 { font-size: 1.8em; margin-bottom: 8px; }
+        .welcome-text p { opacity: 0.8; font-size: 1.05em; }
 
-        .glass-card h2 {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .card-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .card-header h3 { font-size: 1.2em; }
+
+        /* Achievements */
+        .achievements-list { min-height: 300px; max-height: 450px; overflow-y: auto; }
+        .achievement-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 14px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 10px;
         }
+        .achievement-icon { font-size: 1.8em; }
+        .achievement-info { flex: 1; }
+        .achievement-name { font-weight: 600; margin-bottom: 2px; }
+        .achievement-desc { font-size: 0.85em; opacity: 0.7; }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.6;
+        }
+        .empty-state .icon { font-size: 3em; margin-bottom: 15px; }
 
-        /* Resume Bar */
-        .resume-bar {
-            display: none;
-            background: rgba(102, 126, 234, 0.15);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            padding: 16px 20px;
-            border-radius: 16px;
-            margin-bottom: 25px;
+        /* Leaderboard */
+        .leaderboard-list { min-height: 300px; max-height: 450px; overflow-y: auto; padding-right: 5px; }
+        .leaderboard-list::-webkit-scrollbar { width: 5px; }
+        .leaderboard-list::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.4); border-radius: 10px; }
+        .leaderboard-item {
+            display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            animation: fadeInUp 0.5s ease;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
         }
-
-        .resume-bar strong {
+        .leaderboard-item:hover { background: rgba(255, 255, 255, 0.08); transform: translateX(5px); }
+        .rank {
+            font-size: 1.3em; font-weight: 700; min-width: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); -webkit-background-clip: text; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); -webkit-background-clip: text; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #daa06d); -webkit-background-clip: text; }
+        .player-info { flex-grow: 1; margin-left: 12px; }
+        .player-name { font-weight: 600; margin-bottom: 3px; }
+        .player-level { color: rgba(255, 255, 255, 0.6); font-size: 0.85em; }
+        .use-btn {
+            background: rgba(102, 126, 234, 0.2);
             color: #a8b4ff;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .use-btn:hover { background: rgba(102, 126, 234, 0.35); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .resume-actions {
-            display: flex;
-            gap: 10px;
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-header h3 { font-size: 1.3em; }
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+        .modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .input-group input::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.12);
         }
 
-        /* Buttons */
+        .error-msg {
+            margin: 10px 0;
+            color: #ff9999;
+            background: rgba(255, 100, 100, 0.15);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            display: none;
+            text-align: center;
+        }
+
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             padding: 14px 28px;
-            border-radius: 50px;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
         }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
 
-        .btn:hover::before {
-            left: 100%;
+        .hidden { display: none !important; }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .welcome-banner { flex-direction: column; text-align: center; gap: 20px; }
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        @media (max-width: 600px) {
+            .header { padding: 12px 16px; gap: 10px; }
+            .header-brand { display: none; }
+            .header-actions { 
+                width: 100%; 
+                align-items: center;
+            }
+            .user-greeting { 
+                padding: 8px 12px;
+                font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 140px;
+                margin-right: auto;
+            }
+            .header-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            .header-btn.primary {
+                padding: 8px 14px;
+            }
+            .header-btn.primary span {
+                display: none;
+            }
+            .header-btn.primary::before {
+                content: '+';
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .content { padding: 20px 16px; }
+            .welcome-banner { padding: 20px; }
+            .welcome-text h2 { font-size: 1.4em; }
+            .glass-card { padding: 20px; }
         }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Input */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            font-size: 16px;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
-        }
-
-        .error-msg {
-            margin: 10px 0 15px;
-            color: #ff9999;
-            background: rgba(255, 100, 100, 0.15);
-            border: 1px solid rgba(255, 100, 100, 0.3);
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            display: none;
-            text-align: center;
-        }
-
-        /* Player Setup */
-        .player-setup {
-            text-align: center;
-            position: relative;
-            animation-delay: 0.1s;
-        }
-
-        .icon-action {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-        }
-
-        .icon-action:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        /* Leaderboard */
-        .leaderboard {
-            animation-delay: 0.2s;
-        }
-
-        .leaderboard-list {
-            max-height: 320px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .leaderboard-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .leaderboard-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .leaderboard-list::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.4);
-            border-radius: 10px;
-        }
-
-        .leaderboard-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.6);
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 14px;
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .leaderboard-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-        }
-
-        .leaderboard-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .rank {
-            font-size: 1.4em;
-            font-weight: 700;
-            min-width: 50px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); -webkit-background-clip: text; background-clip: text; }
-        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); -webkit-background-clip: text; background-clip: text; }
-        .rank-3 { background: linear-gradient(135deg, #cd7f32, #daa06d); -webkit-background-clip: text; background-clip: text; }
-
-        .player-info {
-            flex-grow: 1;
-            margin-left: 15px;
-        }
-
-        .player-name {
-            font-weight: 600;
-            font-size: 1.05em;
-            margin-bottom: 4px;
-        }
-
-        .player-level {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9em;
-        }
-
-        .use-btn {
-            background: rgba(102, 126, 234, 0.2);
-            color: #a8b4ff;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50px;
-            padding: 8px 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.3s ease;
-        }
-
-        .use-btn:hover {
-            background: rgba(102, 126, 234, 0.3);
-        }
-
-        /* Back Button */
-        .back-index {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            padding: 10px 18px;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .back-index:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-</style>
+    </style>
 </head>
 <body>
-    <div class="container">
-        <button class="back-index" id="backIndexBtn" onclick="backToHome()" style="display:none;">⟵ Voltar</button>
-        
-        <div class="header">
-            <div class="header-badge">🏛️ Explore o Recife Histórico</div>
-            <h1>Recife Turístico</h1>
-            <p>Descubra os pontos históricos do Recife através de desafios interativos e ganhe pontos!</p>
-            <div class="actions" id="headerActions">
-                <button id="resetRankingBtn" class="reset-btn" onclick="resetRanking()">Resetar Ranking</button>
-                <button class="logout-btn" onclick="logoutUser()">Sair</button>
+    <div class="dashboard">
+        <header class="header">
+            <div class="header-brand">
+                <div class="logo">🏛️</div>
+                <h1>Recife Turístico</h1>
             </div>
-        </div>
-
-        <div id="resumeBar" class="resume-bar">
-            <div>Bem-vindo de volta, <strong id="resumeName"></strong>!</div>
-            <div class="resume-actions">
-                <button class="btn" onclick="continueAsSaved()">Continuar</button>
-                <button class="btn btn-secondary" onclick="switchPlayer()">Trocar</button>
+            <div class="header-actions">
+                <span id="userGreeting" class="user-greeting" style="display:none;">Olá, <strong id="userName"></strong></span>
+                <button class="header-btn primary" onclick="openModal()"><span>+ Novo Jogador</span></button>
+                <button id="resetRankingBtn" class="header-btn danger" onclick="resetRanking()">Resetar</button>
+                <button id="logoutBtn" class="header-btn" onclick="logoutUser()" style="display:none;">Sair</button>
             </div>
-        </div>
+        </header>
 
-        <!-- Setup do Jogador -->
-        <div class="glass-card player-setup" id="playerSetup">
-            <button class="icon-action" title="Abrir análise/descrição aqui" onclick="openAnalysis()">⚙️</button>
-            <h2>👤 Criar Jogador</h2>
+        <main class="content">
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h2>Desvende os segredos do Recife</h2>
+                    <p>Participe de um desafio fotográfico, identifique locais históricos e suba no ranking.</p>
+                </div>
+                <div>
+                    <button class="btn" onclick="startGame()">Começar Agora</button>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Card Conquistas -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">🏆</div>
+                        <h3>Conquistas Recentes</h3>
+                    </div>
+                    <div id="achievementsList" class="achievements-list">
+                        <div class="empty-state">
+                            <div class="icon">🏆</div>
+                            <p>Suas medalhas e troféus aparecerão aqui. Comece a jogar para colecioná-los!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Ranking -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <h3>Ranking</h3>
+                    </div>
+                    <div id="leaderboardList" class="leaderboard-list">
+                        <p style="opacity: 0.6; text-align: center; padding: 20px;">Carregando...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Criar Jogador -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>👤 Criar Jogador</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
             <div class="input-group">
                 <label for="playerName">Nome do Jogador</label>
                 <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
             </div>
             <div id="nameError" class="error-msg"></div>
-            <button class="btn" onclick="createPlayer()">🎮 Começar Jogo</button>
-        </div>
-
-        <!-- Ranking -->
-        <div class="glass-card leaderboard" id="homeLeaderboard">
-            <h2>🏆 Ranking</h2>
-            <div id="leaderboardList" class="leaderboard-list">
-                <p style="opacity: 0.6; text-align: center; padding: 20px;">Carregando ranking...</p>
-            </div>
-        </div>
-
-        <!-- Interface de Análise de Imagens -->
-        <div class="hidden" id="gameInterface">
-            <div id="imageAnalysis">
-                <div class="game-grid">
-                    <!-- Upload de Imagem -->
-                    <div class="glass-card">
-                        <h2>📸 Enviar Imagem</h2>
-                        <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
-                            <div class="upload-icon">📁</div>
-                            <p>Clique ou arraste uma imagem</p>
-                            <span>JPG, PNG, GIF</span>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                            <img id="imagePreview" class="image-preview" style="display: none;">
-                        </div>
-                        <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled style="width: 100%; margin-top: 20px;">🔍 Analisar Imagem</button>
-                    </div>
-
-                    <!-- Resposta do Sistema -->
-                    <div class="glass-card">
-                        <h2>🤖 Resposta</h2>
-                        <div class="loading" id="loading">
-                            <div class="spinner"></div>
-                            <p>Analisando imagem...</p>
-                        </div>
-                        <div id="responseArea" style="display: none;"></div>
-                        <div class="info-chips">
-                            <p style="opacity: 0.7; margin-bottom: 12px; font-size: 0.9em;">Locais reconhecidos:</p>
-                            <div class="chip-list">
-                                <span class="chip">Marco Zero</span>
-                                <span class="chip">Casa da Cultura</span>
-                                <span class="chip">Forte das Cinco Pontas</span>
-                                <span class="chip">Igreja Madre de Deus</span>
-                                <span class="chip">Mercado São José</span>
-                                <span class="chip">Teatro Santa Isabel</span>
-                                <span class="chip">Rua do Bom Jesus</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <button class="btn" onclick="createPlayer()">🎮 Criar e Jogar</button>
         </div>
     </div>
 
-    <style>
-        /* Game Interface Styles */
-        .game-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        .image-upload {
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .image-upload:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .image-upload.dragover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.15);
-        }
-
-        .upload-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-
-        .image-upload p {
-            font-size: 1.1em;
-            margin-bottom: 8px;
-        }
-
-        .image-upload span {
-            font-size: 0.85em;
-            opacity: 0.6;
-        }
-
-        .image-preview {
-            max-width: 100%;
-            max-height: 250px;
-            border-radius: 12px;
-            margin-top: 15px;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .response-item {
-            margin-bottom: 16px;
-            padding: 16px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid #667eea;
-        }
-
-        .response-label {
-            font-weight: 600;
-            color: #a8b4ff;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
-
-        .chip-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .chip {
-            background: rgba(102, 126, 234, 0.2);
-            color: #a8b4ff;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50px;
-            padding: 6px 12px;
-            font-size: 0.8em;
-        }
-
-        .info-chips {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 15px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .header p {
-                font-size: 0.95em;
-            }
-
-            .glass-card {
-                padding: 20px;
-            }
-
-            .game-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .btn {
-                width: 100%;
-                padding: 14px 20px;
-            }
-
-            .resume-bar {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .resume-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .back-index {
-                top: 10px;
-                left: 10px;
-                padding: 8px 14px;
-                font-size: 14px;
-            }
-
-            .leaderboard-item {
-                padding: 14px 12px;
-            }
-
-            .rank {
-                font-size: 1.2em;
-                min-width: 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.7em;
-            }
-
-            .header-badge {
-                font-size: 0.8em;
-                padding: 6px 12px;
-            }
-
-            .glass-card h2 {
-                font-size: 1.2em;
-            }
-
-            .image-upload {
-                padding: 30px 15px;
-            }
-
-            .upload-icon {
-                font-size: 2.5em;
-            }
-        }
-    </style>
-
     <script>
-        let currentImageData = null;
-        let currentPhoto = null;
+        const ACHIEVEMENTS_MAP = {
+            'first_image': { icon: '📸', name: 'Primeira Foto', desc: 'Enviou sua primeira imagem' },
+            'detective_novice': { icon: '🔍', name: 'Detetive Novato', desc: 'Identificou 5 locais' },
+            'perfect_streak': { icon: '🔥', name: 'Sequência Perfeita', desc: 'Acertou 5 seguidos' },
+            'history_expert': { icon: '📚', name: 'Expert em História', desc: 'Identificou 20 locais' },
+            'speed_demon': { icon: '⚡', name: 'Velocista', desc: 'Resposta super rápida' }
+        };
 
-        try { window.currentPlayerId = window.currentPlayerId || localStorage.getItem('player_id') || null; } catch (e) { window.currentPlayerId = null; }
+        try { window.currentPlayerId = localStorage.getItem('player_id') || null; } catch (e) {}
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Mostrar nome do jogador salvo
+            const savedName = localStorage.getItem('player_name');
+            if (savedName) {
+                document.getElementById('userGreeting').style.display = 'block';
+                document.getElementById('userName').textContent = savedName;
+            }
+
             try {
-                const savedId = localStorage.getItem('player_id');
-                const savedName = localStorage.getItem('player_name');
-                if (savedId && savedName) {
-                    const bar = document.getElementById('resumeBar');
-                    const nm = document.getElementById('resumeName');
-                    if (bar) bar.style.display = 'flex';
-                    if (nm) nm.textContent = savedName;
+                const me = await fetch('/me');
+                if (me.ok) {
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    const data = await me.json();
+                    if (data.is_admin) document.getElementById('resetRankingBtn').style.display = 'block';
                 }
-                try {
-                    const me = await fetch('/me');
-                    if (me.ok) {
-                        const data = await me.json();
-                        const actions = document.getElementById('headerActions');
-                        const resetBtn = document.getElementById('resetRankingBtn');
-                        if (actions) actions.style.display = 'block';
-                        if (resetBtn) resetBtn.style.display = data.is_admin ? 'inline-block' : 'none';
-                    }
-                } catch (e) {}
             } catch (e) {}
             loadHomeLeaderboard();
+            loadAchievements();
         });
+
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('playerName').focus();
+        }
+
+        function closeModal(e) {
+            if (!e || e.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        }
 
         async function logoutUser() {
             try { await fetch('/logout', { method:'POST' }); } catch (e) {}
@@ -733,59 +467,49 @@
         async function resetRanking() {
             const btn = document.getElementById('resetRankingBtn');
             try {
-                if (btn) { btn.disabled = true; btn.textContent = 'Limpando...'; }
+                btn.disabled = true; btn.textContent = '...';
                 await fetch('/api/admin/reset_players', { method: 'POST' });
                 await fetch('/api/admin/reload_players', { method: 'POST' });
                 await loadHomeLeaderboard();
+                await loadAchievements();
             } catch (e) {} finally {
-                if (btn) { btn.disabled = false; btn.textContent = 'Resetar Ranking'; }
+                btn.disabled = false; btn.textContent = 'Resetar';
             }
         }
 
-        function continueAsSaved() {
-            try {
-                const savedId = localStorage.getItem('player_id');
-                if (savedId) window.location.href = '/chatbot';
-            } catch (e) {}
-        }
-
-        function switchPlayer() {
-            try { localStorage.removeItem('player_id'); localStorage.removeItem('player_name'); } catch (e) {}
-            const bar = document.getElementById('resumeBar');
-            if (bar) bar.style.display = 'none';
-            const input = document.getElementById('playerName');
-            if (input) input.focus();
+        function startGame() {
+            const savedId = localStorage.getItem('player_id');
+            if (savedId) {
+                window.location.href = '/chatbot';
+            } else {
+                openModal();
+            }
         }
 
         async function selectMyPlayer(id, name) {
-            try {
-                if (!id) return;
-                localStorage.setItem('player_id', String(id));
-                localStorage.setItem('player_name', name || 'Jogador');
-                window.location.href = '/chatbot';
-            } catch (e) {}
+            if (!id) return;
+            localStorage.setItem('player_id', String(id));
+            localStorage.setItem('player_name', name || 'Jogador');
+            window.location.href = '/chatbot';
         }
 
         async function createPlayer() {
             const name = document.getElementById('playerName').value.trim();
             const nameError = document.getElementById('nameError');
-            if (nameError) { nameError.style.display = 'none'; nameError.textContent = ''; }
+            nameError.style.display = 'none';
             
-            if (!name) {
-                if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
-                return;
-            }
-            if (name.length < 3) {
-                if (nameError) { nameError.textContent = 'O nome deve ter pelo menos 3 caracteres.'; nameError.style.display = 'block'; }
+            if (!name || name.length < 3) {
+                nameError.textContent = 'Nome deve ter pelo menos 3 caracteres.';
+                nameError.style.display = 'block';
                 return;
             }
 
             try {
                 const lb = await fetch('/api/leaderboard');
                 const list = await lb.json();
-                const taken = Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase());
-                if (taken) {
-                    if (nameError) { nameError.textContent = 'Este nome já está em uso. Escolha outro.'; nameError.style.display = 'block'; }
+                if (Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase())) {
+                    nameError.textContent = 'Este nome já está em uso.';
+                    nameError.style.display = 'block';
                     return;
                 }
             } catch (e) {}
@@ -794,160 +518,57 @@
                 const response = await fetch('/api/create_player', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name })
+                    body: JSON.stringify({ name })
                 });
                 const result = await response.json();
                 
                 if (result.success) {
-                    window.currentPlayerId = result.player_id;
-                    try {
-                        localStorage.setItem('player_id', result.player_id);
-                        localStorage.setItem('player_name', name);
-                    } catch (e) {}
+                    localStorage.setItem('player_id', result.player_id);
+                    localStorage.setItem('player_name', name);
                     window.location.href = '/chatbot';
                 } else {
-                    if (nameError) { nameError.textContent = 'Erro: ' + (result.error || 'desconhecido'); nameError.style.display = 'block'; }
+                    nameError.textContent = result.error || 'Erro ao criar';
+                    nameError.style.display = 'block';
                 }
             } catch (error) {
-                if (nameError) { nameError.textContent = 'Erro de conexão: ' + error.message; nameError.style.display = 'block'; }
+                nameError.textContent = 'Erro de conexão';
+                nameError.style.display = 'block';
             }
         }
 
-        async function openAnalysis() {
-            try {
-                if (!window.currentPlayerId) {
-                    const nameInput = document.getElementById('playerName');
-                    const nameError = document.getElementById('nameError');
-                    const name = (nameInput && nameInput.value.trim()) || '';
-                    if (!name) {
-                        if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
-                        return;
-                    }
-                    try {
-                        const lb = await fetch('/api/leaderboard');
-                        const list = await lb.json();
-                        const taken = Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase());
-                        if (taken) {
-                            if (nameError) { nameError.textContent = 'Este nome já está em uso.'; nameError.style.display = 'block'; }
-                            return;
-                        }
-                    } catch (e) {}
-                    const resp = await fetch('/api/create_player', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name })
-                    });
-                    const result = await resp.json();
-                    if (!result.success) {
-                        alert('Erro ao criar jogador: ' + (result.error || 'desconhecido'));
-                        return;
-                    }
-                    window.currentPlayerId = result.player_id;
-                    try { localStorage.setItem('player_id', result.player_id); localStorage.setItem('player_name', name); } catch (e) {}
-                }
-
-                document.getElementById('playerSetup').style.display = 'none';
-                document.getElementById('gameInterface').classList.remove('hidden');
-                document.getElementById('homeLeaderboard').style.display = 'none';
-                document.getElementById('backIndexBtn').style.display = 'inline-block';
-            } catch (e) {
-                alert('Erro: ' + e.message);
-            }
-        }
-
-        function backToHome() {
-            document.getElementById('playerSetup').style.display = 'block';
-            document.getElementById('gameInterface').classList.add('hidden');
-            document.getElementById('backIndexBtn').style.display = 'none';
-            document.getElementById('homeLeaderboard').style.display = 'block';
-            const responseArea = document.getElementById('responseArea');
-            if (responseArea) { responseArea.innerHTML = ''; responseArea.style.display = 'none'; }
-            const imgPrev = document.getElementById('imagePreview');
-            if (imgPrev) { imgPrev.src = ''; imgPrev.style.display = 'none'; }
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                currentImageData = e.target.result;
-                document.getElementById('imagePreview').src = currentImageData;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('analyzeBtn').disabled = false;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        const imageUpload = document.getElementById('imageUpload');
-        if (imageUpload) {
-            imageUpload.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                imageUpload.classList.add('dragover');
-            });
-            imageUpload.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                imageUpload.classList.remove('dragover');
-            });
-            imageUpload.addEventListener('drop', function(e) {
-                e.preventDefault();
-                imageUpload.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        currentImageData = ev.target.result;
-                        document.getElementById('imagePreview').src = currentImageData;
-                        document.getElementById('imagePreview').style.display = 'block';
-                        document.getElementById('analyzeBtn').disabled = false;
-                    };
-                    reader.readAsDataURL(files[0]);
-                }
-            });
-        }
-
-        async function analyzeImage() {
-            if (!currentImageData || !window.currentPlayerId) {
-                alert('Carregue uma imagem e crie um jogador primeiro!');
+        async function loadAchievements() {
+            const listEl = document.getElementById('achievementsList');
+            const playerId = localStorage.getItem('player_id');
+            
+            if (!playerId) {
+                listEl.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>Crie um perfil de jogador para começar a colecionar conquistas!</p></div>`;
                 return;
             }
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('responseArea').style.display = 'none';
-            document.getElementById('analyzeBtn').disabled = true;
 
             try {
-                const response = await fetch('/api/process_image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: currentImageData, player_id: window.currentPlayerId, no_xp: true })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    displayResponse(result);
-                } else {
-                    alert('Erro: ' + result.error);
+                const response = await fetch(`/api/player_stats/${playerId}`);
+                const stats = await response.json();
+                
+                if (stats.error || !stats.achievements || stats.achievements.length === 0) {
+                    listEl.innerHTML = `<div class="empty-state"><div class="icon">🎯</div><p>Jogue para desbloquear conquistas!</p></div>`;
+                    return;
                 }
-            } catch (error) {
-                alert('Erro de conexão: ' + error.message);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('analyzeBtn').disabled = false;
-            }
-        }
 
-        function displayResponse(result) {
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML = `
-                <div class="response-item">
-                    <div class="response-label">🎯 Local Identificado</div>
-                    <div>${result.answer}</div>
-                </div>
-                <div class="response-item">
-                    <div class="response-label">📖 História</div>
-                    <div>${result.explanation}</div>
-                </div>
-            `;
-            responseArea.style.display = 'block';
+                listEl.innerHTML = stats.achievements.map(achId => {
+                    const ach = ACHIEVEMENTS_MAP[achId] || { icon: '🏅', name: achId, desc: '' };
+                    return `
+                        <div class="achievement-item">
+                            <div class="achievement-icon">${ach.icon}</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">${ach.name}</div>
+                                <div class="achievement-desc">${ach.desc}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                listEl.innerHTML = `<div class="empty-state"><div class="icon">🎮</div><p>Jogue para desbloquear conquistas!</p></div>`;
+            }
         }
 
         async function loadHomeLeaderboard() {
@@ -958,10 +579,9 @@
                 const response = await fetch('/api/leaderboard');
                 const leaderboard = await response.json();
                 const listEl = document.getElementById('leaderboardList');
-                if (!listEl) return;
 
                 if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
-                    listEl.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">Nenhum jogador ainda. Seja o primeiro!</p>';
+                    listEl.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">Nenhum jogador ainda!</p>';
                     return;
                 }
 
@@ -983,6 +603,14 @@
                 }).join('');
             } catch (e) {}
         }
+
+        document.getElementById('playerName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') createPlayer();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
     </script>
 </body>
 </html>
