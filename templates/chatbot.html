@@ -2562,32 +2562,36 @@
                 // Mensagem sobre dicas usadas
                 let hintInfo = '';
                 if (hintsUsedCount > 0) {
-                    hintInfo = `<div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:10px 12px; margin-top:8px;">
-                        <div style="font-size:12px; color:#856404;">💡 ${hintsUsedCount} dica${hintsUsedCount > 1 ? 's' : ''} usada${hintsUsedCount > 1 ? 's' : ''} (-${hintPenalty} XP)</div>
+                    hintInfo = `<div style="background:rgba(251, 191, 36, 0.15); border:1px solid rgba(251, 191, 36, 0.4); border-radius:10px; padding:10px 14px; margin-bottom:8px;">
+                        <div style="font-size:13px; color:#fbbf24; display:flex; align-items:center; gap:6px;">💡 ${hintsUsedCount} dica${hintsUsedCount > 1 ? 's' : ''} usada${hintsUsedCount > 1 ? 's' : ''} <span style="opacity:0.7;">(-${hintPenalty} XP)</span></div>
                     </div>`;
                 }
                 
                 addBotMessage(`
-                    <div style="background: linear-gradient(135deg, #e7f7ec, #d9f2e3); border: 1px solid #b9ebc9; color: #1f4d33; padding: 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                            <div style="font-size:26px;">🎉</div>
-                            <div style="font-weight:800; letter-spacing:.3px;">VOCÊ ACERTOU!</div>
+                    <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #667eea; color: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                            <div style="font-size:32px;">🎉</div>
+                            <div style="font-size:20px; font-weight:800; color:#4ade80; letter-spacing:.5px;">VOCÊ ACERTOU!</div>
                         </div>
-                        <div style="font-size:22px; font-weight:800; color:#0f3a28; margin: 4px 0 12px;">${currentChallenge.name}</div>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
-                            <div style="background:#fff; border:1px solid #b9ebc9; border-radius:12px; padding:10px 12px; min-width:160px;">
-                                <div style="font-size:12px; color:#1f4d33; opacity:.8;">Modo</div>
-                                <div style="font-size:18px; font-weight:800; color:#106b43;">🔮 Mistério</div>
+                        <div style="font-size:24px; font-weight:800; color:#fff; margin: 8px 0 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${currentChallenge.name}</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                            <div style="background:rgba(102, 126, 234, 0.2); border:1px solid rgba(102, 126, 234, 0.4); border-radius:12px; padding:12px 16px; flex:1; min-width:120px;">
+                                <div style="font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px;">Modo</div>
+                                <div style="font-size:18px; font-weight:700; color:#a78bfa; margin-top:4px;">🔮 Mistério</div>
                             </div>
-                            <div style="background:#fff; border:1px solid #b9ebc9; border-radius:12px; padding:10px 12px; min-width:160px;">
-                                <div style="font-size:12px; color:#1f4d33; opacity:.8;">XP Ganho</div>
-                                <div style="font-size:18px; font-weight:800; color:#106b43;">+${xpEarned} XP</div>
+                            <div style="background:rgba(74, 222, 128, 0.15); border:1px solid rgba(74, 222, 128, 0.4); border-radius:12px; padding:12px 16px; flex:1; min-width:120px;">
+                                <div style="font-size:11px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px;">XP Ganho</div>
+                                <div style="font-size:20px; font-weight:800; color:#4ade80; margin-top:4px;">+${xpEarned} XP</div>
                             </div>
                         </div>
                         ${hintInfo}
-                        <div class="quick-buttons" style="margin-top: 8px;">
-                            <button class="quick-btn" onclick="startNextChallenge()">➡️ Próximo Desafio</button>
-                            <button class="quick-btn" onclick="showStats()">📊 Minhas Estatísticas</button>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                            <button onclick="startNextChallenge()" style="flex:1; min-width:140px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; border:none; padding:12px 16px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                ➡️ Próximo Desafio
+                            </button>
+                            <button onclick="showStats()" style="flex:1; min-width:140px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px 16px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                📊 Estatísticas
+                            </button>
                         </div>
                     </div>
                 `);
