@@ -325,7 +325,11 @@ def register():
             except Exception:
                 pass
             _save_users(users)
-            return redirect(url_for('login'))
+            # Login automático após cadastro
+            session['username'] = username
+            return redirect(url_for('index'))
+        else:
+            return render_template('register.html', error='Usuário já existe')
     return render_template('register.html')
 
 @app.route('/reset', methods=['GET', 'POST'])
