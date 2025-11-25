@@ -952,6 +952,11 @@ def serve_static(filename):
     """Serve arquivos estáticos incluindo imagens"""
     return app.send_static_file(filename)
 
+@app.route('/favicon.ico')
+def favicon_ico():
+    """Redireciona favicon.ico para o SVG"""
+    return app.send_static_file('static/favicon.svg')
+
 # Rota para Chrome DevTools (evitar 404 nos logs)
 @app.route('/.well-known/appspecific/com.chrome.devtools.json', methods=['GET'])
 def chrome_devtools():
