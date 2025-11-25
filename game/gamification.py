@@ -461,7 +461,7 @@ class GamificationSystem:
         
         return progress
     
-    def get_leaderboard(self, limit: int = 10) -> List[Dict]:
+    def get_leaderboard(self, limit: int = None) -> List[Dict]:
         """Retorna o ranking dos jogadores"""
         sorted_players = sorted(
             self.players.values(),
@@ -469,8 +469,9 @@ class GamificationSystem:
             reverse=True
         )
         
+        players_to_show = sorted_players[:limit] if limit else sorted_players
         leaderboard = []
-        for i, player in enumerate(sorted_players[:limit]):
+        for i, player in enumerate(players_to_show):
             leaderboard.append({
                 "id": player.id,
                 "rank": i + 1,

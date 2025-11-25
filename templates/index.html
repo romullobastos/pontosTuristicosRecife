@@ -18,208 +18,510 @@
             width: 100%;
         }
 
-        .resume-bar {
-            display: none;
-            background: #f5f6ff;
-            border: 1px solid #e6e6f0;
-            color: #333;
-            padding: 12px 14px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .resume-actions { display: flex; gap: 8px; }
-        .btn-light { background: #fff; color: #5b5f97; border: 1px solid #e6e6f0; }
-
-        .error-msg {
-            margin: 8px 0 12px;
-            color: #d33;
-            background: #ffeaea;
-            border: 1px solid #f3b5b5;
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 0.95em;
-            display: none;
-            text-align: center;
-        }
-
-        .back-index {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #ffffff;
-            color: #5b5f97;
-            border: none;
-            border-radius: 999px;
-            padding: 10px 14px;
-            font-weight: 700;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            cursor: pointer;
-            z-index: 1000;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            color: #333;
+            color: #fff;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(234, 102, 182, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, #a8b4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
+            font-size: 1.1em;
+            opacity: 0.8;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
-        .header .actions { margin-top: 10px; display: none; }
-        .logout-btn { background:#fff; color:#5b5f97; border:1px solid #e6e6f0; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; }
-        .reset-btn { background:#ffeff0; color:#c22; border:1px solid #f3b5b5; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; margin-left:8px; display:none; }
-        .use-btn { background:#e7f7ec; color:#246b3d; border:1px solid #b9ebc9; border-radius:999px; padding:6px 10px; font-weight:700; cursor:pointer; margin-left:8px; font-size:12px; }
-
-        .link-btn {
-            display: inline-block;
-            background: #fff;
-            color: #667eea;
-            padding: 10px 18px;
-            border-radius: 999px;
-            font-weight: 700;
-            text-decoration: none;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        .header .actions {
+            margin-top: 15px;
+            display: none;
         }
 
-        .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-        .chip {
-            background: #f5f6ff;
-            color: #5b5f97;
-            border: 1px solid #e6e6f0;
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.9em;
-            white-space: nowrap;
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        #analyzeBtn { margin-top: 14px; }
-
-        .game-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
+        .reset-btn {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff9999;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            display: none;
+            transition: all 0.3s ease;
         }
 
-        .card:hover {
+        .reset-btn:hover {
+            background: rgba(255, 100, 100, 0.3);
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 20px;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card h2 {
             font-size: 1.5em;
-        }
-
-        .player-setup {
-            text-align: center;
-            position: relative;
-            margin-bottom: 28px;
-        }
-
-        .icon-action {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #ffffffcc;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            gap: 10px;
         }
 
+        /* Resume Bar */
+        .resume-bar {
+            display: none;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .resume-bar strong {
+            color: #a8b4ff;
+        }
+
+        .resume-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Input */
         .input-group {
             margin-bottom: 20px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .input-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
         }
 
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
+        .error-msg {
+            margin: 10px 0 15px;
+            color: #ff9999;
+            background: rgba(255, 100, 100, 0.15);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            display: none;
+            text-align: center;
+        }
+
+        /* Player Setup */
+        .player-setup {
+            text-align: center;
+            position: relative;
+            animation-delay: 0.1s;
+        }
+
+        .icon-action {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 16px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .icon-action:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        /* Leaderboard */
+        .leaderboard {
+            animation-delay: 0.2s;
+        }
+
+        .leaderboard-list {
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.4);
+            border-radius: 10px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.6);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .rank {
+            font-size: 1.4em;
+            font-weight: 700;
+            min-width: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); -webkit-background-clip: text; background-clip: text; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); -webkit-background-clip: text; background-clip: text; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #daa06d); -webkit-background-clip: text; background-clip: text; }
+
+        .player-info {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 1.05em;
+            margin-bottom: 4px;
+        }
+
+        .player-level {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+        }
+
+        .use-btn {
+            background: rgba(102, 126, 234, 0.2);
+            color: #a8b4ff;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .use-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        /* Back Button */
+        .back-index {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .back-index:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+</style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-index" id="backIndexBtn" onclick="backToHome()" style="display:none;">⟵ Voltar</button>
+        
+        <div class="header">
+            <div class="header-badge">🏛️ Explore o Recife Histórico</div>
+            <h1>Recife Turístico</h1>
+            <p>Descubra os pontos históricos do Recife através de desafios interativos e ganhe pontos!</p>
+            <div class="actions" id="headerActions">
+                <button id="resetRankingBtn" class="reset-btn" onclick="resetRanking()">Resetar Ranking</button>
+                <button class="logout-btn" onclick="logoutUser()">Sair</button>
+            </div>
+        </div>
+
+        <div id="resumeBar" class="resume-bar">
+            <div>Bem-vindo de volta, <strong id="resumeName"></strong>!</div>
+            <div class="resume-actions">
+                <button class="btn" onclick="continueAsSaved()">Continuar</button>
+                <button class="btn btn-secondary" onclick="switchPlayer()">Trocar</button>
+            </div>
+        </div>
+
+        <!-- Setup do Jogador -->
+        <div class="glass-card player-setup" id="playerSetup">
+            <button class="icon-action" title="Abrir análise/descrição aqui" onclick="openAnalysis()">⚙️</button>
+            <h2>👤 Criar Jogador</h2>
+            <div class="input-group">
+                <label for="playerName">Nome do Jogador</label>
+                <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
+            </div>
+            <div id="nameError" class="error-msg"></div>
+            <button class="btn" onclick="createPlayer()">🎮 Começar Jogo</button>
+        </div>
+
+        <!-- Ranking -->
+        <div class="glass-card leaderboard" id="homeLeaderboard">
+            <h2>🏆 Ranking</h2>
+            <div id="leaderboardList" class="leaderboard-list">
+                <p style="opacity: 0.6; text-align: center; padding: 20px;">Carregando ranking...</p>
+            </div>
+        </div>
+
+        <!-- Interface de Análise de Imagens -->
+        <div class="hidden" id="gameInterface">
+            <div id="imageAnalysis">
+                <div class="game-grid">
+                    <!-- Upload de Imagem -->
+                    <div class="glass-card">
+                        <h2>📸 Enviar Imagem</h2>
+                        <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
+                            <div class="upload-icon">📁</div>
+                            <p>Clique ou arraste uma imagem</p>
+                            <span>JPG, PNG, GIF</span>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                            <img id="imagePreview" class="image-preview" style="display: none;">
+                        </div>
+                        <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled style="width: 100%; margin-top: 20px;">🔍 Analisar Imagem</button>
+                    </div>
+
+                    <!-- Resposta do Sistema -->
+                    <div class="glass-card">
+                        <h2>🤖 Resposta</h2>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>Analisando imagem...</p>
+                        </div>
+                        <div id="responseArea" style="display: none;"></div>
+                        <div class="info-chips">
+                            <p style="opacity: 0.7; margin-bottom: 12px; font-size: 0.9em;">Locais reconhecidos:</p>
+                            <div class="chip-list">
+                                <span class="chip">Marco Zero</span>
+                                <span class="chip">Casa da Cultura</span>
+                                <span class="chip">Forte das Cinco Pontas</span>
+                                <span class="chip">Igreja Madre de Deus</span>
+                                <span class="chip">Mercado São José</span>
+                                <span class="chip">Teatro Santa Isabel</span>
+                                <span class="chip">Rua do Bom Jesus</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Game Interface Styles */
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
         }
 
         .image-upload {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 40px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -227,100 +529,45 @@
 
         .image-upload:hover {
             border-color: #667eea;
-            background-color: #f8f9ff;
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .image-upload.dragover {
             border-color: #667eea;
-            background-color: #f0f2ff;
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .image-upload p {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .image-upload span {
+            font-size: 0.85em;
+            opacity: 0.6;
         }
 
         .image-preview {
             max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
+            max-height: 250px;
+            border-radius: 12px;
             margin-top: 15px;
-        }
-
-        .question-input {
-
-.question-input textarea:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.stats-panel {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    margin-bottom: 30px;
-}
-        }
-
-        .stats-panel {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: #f8f9ff;
-            border-radius: 10px;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .response-panel {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-top: 20px;
-        }
-
-        .response-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            background: #f8f9ff;
-        }
-
-        .response-label {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 8px;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -333,292 +580,72 @@
             100% { transform: rotate(360deg); }
         }
 
-        .achievement {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            color: #333;
-            padding: 10px 15px;
-            border-radius: 20px;
-            margin: 5px;
-            display: inline-block;
-            font-weight: bold;
+        .response-item {
+            margin-bottom: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #667eea;
         }
 
-        .leaderboard {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .rank {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .player-info {
-            flex-grow: 1;
-            margin-left: 15px;
-        }
-
-        .player-name {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .player-level {
-            color: #666;
+        .response-label {
+            font-weight: 600;
+            color: #a8b4ff;
+            margin-bottom: 8px;
             font-size: 0.9em;
         }
 
-        .hidden {
-            display: none;
-        }
-
-        /* Estilos para abas */
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px 20px;
-            background: #f8f9ff;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            color: #667eea;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab.active {
-            background: white;
-            color: #333;
-            border-bottom-color: #667eea;
-        }
-
-        .tab:hover {
-            background: #f0f2ff;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Estilos específicos para o jogo de descrições */
-        .photo-game-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .photo-display {
-            text-align: center;
-        }
-
-        .photo-image {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            margin-bottom: 15px;
-        }
-
-        .photo-info {
-            background: #f8f9ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .photo-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .photo-difficulty {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .description-input {
-            margin-bottom: 20px;
-        }
-
-        .description-input textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            resize: vertical;
-            min-height: 120px;
-            font-family: inherit;
-        }
-
-        .description-input textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .description-input label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .game-stats {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .stats-label {
-            color: #666;
-        }
-
-        .stats-value {
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .result-panel {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-
-        .result-item {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f8f9ff;
-        }
-
-        .result-label {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .keywords-found {
+        .chip-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
+            gap: 8px;
         }
 
-        .keyword-tag {
-            background: #667eea;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
+        .chip {
+            background: rgba(102, 126, 234, 0.2);
+            color: #a8b4ff;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50px;
+            padding: 6px 12px;
             font-size: 0.8em;
         }
 
-        .feedback {
-            background: #e8f5e8;
-            border-left: 4px solid #4caf50;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 15px;
+        .info-chips {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .feedback.error {
-            background: #ffeaea;
-            border-left-color: #f44336;
-        }
-
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 0;
-            }
-
             .container {
-                padding: 15px;
-                max-width: 100%;
+                padding: 20px 15px;
             }
 
             .header h1 {
-                font-size: 1.8em;
-                margin-bottom: 8px;
+                font-size: 2em;
             }
 
             .header p {
-                font-size: 1em;
+                font-size: 0.95em;
             }
 
-            .link-btn {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-
-            .game-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .photo-game-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .card {
+            .glass-card {
                 padding: 20px;
-                margin-bottom: 15px;
             }
 
-            .card h2 {
-                font-size: 1.3em;
+            .game-grid {
+                grid-template-columns: 1fr;
             }
 
             .btn {
-                padding: 10px 16px;
-                font-size: 14px;
                 width: 100%;
+                padding: 14px 20px;
             }
 
             .resume-bar {
                 flex-direction: column;
-                align-items: flex-start;
-                padding: 12px;
+                text-align: center;
             }
 
             .resume-actions {
@@ -626,143 +653,51 @@
                 flex-direction: column;
             }
 
-            .resume-actions .btn {
-                width: 100%;
-            }
-
-            input[type="text"],
-            textarea {
-                font-size: 16px; /* Evita zoom no iOS */
-            }
-
             .back-index {
                 top: 10px;
                 left: 10px;
-                padding: 8px 12px;
+                padding: 8px 14px;
                 font-size: 14px;
             }
 
-            .logout-btn,
-            .reset-btn,
-            .use-btn {
-                padding: 6px 12px;
-                font-size: 13px;
+            .leaderboard-item {
+                padding: 14px 12px;
+            }
+
+            .rank {
+                font-size: 1.2em;
+                min-width: 40px;
             }
         }
 
         @media (max-width: 480px) {
             .header h1 {
-                font-size: 1.5em;
+                font-size: 1.7em;
             }
 
-            .header p {
-                font-size: 0.9em;
+            .header-badge {
+                font-size: 0.8em;
+                padding: 6px 12px;
             }
 
-            .card {
-                padding: 15px;
+            .glass-card h2 {
+                font-size: 1.2em;
             }
 
-            .card h2 {
-                font-size: 1.1em;
+            .image-upload {
+                padding: 30px 15px;
+            }
+
+            .upload-icon {
+                font-size: 2.5em;
             }
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <button class="back-index" id="backIndexBtn" onclick="backToHome()" style="display:none;">⟵ Voltar</button>
-        <div class="header">
-            <h1>Recife Turístico - App</h1>
-            <p>Explore os pontos históricos do Recife e desenvolva suas habilidades!</p>
-            <div class="actions" id="headerActions">
-                <button id="resetRankingBtn" class="reset-btn" onclick="resetRanking()">Resetar Ranking</button>
-                <button class="logout-btn" onclick="logoutUser()">Sair</button>
-            </div>
-        </div>
-
-        <div id="resumeBar" class="resume-bar">
-            <div>Você já tem um jogador salvo: <strong id="resumeName"></strong></div>
-            <div class="resume-actions">
-                <button class="btn" onclick="continueAsSaved()">Continuar</button>
-                <button class="btn btn-light" onclick="switchPlayer()">Trocar</button>
-            </div>
-        </div>
-
-        <!-- Setup do Jogador -->
-        <div class="card player-setup" id="playerSetup">
-            <button class="icon-action" title="Abrir análise/descrição aqui" onclick="openAnalysis()">⚙️</button>
-            <h2>👤 Criar Jogador</h2>
-            <div class="input-group">
-                <label for="playerName">Nome do Jogador:</label>
-                <input type="text" id="playerName" placeholder="Digite seu nome" value="Jogador">
-            </div>
-            <div id="nameError" class="error-msg"></div>
-            <button class="btn" style="margin-top: 6px;" onclick="createPlayer()">Começar Jogo</button>
-        </div>
-
-        <!-- Ranking -->
-        <div class="card leaderboard" id="homeLeaderboard">
-            <h2>🏆 Ranking</h2>
-            <div id="leaderboardList"></div>
-        </div>
-
-        <!-- Interface de Análise de Imagens -->
-        <div class="hidden" id="gameInterface">
-            <div id="imageAnalysis">
-                <div class="game-container">
-                    <!-- Upload de Imagem -->
-                    <div class="card">
-                        <h2>📸 Enviar Imagem</h2>
-                        <div class="image-upload" id="imageUpload" onclick="document.getElementById('imageInput').click()">
-                            <p>📁 Clique aqui ou arraste uma imagem</p>
-                            <p style="color: #666; font-size: 0.9em;">Formatos suportados: JPG, PNG, GIF</p>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                            <img id="imagePreview" class="image-preview" style="display: none;">
-                        </div>
-                        
-                        <button class="btn" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 Analisar Imagem</button>
-                    </div>
-
-                    <!-- Resposta do Sistema -->
-                    <div class="card response-card">
-                        <h2>🤖 Resposta do Sistema</h2>
-                        <div class="loading" id="loading">
-                            <div class="spinner"></div>
-                            <p>Analisando imagem e gerando resposta...</p>
-                        </div>
-                        <div id="responseArea" style="display: none;">
-                            <!-- Respostas serão preenchidas dinamicamente -->
-                        </div>
-                        <div class="info" style="margin-top:16px; font-size:0.95em; color:#555;">
-                            <div style="font-weight:700; color:#5b5f97; margin-bottom:6px;">Locais reconhecidos:</div>
-                            <div class="chip-list">
-                                <span class="chip">Marco Zero</span>
-                                <span class="chip">Casa da Cultura</span>
-                                <span class="chip">Forte das Cinco Pontas</span>
-                                <span class="chip">Igreja Madre de Deus</span>
-                                <span class="chip">Igreja Nossa Senhora do Carmo</span>
-                                <span class="chip">Igreja Santo Antônio</span>
-                                <span class="chip">Igreja de São Pedro dos Clérigos</span>
-                                <span class="chip">Mercado São José</span>
-                                <span class="chip">Palácio da Justiça</span>
-                                <span class="chip">Rua Aurora</span>
-                                <span class="chip">Rua do Bom Jesus</span>
-                                <span class="chip">Teatro Santa Isabel</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                
-            </div>
-        </div>
-
-        
-    </div>
 
     <script>
-        // Inicializa player global a partir do localStorage (sem quebrar se indisponível)
+        let currentImageData = null;
+        let currentPhoto = null;
+
         try { window.currentPlayerId = window.currentPlayerId || localStorage.getItem('player_id') || null; } catch (e) { window.currentPlayerId = null; }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -774,9 +709,7 @@
                     const nm = document.getElementById('resumeName');
                     if (bar) bar.style.display = 'flex';
                     if (nm) nm.textContent = savedName;
-                    // não seta currentPlayerId automaticamente, só oferece continuar
                 }
-                // checar sessão para mostrar botão sair
                 try {
                     const me = await fetch('/me');
                     if (me.ok) {
@@ -792,9 +725,7 @@
         });
 
         async function logoutUser() {
-            try {
-                await fetch('/logout', { method:'POST' });
-            } catch (e) {}
+            try { await fetch('/logout', { method:'POST' }); } catch (e) {}
             try { localStorage.removeItem('player_id'); localStorage.removeItem('player_name'); } catch (e) {}
             window.location.href = '/login';
         }
@@ -803,14 +734,10 @@
             const btn = document.getElementById('resetRankingBtn');
             try {
                 if (btn) { btn.disabled = true; btn.textContent = 'Limpando...'; }
-                const r1 = await fetch('/api/admin/reset_players', { method: 'POST' });
-                await r1.json().catch(() => ({}));
-                // Recarrega dados em memória
+                await fetch('/api/admin/reset_players', { method: 'POST' });
                 await fetch('/api/admin/reload_players', { method: 'POST' });
                 await loadHomeLeaderboard();
-            } catch (e) {
-                // noop
-            } finally {
+            } catch (e) {} finally {
                 if (btn) { btn.disabled = false; btn.textContent = 'Resetar Ranking'; }
             }
         }
@@ -818,62 +745,41 @@
         function continueAsSaved() {
             try {
                 const savedId = localStorage.getItem('player_id');
-                const savedName = localStorage.getItem('player_name');
-                if (savedId && savedName) {
-                    window.location.href = '/chatbot';
-                }
+                if (savedId) window.location.href = '/chatbot';
             } catch (e) {}
         }
 
         function switchPlayer() {
-            try {
-                localStorage.removeItem('player_id');
-                localStorage.removeItem('player_name');
-            } catch (e) {}
+            try { localStorage.removeItem('player_id'); localStorage.removeItem('player_name'); } catch (e) {}
             const bar = document.getElementById('resumeBar');
             if (bar) bar.style.display = 'none';
-            const setup = document.getElementById('playerSetup');
-            const game = document.getElementById('gameInterface');
-            if (setup) setup.style.display = 'block';
-            if (game) game.classList.add('hidden');
             const input = document.getElementById('playerName');
             if (input) input.focus();
         }
 
         async function selectMyPlayer(id, name) {
             try {
-                const chosenId = String(id||'');
-                const chosenName = name || 'Jogador';
-                if (!chosenId) return;
-                try {
-                    localStorage.setItem('player_id', chosenId);
-                    localStorage.setItem('player_name', chosenName);
-                } catch (e) {}
-                const bar = document.getElementById('resumeBar');
-                const nm = document.getElementById('resumeName');
-                if (bar) bar.style.display = 'flex';
-                if (nm) nm.textContent = chosenName;
-                // Ir direto para o chatbot
+                if (!id) return;
+                localStorage.setItem('player_id', String(id));
+                localStorage.setItem('player_name', name || 'Jogador');
                 window.location.href = '/chatbot';
             } catch (e) {}
         }
 
-        // Criar jogador
         async function createPlayer() {
             const name = document.getElementById('playerName').value.trim();
             const nameError = document.getElementById('nameError');
             if (nameError) { nameError.style.display = 'none'; nameError.textContent = ''; }
+            
             if (!name) {
                 if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
                 return;
             }
-
             if (name.length < 3) {
                 if (nameError) { nameError.textContent = 'O nome deve ter pelo menos 3 caracteres.'; nameError.style.display = 'block'; }
                 return;
             }
 
-            // Verificar unicidade do nome (username)
             try {
                 const lb = await fetch('/api/leaderboard');
                 const list = await lb.json();
@@ -882,37 +788,31 @@
                     if (nameError) { nameError.textContent = 'Este nome já está em uso. Escolha outro.'; nameError.style.display = 'block'; }
                     return;
                 }
-            } catch (e) { /* se falhar, segue */ }
+            } catch (e) {}
 
             try {
                 const response = await fetch('/api/create_player', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: name })
                 });
-
                 const result = await response.json();
                 
                 if (result.success) {
                     window.currentPlayerId = result.player_id;
-                    // Persistir para o chatbot
                     try {
                         localStorage.setItem('player_id', result.player_id);
                         localStorage.setItem('player_name', name);
                     } catch (e) {}
-                    // Redirecionar para o Chatbot
                     window.location.href = '/chatbot';
                 } else {
-                    if (nameError) { nameError.textContent = 'Erro ao criar jogador: ' + (result.error || 'desconhecido'); nameError.style.display = 'block'; }
+                    if (nameError) { nameError.textContent = 'Erro: ' + (result.error || 'desconhecido'); nameError.style.display = 'block'; }
                 }
             } catch (error) {
                 if (nameError) { nameError.textContent = 'Erro de conexão: ' + error.message; nameError.style.display = 'block'; }
             }
         }
 
-        // Abrir análise/descrição nesta página (sem redirecionar)
         async function openAnalysis() {
             try {
                 if (!window.currentPlayerId) {
@@ -923,16 +823,15 @@
                         if (nameError) { nameError.textContent = 'Por favor, digite um nome.'; nameError.style.display = 'block'; }
                         return;
                     }
-                    // Verificar unicidade do nome antes de criar (evita duplicados)
                     try {
                         const lb = await fetch('/api/leaderboard');
                         const list = await lb.json();
                         const taken = Array.isArray(list) && list.some(p => (p.name||'').toLowerCase() === name.toLowerCase());
                         if (taken) {
-                            if (nameError) { nameError.textContent = 'Este nome já está em uso. Escolha outro.'; nameError.style.display = 'block'; }
+                            if (nameError) { nameError.textContent = 'Este nome já está em uso.'; nameError.style.display = 'block'; }
                             return;
                         }
-                    } catch (e) { /* se falhar, segue */ }
+                    } catch (e) {}
                     const resp = await fetch('/api/create_player', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -947,44 +846,29 @@
                     try { localStorage.setItem('player_id', result.player_id); localStorage.setItem('player_name', name); } catch (e) {}
                 }
 
-                // Exibir interfaces
-                const setup = document.getElementById('playerSetup');
-                const game = document.getElementById('gameInterface');
-                const ranking = document.getElementById('homeLeaderboard');
-                if (setup) setup.style.display = 'none';
-                if (game) game.classList.remove('hidden');
-                if (ranking) ranking.style.display = 'none';
-                await loadPlayerStats();
-                const backBtn = document.getElementById('backIndexBtn');
-                if (backBtn) backBtn.style.display = 'inline-block';
+                document.getElementById('playerSetup').style.display = 'none';
+                document.getElementById('gameInterface').classList.remove('hidden');
+                document.getElementById('homeLeaderboard').style.display = 'none';
+                document.getElementById('backIndexBtn').style.display = 'inline-block';
             } catch (e) {
-                alert('Erro ao abrir análise: ' + e.message);
+                alert('Erro: ' + e.message);
             }
         }
 
         function backToHome() {
-            const setup = document.getElementById('playerSetup');
-            const game = document.getElementById('gameInterface');
-            const backBtn = document.getElementById('backIndexBtn');
-            const ranking = document.getElementById('homeLeaderboard');
-            if (setup) setup.style.display = 'block';
-            if (game) game.classList.add('hidden');
-            if (backBtn) backBtn.style.display = 'none';
-            if (ranking) ranking.style.display = 'block';
-            // limpar resposta e preview
+            document.getElementById('playerSetup').style.display = 'block';
+            document.getElementById('gameInterface').classList.add('hidden');
+            document.getElementById('backIndexBtn').style.display = 'none';
+            document.getElementById('homeLeaderboard').style.display = 'block';
             const responseArea = document.getElementById('responseArea');
             if (responseArea) { responseArea.innerHTML = ''; responseArea.style.display = 'none'; }
             const imgPrev = document.getElementById('imagePreview');
             if (imgPrev) { imgPrev.src = ''; imgPrev.style.display = 'none'; }
-            const input = document.getElementById('imageInput');
-            if (input) input.value = '';
         }
 
-        // Upload de imagem
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 currentImageData = e.target.result;
@@ -995,47 +879,38 @@
             reader.readAsDataURL(file);
         }
 
-        // Drag and drop
         const imageUpload = document.getElementById('imageUpload');
-        
-        imageUpload.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            imageUpload.classList.add('dragover');
-        });
-        
-        imageUpload.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            imageUpload.classList.remove('dragover');
-        });
-        
-        imageUpload.addEventListener('drop', function(e) {
-            e.preventDefault();
-            imageUpload.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const file = files[0];
-                if (file.type.startsWith('image/')) {
+        if (imageUpload) {
+            imageUpload.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                imageUpload.classList.add('dragover');
+            });
+            imageUpload.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                imageUpload.classList.remove('dragover');
+            });
+            imageUpload.addEventListener('drop', function(e) {
+                e.preventDefault();
+                imageUpload.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        currentImageData = e.target.result;
+                    reader.onload = function(ev) {
+                        currentImageData = ev.target.result;
                         document.getElementById('imagePreview').src = currentImageData;
                         document.getElementById('imagePreview').style.display = 'block';
                         document.getElementById('analyzeBtn').disabled = false;
                     };
-                    reader.readAsDataURL(file);
+                    reader.readAsDataURL(files[0]);
                 }
-            }
-        });
+            });
+        }
 
-        // Analisar imagem
         async function analyzeImage() {
             if (!currentImageData || !window.currentPlayerId) {
-                alert('Por favor, carregue uma imagem e crie um jogador primeiro!');
+                alert('Carregue uma imagem e crie um jogador primeiro!');
                 return;
             }
-            
-            // Mostrar loading
             document.getElementById('loading').style.display = 'block';
             document.getElementById('responseArea').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = true;
@@ -1043,22 +918,14 @@
             try {
                 const response = await fetch('/api/process_image', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: currentImageData,
-                        player_id: window.currentPlayerId,
-                        no_xp: true
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: currentImageData, player_id: window.currentPlayerId, no_xp: true })
                 });
-
                 const result = await response.json();
-                
                 if (result.success) {
                     displayResponse(result);
                 } else {
-                    alert('Erro ao processar imagem: ' + result.error);
+                    alert('Erro: ' + result.error);
                 }
             } catch (error) {
                 alert('Erro de conexão: ' + error.message);
@@ -1068,253 +935,23 @@
             }
         }
 
-        // Exibir resposta
         function displayResponse(result) {
             const responseArea = document.getElementById('responseArea');
-            
             responseArea.innerHTML = `
                 <div class="response-item">
-                    <div class="response-label">Resposta:</div>
+                    <div class="response-label">🎯 Local Identificado</div>
                     <div>${result.answer}</div>
                 </div>
                 <div class="response-item">
-                    <div class="response-label">Explicação:</div>
+                    <div class="response-label">📖 História</div>
                     <div>${result.explanation}</div>
                 </div>
             `;
-            
             responseArea.style.display = 'block';
-            
-            // Mostrar conquistas se houver
-            if (result.game_result && result.game_result.new_achievements) {
-                displayAchievements(result.game_result.new_achievements);
-            }
-            
-            // Mostrar level up se houver
-            if (result.game_result && result.game_result.level_up) {
-                alert(`🎉 Parabéns! Você subiu para o nível ${result.game_result.new_level}!`);
-            }
         }
 
-        // Exibir conquistas
-        function displayAchievements(achievements) {
-            const achievementHtml = achievements.map(achievement => 
-                `<div class="achievement">${achievement.icon} ${achievement.name}</div>`
-            ).join('');
-            
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML += `
-                <div class="response-item">
-                    <div class="response-label">🏆 Novas Conquistas:</div>
-                    <div>${achievementHtml}</div>
-                </div>
-            `;
-        }
-
-        // Carregar estatísticas do jogador
-        async function loadPlayerStats() {
-            if (!currentPlayerId) return;
-
-            try {
-                const response = await fetch(`/api/player_stats/${currentPlayerId}`);
-                const stats = await response.json();
-                
-                const grid = document.getElementById('statsGrid');
-                if (!stats.error && grid) {
-                    grid.innerHTML = `
-                        <div class="stat-item">
-                            <div class="stat-value">${stats.level}</div>
-                            <div class="stat-label">Nível</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${stats.experience}</div>
-                            <div class="stat-label">Experiência (XP)</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${stats.streak}</div>
-                            <div class="stat-label">Sequência</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${stats.achievements}</div>
-                            <div class="stat-label">Conquistas</div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-            }
-        }
-
-        // Carregar ranking
-        // Removido leaderboard/XP desta página
-
-        // Funções para o jogo de descrições de fotos
-        async function loadNewPhoto() {
-            try {
-                const response = await fetch('/api/photo_game/random_photo');
-                const result = await response.json();
-                
-                if (result.success) {
-                    currentPhoto = result.photo;
-                    
-                    // Exibir foto
-                    const photoContainer = document.getElementById('photoContainer');
-                    if (currentPhoto.image_data) {
-                        // Usar imagem em base64
-                        photoContainer.innerHTML = `
-                            <img src="${currentPhoto.image_data}" alt="${currentPhoto.name}" class="photo-image">
-                        `;
-                    } else {
-                        // Fallback para caminho de arquivo
-                        const imageUrl = currentPhoto.image_path.replace(/\\/g, '/');
-                        photoContainer.innerHTML = `
-                            <img src="${imageUrl}" alt="${currentPhoto.name}" class="photo-image">
-                        `;
-                    }
-                    
-                    // Exibir informações da foto
-                    document.getElementById('photoName').textContent = currentPhoto.name;
-                    document.getElementById('photoDifficulty').textContent = `Dificuldade: ${currentPhoto.difficulty} • Pontos: ${currentPhoto.points}`;
-                    document.getElementById('photoInfo').classList.remove('hidden');
-                    
-                    // Habilitar botão de envio
-                    document.getElementById('submitDescriptionBtn').disabled = false;
-                    
-                    // Limpar descrição anterior
-                    document.getElementById('descriptionInput').value = '';
-                    
-                    // Esconder resultado anterior
-                    document.getElementById('resultPanel').classList.add('hidden');
-                    
-                } else {
-                    alert('Erro ao carregar foto: ' + result.error);
-                }
-            } catch (error) {
-                alert('Erro de conexão: ' + error.message);
-            }
-        }
-
-        async function submitDescription() {
-            if (!currentPhoto) {
-                alert('Por favor, carregue uma foto primeiro!');
-                return;
-            }
-
-            const description = document.getElementById('descriptionInput').value.trim();
-            if (!description) {
-                alert('Por favor, escreva uma descrição!');
-                return;
-            }
-
-            // Desabilitar botão durante o processamento
-            document.getElementById('submitDescriptionBtn').disabled = true;
-
-            try {
-                const response = await fetch('/api/photo_game/submit_description', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        description: description
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    displayDescriptionResult(result);
-                    loadPhotoGameStats();
-                } else {
-                    alert('Erro ao processar descrição: ' + result.error);
-                }
-            } catch (error) {
-                alert('Erro de conexão: ' + error.message);
-            } finally {
-                document.getElementById('submitDescriptionBtn').disabled = false;
-            }
-        }
-
-        function displayDescriptionResult(result) {
-            const resultPanel = document.getElementById('resultPanel');
-            
-            const keywordsHtml = result.keywords_found.map(keyword => 
-                `<span class="keyword-tag">${keyword}</span>`
-            ).join('');
-
-            resultPanel.innerHTML = `
-                <h3>📊 Resultado da Avaliação</h3>
-                
-                <div class="result-item">
-                    <div class="result-label">Status:</div>
-                    <div>${result.is_correct ? '✅ Acertou!' : '❌ Tente novamente'}</div>
-                </div>
-                
-                <div class="result-item">
-                    <div class="result-label">Pontuação Final:</div>
-                    <div>${(result.final_score * 100).toFixed(1)}%</div>
-                </div>
-                
-                <div class="result-item">
-                    <div class="result-label">Similaridade:</div>
-                    <div>${(result.similarity_score * 100).toFixed(1)}%</div>
-                </div>
-                
-                <div class="result-item">
-                    <div class="result-label">Palavras-chave encontradas:</div>
-                    <div>${(result.keyword_score * 100).toFixed(1)}%</div>
-                    <div class="keywords-found">${keywordsHtml}</div>
-                </div>
-                
-                <div class="result-item">
-                    <div class="result-label">Pontos ganhos:</div>
-                    <div>${result.points_earned} pontos</div>
-                </div>
-                
-                <div class="feedback ${result.is_correct ? '' : 'error'}">
-                    <strong>💬 Feedback:</strong><br>
-                    ${result.feedback}
-                </div>
-            `;
-            
-            resultPanel.classList.remove('hidden');
-        }
-
-        async function loadPhotoGameStats() {
-            try {
-                const response = await fetch('/api/photo_game/stats');
-                const result = await response.json();
-                
-                if (result.success) {
-                    const stats = result.stats;
-                    document.getElementById('totalAttempts').textContent = stats.total_attempts;
-                    document.getElementById('totalCorrect').textContent = stats.total_correct;
-                    document.getElementById('accuracy').textContent = (stats.accuracy * 100).toFixed(1) + '%';
-                    document.getElementById('currentStreak').textContent = stats.current_streak;
-                    document.getElementById('bestStreak').textContent = stats.best_streak;
-                    
-                    document.getElementById('photoGameStats').classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-            }
-        }
-
-        // Função para alternar entre abas
-        function switchTab(tabName) {
-            // Remover classe active de todas as abas e conteúdos
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Adicionar classe active à aba selecionada
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-        }
-
-        // Ranking da home (sem precisão)
         async function loadHomeLeaderboard() {
             try {
-                // obter sessão atual
                 let me = null;
                 try { const meResp = await fetch('/me'); if (meResp.ok) me = await meResp.json(); } catch(e){}
 
@@ -1322,24 +959,29 @@
                 const leaderboard = await response.json();
                 const listEl = document.getElementById('leaderboardList');
                 if (!listEl) return;
-                listEl.innerHTML = (Array.isArray(leaderboard) ? leaderboard : []).map(p => {
+
+                if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
+                    listEl.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">Nenhum jogador ainda. Seja o primeiro!</p>';
+                    return;
+                }
+
+                listEl.innerHTML = leaderboard.map(p => {
                     const myIds = (me && Array.isArray(me.player_ids)) ? me.player_ids.map(x => String(x)) : [];
                     const canUse = myIds.includes(String(p.id||''));
                     const safeName = String(p.name||'').replace(/"/g, '&quot;');
-                    const btn = canUse ? `<button class=\"use-btn\" onclick=\"selectMyPlayer('${String(p.id)}','${safeName}')\">Usar</button>` : '';
+                    const btn = canUse ? `<button class="use-btn" onclick="selectMyPlayer('${String(p.id)}','${safeName}')">Usar</button>` : '';
+                    const rankClass = p.rank <= 3 ? `rank-${p.rank}` : '';
                     return `
-                    <div class=\"leaderboard-item\">
-                        <div class=\"rank\">#${p.rank}</div>
-                        <div class=\"player-info\">
-                            <div class=\"player-name\">${p.name}</div>
-                            <div class=\"player-level\">Nível ${p.level} • ${p.experience} XP</div>
+                    <div class="leaderboard-item">
+                        <div class="rank ${rankClass}">#${p.rank}</div>
+                        <div class="player-info">
+                            <div class="player-name">${p.name}</div>
+                            <div class="player-level">Nível ${p.level} • ${p.experience} XP</div>
                         </div>
                         ${btn}
                     </div>`;
                 }).join('');
-            } catch (e) {
-                // silencioso
-            }
+            } catch (e) {}
         }
     </script>
 </body>
