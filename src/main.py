@@ -779,13 +779,21 @@ def compare_visual_similarity():
     Compara visualmente duas imagens usando deep learning
     Retorna uma similaridade entre 0 e 1 e adiciona pontos ao XP
     """
+    print("\n" + "="*50)
+    print("[COMPARE_VISUAL] Iniciando comparação de imagens...")
+    
     try:
         data = request.json
         user_image = data.get('user_image')  # Base64 da foto do usuário
         target_location = data.get('target_location')  # ID da foto do desafio
         player_id = data.get('player_id', 'default_player')
         
+        print(f"[COMPARE_VISUAL] target_location: {target_location}")
+        print(f"[COMPARE_VISUAL] player_id: {player_id}")
+        print(f"[COMPARE_VISUAL] user_image recebida: {len(user_image) if user_image else 0} chars")
+        
         if not user_image or not target_location:
+            print("[COMPARE_VISUAL] ERRO: Dados incompletos")
             return jsonify({'error': 'Dados incompletos'}), 400
         
         # Decodificar imagem do usuário
@@ -793,38 +801,70 @@ def compare_visual_similarity():
             user_image = user_image.split(',')[1]
         
         try:
+            print("[COMPARE_VISUAL] Decodificando imagem do usuário...")
             user_image_bytes = base64.b64decode(user_image)
             user_img = Image.open(io.BytesIO(user_image_bytes)).convert('RGB')
+            print(f"[COMPARE_VISUAL] Imagem do usuário: {user_img.size}")
         except Exception as e:
-            print(f"Erro ao decodificar imagem do usuário: {e}")
+            print(f"[COMPARE_VISUAL] ERRO ao decodificar imagem do usuário: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify({'error': 'Erro ao processar sua foto. Tente novamente.'}), 400
         
         # Obter foto do desafio
+        print(f"[COMPARE_VISUAL] Buscando foto do desafio: {target_location}")
         photo = game.photo_description_game.get_photo_by_id(target_location)
         if not photo:
+            print(f"[COMPARE_VISUAL] ERRO: Foto não encontrada no dataset")
             return jsonify({'error': 'Foto do desafio não encontrada'}), 404
+        
+        print(f"[COMPARE_VISUAL] Foto encontrada: {photo.get('name', 'N/A')}")
         
         # Carregar foto do desafio
         image_path = photo.get('image_path', '')
+        print(f"[COMPARE_VISUAL] image_path original: {image_path}")
         
         # Garantir caminho absoluto baseado no diretório raiz do projeto
         if image_path and not os.path.isabs(image_path):
             image_path = os.path.join(ROOT_DIR, image_path)
         
+        print(f"[COMPARE_VISUAL] image_path absoluto: {image_path}")
+        print(f"[COMPARE_VISUAL] ROOT_DIR: {ROOT_DIR}")
+        print(f"[COMPARE_VISUAL] CWD: {os.getcwd()}")
+        print(f"[COMPARE_VISUAL] Arquivo existe: {os.path.exists(image_path)}")
+        
         if not image_path or not os.path.exists(image_path):
-            print(f"Caminho da imagem não encontrado: {image_path}")
-            print(f"ROOT_DIR: {ROOT_DIR}")
-            print(f"CWD: {os.getcwd()}")
+            print(f"[COMPARE_VISUAL] ERRO: Caminho da imagem não encontrado!")
+            # Listar arquivos no diretório para debug
+            try:
+                parent_dir = os.path.dirname(image_path)
+                if os.path.exists(parent_dir):
+                    files = os.listdir(parent_dir)
+                    print(f"[COMPARE_VISUAL] Arquivos em {parent_dir}: {files[:5]}...")
+            except Exception as e:
+                print(f"[COMPARE_VISUAL] Erro ao listar diretório: {e}")
             return jsonify({'error': 'Imagem do desafio não encontrada no servidor'}), 404
         
         try:
+            print("[COMPARE_VISUAL] Carregando imagem do desafio...")
             target_img = Image.open(image_path).convert('RGB')
+            print(f"[COMPARE_VISUAL] Imagem do desafio: {target_img.size}")
         except Exception as e:
-            print(f"Erro ao carregar imagem do desafio: {e}")
+            print(f"[COMPARE_VISUAL] ERRO ao carregar imagem do desafio: {e}")
+            import traceback
+            traceback.print_exc()
             return jsonify({'error': 'Erro ao carregar imagem do desafio'}), 500
         
         # Calcular similaridade usando o modelo de pontos históricos
-        similarity = game.recife_trainer.compare_images(user_img, target_img)
+        print("[COMPARE_VISUAL] Calculando similaridade...")
+        try:
+            similarity = game.recife_trainer.compare_images(user_img, target_img)
+            print(f"[COMPARE_VISUAL] Similaridade calculada: {similarity}")
+        except Exception as e:
+            print(f"[COMPARE_VISUAL] ERRO ao calcular similaridade: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Erro ao comparar imagens: {str(e)}'}), 500
         
         # Calcular pontos baseado na similaridade
         # Similaridade de 0.8+ = excelente, 0.6+ = bom, 0.4+ = aceitável, 0.30+ = tentativa
@@ -865,6 +905,9 @@ def compare_visual_similarity():
             except Exception:
                 pass
         
+        print(f"[COMPARE_VISUAL] SUCESSO! Pontos: {points}")
+        print("="*50 + "\n")
+        
         return jsonify({
             'success': True,
             'similarity_score': float(similarity),
@@ -873,9 +916,10 @@ def compare_visual_similarity():
         })
         
     except Exception as e:
-        print(f"Erro ao comparar imagens: {e}")
+        print(f"[COMPARE_VISUAL] ERRO GERAL: {e}")
         import traceback
         traceback.print_exc()
+        print("="*50 + "\n")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/photo_game/stats', methods=['GET'])
