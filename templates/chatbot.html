@@ -40,7 +40,7 @@
             font-weight: 700;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 9999; /* Aumentado para ficar acima de tudo */
         }
 
         .chat-container {
@@ -435,10 +435,11 @@
             }
 
             .back-home {
-                top: 10px;
-                left: 10px;
+                top: 15px;
+                left: 15px;
                 padding: 8px 12px;
                 font-size: 14px;
+                z-index: 10000; /* Garantir que fique acima do header */
             }
 
             .chat-container {
@@ -798,6 +799,21 @@
 
         // Bootstrap: recuperar jogador do localStorage, garantir existência no backend e iniciar experiência
         document.addEventListener('DOMContentLoaded', async () => {
+            // Ajustar placeholder para mobile
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput && window.innerWidth <= 768) {
+                chatInput.placeholder = 'Digite sua mensagem';
+            }
+            
+            // Atualizar placeholder ao redimensionar
+            window.addEventListener('resize', () => {
+                if (chatInput) {
+                    chatInput.placeholder = window.innerWidth <= 768 
+                        ? 'Digite sua mensagem' 
+                        : 'Digite sua mensagem ou faça uma pergunta...';
+                }
+            });
+            
             try {
                 const storedId = window.localStorage ? localStorage.getItem('player_id') : null;
                 const storedName = window.localStorage ? (localStorage.getItem('player_name') || 'Jogador') : 'Jogador';
