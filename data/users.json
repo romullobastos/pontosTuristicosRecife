@@ -1,7 +1,7 @@
 {
   "admin": {
     "email": "email@email.com",
-    "password_hash": "scrypt:32768:8:1$5u657aassMx1AdK0$5c6f661d08f2053857316d60959fd9c4c41e76fad97837cf1c417456b0b9eca799e2885116db3d8db588338bf601f3b55ed970047373090c4cb64b03feb8367f",
+    "password_hash": "scrypt:32768:8:1$A56xqE8iWkhVgV8V$f231be18629e8868eb39c86bf197b81a6f63cb75d8d98637a4acbca614de0f448ebd98b4be627ba6ff395127f8eeb39b78801f5017a8f061ebd206974ef46acc",
     "is_admin": true,
     "player_id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
     "created_at": "2025-10-31T19:24:57.642487",
