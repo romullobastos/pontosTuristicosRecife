@@ -1318,13 +1318,12 @@
                 return;
             }
 
-            // Debug visual na tela
-            addSystemMessage(`🔧 Debug: challenge=${currentChallenge?.id}, img=${currentImageData?.length} chars`);
+            console.log('[MODO FOTO] challenge:', currentChallenge?.id, 'img:', currentImageData?.length, 'chars');
 
             addTypingIndicator();
 
             try {
-                addSystemMessage('🔧 Enviando foto para o servidor...');
+                console.log('[MODO FOTO] Enviando requisição...');
                 
                 // Calcular similaridade visual entre a foto enviada e as fotos do dataset
                 const compareResponse = await fetch('/api/compare_visual_similarity', {
@@ -1337,9 +1336,10 @@
                     })
                 });
 
-                addSystemMessage(`🔧 Status: ${compareResponse.status}`);
+                console.log('[MODO FOTO] Status:', compareResponse.status);
                 
                 const compareResult = await compareResponse.json();
+                console.log('[MODO FOTO] Result:', compareResult);
                 
                 if (!compareResponse.ok) {
                     addBotMessage(`❌ Erro do servidor (${compareResponse.status}): ${compareResult.error || 'Erro desconhecido'}`);
