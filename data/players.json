@@ -7,8 +7,21 @@
     "streak": 5,
     "total_correct": 22,
     "total_attempts": 34,
-    "achievements": ["first_image", "detective_novice", "perfect_streak", "history_expert", "speed_demon"],
-    "daily_challenges": {"daily_images": 31, "daily_accuracy": 22, "daily_categories": 1, "categories_seen": ["mystery_mode"]},
+    "achievements": [
+      "first_image",
+      "detective_novice",
+      "perfect_streak",
+      "history_expert",
+      "speed_demon"
+    ],
+    "daily_challenges": {
+      "daily_images": 31,
+      "daily_accuracy": 22,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
     "historic_locations_identified": 22,
     "fastest_time": 1.55,
     "recent_activities": []
@@ -16,16 +29,129 @@
   "f1cc77d4-c6a7-481f-b5ae-c651d43afb08": {
     "id": "f1cc77d4-c6a7-481f-b5ae-c651d43afb08",
     "name": "admin",
-    "level": 2,
-    "experience": 362,
-    "streak": 2,
-    "total_correct": 2,
-    "total_attempts": 2,
-    "achievements": ["first_image", "speed_demon"],
-    "daily_challenges": {"daily_images": 2, "daily_accuracy": 2, "daily_categories": 1, "categories_seen": ["mystery_mode"]},
-    "historic_locations_identified": 2,
-    "fastest_time": 1.56,
-    "recent_activities": []
+    "level": 4,
+    "experience": 1381,
+    "streak": 10,
+    "total_correct": 16,
+    "total_attempts": 18,
+    "achievements": [
+      "first_image",
+      "speed_demon",
+      "perfect_streak",
+      "detective_novice"
+    ],
+    "daily_challenges": {
+      "daily_images": 18,
+      "daily_accuracy": 16,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
+    "historic_locations_identified": 16,
+    "fastest_time": 0.0021843910217285156,
+    "recent_activities": [
+      {
+        "timestamp": "2025-11-25T14:05:21.536155",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 49,
+        "level_up": false,
+        "streak": 10
+      },
+      {
+        "timestamp": "2025-11-25T14:05:12.495502",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 47,
+        "level_up": false,
+        "streak": 9
+      },
+      {
+        "timestamp": "2025-11-25T14:05:02.518079",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 45,
+        "level_up": false,
+        "streak": 8
+      },
+      {
+        "timestamp": "2025-11-25T14:04:52.832705",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 43,
+        "level_up": false,
+        "streak": 7
+      },
+      {
+        "timestamp": "2025-11-25T14:04:43.943399",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 41,
+        "level_up": false,
+        "streak": 6
+      },
+      {
+        "timestamp": "2025-11-25T14:04:35.265019",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 39,
+        "level_up": false,
+        "streak": 5
+      },
+      {
+        "timestamp": "2025-11-25T14:04:22.477252",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 37,
+        "level_up": false,
+        "streak": 4
+      },
+      {
+        "timestamp": "2025-11-25T14:04:11.499589",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 35,
+        "level_up": true,
+        "streak": 3
+      },
+      {
+        "timestamp": "2025-11-25T14:03:59.203919",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 33,
+        "level_up": false,
+        "streak": 2
+      },
+      {
+        "timestamp": "2025-11-25T14:03:43.485852",
+        "category": "mystery_mode",
+        "icon": "🔮",
+        "name": "Modo Mistério",
+        "is_correct": true,
+        "points": 26,
+        "level_up": false,
+        "streak": 1
+      }
+    ]
   },
   "54ee5e7c-36c2-478f-8722-64b03e65302d": {
     "id": "54ee5e7c-36c2-478f-8722-64b03e65302d",
@@ -35,8 +161,20 @@
     "streak": 2,
     "total_correct": 10,
     "total_attempts": 11,
-    "achievements": ["first_image", "speed_demon", "perfect_streak", "detective_novice"],
-    "daily_challenges": {"daily_images": 5, "daily_accuracy": 2, "daily_categories": 1, "categories_seen": ["mystery_mode"]},
+    "achievements": [
+      "first_image",
+      "speed_demon",
+      "perfect_streak",
+      "detective_novice"
+    ],
+    "daily_challenges": {
+      "daily_images": 5,
+      "daily_accuracy": 2,
+      "daily_categories": 1,
+      "categories_seen": [
+        "mystery_mode"
+      ]
+    },
     "historic_locations_identified": 2,
     "fastest_time": 0.004,
     "recent_activities": []

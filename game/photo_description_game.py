@@ -28,6 +28,7 @@ class PhotoDescriptionGame:
         self.current_photo = None
         self.recent_photos = []  # Histórico de fotos recentes para evitar repetição
         self.max_recent = 10  # Quantas fotos manter no histórico (evita repetir as últimas 10)
+        self.last_photo_id = None  # Última foto escolhida (para evitar repetição imediata)
         self.game_stats = {
             "total_attempts": 0,
             "total_correct": 0,
@@ -78,26 +79,45 @@ class PhotoDescriptionGame:
         if not self.photos_data:
             return None
         
-        # Filtrar fotos que não estão no histórico recente
-        available_photos = [p for p in self.photos_data if p["id"] not in self.recent_photos]
+        # Filtrar fotos que não estão no histórico recente E não é a última foto escolhida
+        available_photos = [
+            p for p in self.photos_data 
+            if p["id"] not in self.recent_photos and p["id"] != self.last_photo_id
+        ]
         
-        # Se todas as fotos foram usadas recentemente, resetar histórico
+        # Se não há fotos disponíveis (todas foram usadas recentemente ou é a última),
+        # remover a última foto do filtro para permitir mais opções
         if not available_photos:
-            print("[RANDOM] Todas as fotos foram usadas, resetando histórico")
-            self.recent_photos = []
+            print("[RANDOM] Poucas fotos disponíveis, relaxando filtros")
+            available_photos = [p for p in self.photos_data if p["id"] != self.last_photo_id]
+        
+        # Se ainda não há fotos (só há uma foto no total), usar todas
+        if not available_photos:
+            print("[RANDOM] Usando todas as fotos disponíveis")
             available_photos = self.photos_data
         
+        # Melhorar aleatoriedade: embaralhar a lista antes de escolher
+        # Isso garante que mesmo com random.choice(), a distribuição seja mais uniforme
+        random.shuffle(available_photos)
+        
         # Escolher foto aleatória das disponíveis
+        # Usar random.choice() após shuffle para garantir máxima aleatoriedade
         self.current_photo = random.choice(available_photos)
         
-        # Adicionar ao histórico de recentes
-        self.recent_photos.append(self.current_photo["id"])
+        # Atualizar última foto escolhida
+        self.last_photo_id = self.current_photo["id"]
+        
+        # Adicionar ao histórico de recentes (no início da lista)
+        # Mas verificar se já não está lá (evitar duplicatas)
+        if self.current_photo["id"] not in self.recent_photos:
+            self.recent_photos.insert(0, self.current_photo["id"])
         
         # Manter apenas as últimas N fotos no histórico
         if len(self.recent_photos) > self.max_recent:
-            self.recent_photos = self.recent_photos[-self.max_recent:]
+            self.recent_photos = self.recent_photos[:self.max_recent]
         
-        print(f"[RANDOM] Foto selecionada: {self.current_photo['name']} (histórico: {len(self.recent_photos)}/{self.max_recent})")
+        print(f"[RANDOM] Foto selecionada: {self.current_photo['name']} (ID: {self.current_photo['id']}, histórico: {len(self.recent_photos)}/{self.max_recent})")
+        print(f"[RANDOM] Última foto: {self.last_photo_id}, Histórico: {self.recent_photos[:3]}...")
         
         return {
             "id": self.current_photo["id"],
