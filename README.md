@@ -41,19 +41,23 @@ Sistema de reconhecimento de imagens especializado em identificar **12 pontos hi
 ### 🎮 Modos de Jogo
 
 1. **Modo Identificação** - Envie uma foto e receba informações históricas
-2. **Modo Mistério** - Adivinhe o local e ganhe pontos
+2. **Modo Mistério** - Adivinhe o local através de dicas e ganhe XP
 3. **Modo Foto** - Compare sua foto com fotos oficiais
+4. **Modo Descrição** - Descreva a foto e ganhe pontos por precisão
 
 ---
 
 ## ✨ Funcionalidades
 
 - 📸 **Reconhecimento de Imagens** - CNN treinada com PyTorch
-- 🎮 **Gamificação** - Pontos, níveis, conquistas, ranking
-- 📚 **Educacional** - Informações históricas detalhadas
+- 🎮 **Gamificação** - XP, níveis, conquistas, ranking em tempo real
+- �  **Modo Mistério** - Sistema de dicas progressivas (-5 XP por dica)
+- � **SEducacional** - Informações históricas detalhadas
 - 👤 **Sistema de Login** - Cadastro e autenticação
 - ⚡ **Tempo Real** - Respostas instantâneas
-- 📊 **Estatísticas** - Acompanhe seu progresso
+- 📊 **Estatísticas** - Acompanhe seu progresso e conquistas
+- 🔄 **Auto-reload** - Ranking atualiza automaticamente a cada 5 minutos
+- 🎯 **Anti-repetição** - Sistema evita repetir as últimas 10 fotos
 
 ---
 
@@ -259,8 +263,13 @@ Processa imagem e retorna identificação
 
 ### Outros Endpoints
 
-- `GET /api/leaderboard` - Ranking
-- `GET /api/player_stats/<id>` - Estatísticas
+- `GET /api/leaderboard` - Ranking de jogadores
+- `GET /api/player_stats/<id>` - Estatísticas do jogador
+- `POST /api/create_player` - Criar novo jogador
+- `POST /api/photo_game/mystery_guess` - Enviar palpite no Modo Mistério
+- `GET /api/photo_game/random_photo` - Obter foto aleatória
+- `POST /api/admin/reset_players` - Resetar ranking (admin)
+- `POST /api/admin/reload_players` - Recarregar dados do arquivo
 - `GET/POST /login` - Login
 - `GET/POST /register` - Cadastro
 
@@ -305,6 +314,7 @@ python scripts/training/RETREINAR_MODELO.py
 ## 📚 Documentação
 
 - [Guia Rápido](docs/INICIO_RAPIDO.md)
+- [Deploy em VM](docs/DEPLOY_VM.md)
 - [Solução de Problemas](docs/SOLUCAO_PROBLEMAS.md)
 
 ---
