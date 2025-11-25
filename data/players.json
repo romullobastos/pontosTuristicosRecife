@@ -93,14 +93,15 @@
     "id": "54ee5e7c-36c2-478f-8722-64b03e65302d",
     "name": "codebyafonso",
     "level": 6,
-    "experience": 2584,
-    "streak": 0,
-    "total_correct": 8,
-    "total_attempts": 9,
+    "experience": 2599,
+    "streak": 1,
+    "total_correct": 9,
+    "total_attempts": 10,
     "achievements": [
       "first_image",
       "speed_demon",
-      "perfect_streak"
+      "perfect_streak",
+      "detective_novice"
     ],
     "daily_challenges": {
       "daily_images": 5,

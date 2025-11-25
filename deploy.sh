@@ -48,7 +48,7 @@ echo "✅ Iniciando servidor com PM2..."
 pm2 start venv/bin/gunicorn \
     --name recife-ia \
     --interpreter none \
-    -- -w 4 -b 0.0.0.0:5000 --timeout 120 src.main:app
+    -- -w 4 -b 0.0.0.0:5000 --timeout 300 --limit-request-line 0 --limit-request-field_size 0 --access-logfile - src.main:app
 
 # 10. Salvar configuração PM2
 pm2 save

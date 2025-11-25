@@ -227,6 +227,7 @@ app = Flask(__name__,
             static_folder=ROOT_DIR, 
             static_url_path='')
 app.secret_key = 'dev-secret-key'  # apenas para desenvolvimento
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max para uploads de imagem
 
 # ---- Auth storage helpers ----
 import json, os, uuid, datetime
