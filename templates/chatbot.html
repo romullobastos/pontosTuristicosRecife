@@ -1318,9 +1318,16 @@
                 return;
             }
 
+            console.log('[MODO FOTO] Iniciando processamento...');
+            console.log('[MODO FOTO] currentChallenge:', currentChallenge?.id);
+            console.log('[MODO FOTO] currentImageData length:', currentImageData?.length);
+            console.log('[MODO FOTO] currentPlayerId:', currentPlayerId);
+
             addTypingIndicator();
 
             try {
+                console.log('[MODO FOTO] Enviando requisição...');
+                
                 // Calcular similaridade visual entre a foto enviada e as fotos do dataset
                 const compareResponse = await fetch('/api/compare_visual_similarity', {
                     method: 'POST',
@@ -1332,7 +1339,15 @@
                     })
                 });
 
+                console.log('[MODO FOTO] Response status:', compareResponse.status);
+                
                 const compareResult = await compareResponse.json();
+                console.log('[MODO FOTO] Response:', compareResult);
+                
+                if (!compareResponse.ok) {
+                    addBotMessage(`❌ Erro do servidor: ${compareResult.error || 'Erro desconhecido'}`);
+                    return;
+                }
                 
                 if (compareResult.success) {
                     const visualSimilarity = compareResult.similarity_score;
@@ -1381,9 +1396,12 @@
                     loadPlayerStats();
                     currentGameMode = null;
                 }
+                } else {
+                    addBotMessage(`❌ Erro: ${compareResult.error || 'Falha na comparação'}`);
+                }
             } catch (error) {
-                addBotMessage("❌ Erro ao processar identificação. Tente novamente.");
-                console.error('Erro:', error);
+                console.error('[MODO FOTO] Erro:', error);
+                addBotMessage(`❌ Erro ao processar identificação: ${error.message || 'Tente novamente'}`);
             } finally {
                 removeTypingIndicator();
             }
