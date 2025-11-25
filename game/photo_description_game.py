@@ -26,6 +26,8 @@ class PhotoDescriptionGame:
     def __init__(self):
         self.photos_data = self._load_photos_data()
         self.current_photo = None
+        self.recent_photos = []  # Histórico de fotos recentes para evitar repetição
+        self.max_recent = 10  # Quantas fotos manter no histórico (evita repetir as últimas 10)
         self.game_stats = {
             "total_attempts": 0,
             "total_correct": 0,
@@ -72,11 +74,31 @@ class PhotoDescriptionGame:
             return []
     
     def get_random_photo(self) -> Dict:
-        """Retorna uma foto aleatória para o jogo"""
+        """Retorna uma foto aleatória para o jogo, evitando repetições recentes"""
         if not self.photos_data:
             return None
         
-        self.current_photo = random.choice(self.photos_data)
+        # Filtrar fotos que não estão no histórico recente
+        available_photos = [p for p in self.photos_data if p["id"] not in self.recent_photos]
+        
+        # Se todas as fotos foram usadas recentemente, resetar histórico
+        if not available_photos:
+            print("[RANDOM] Todas as fotos foram usadas, resetando histórico")
+            self.recent_photos = []
+            available_photos = self.photos_data
+        
+        # Escolher foto aleatória das disponíveis
+        self.current_photo = random.choice(available_photos)
+        
+        # Adicionar ao histórico de recentes
+        self.recent_photos.append(self.current_photo["id"])
+        
+        # Manter apenas as últimas N fotos no histórico
+        if len(self.recent_photos) > self.max_recent:
+            self.recent_photos = self.recent_photos[-self.max_recent:]
+        
+        print(f"[RANDOM] Foto selecionada: {self.current_photo['name']} (histórico: {len(self.recent_photos)}/{self.max_recent})")
+        
         return {
             "id": self.current_photo["id"],
             "image_path": self.current_photo["image_path"],
