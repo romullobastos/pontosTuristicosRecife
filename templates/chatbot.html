@@ -2633,23 +2633,52 @@
                 // Se a pré-checagem local indicou um possível acerto, mas o backend não aprovou
                 if (frontendPrecheck) {
                     addBotMessage(`
-                        <strong>⚠️ Quase lá!</strong><br><br>
-                        Sua resposta: "${guess}"<br>
-                        Similaridade: ${(actualSimilarity * 100).toFixed(1)}% (precisa melhorar um pouco para contar como acerto)<br><br>
-                        <div class="quick-buttons">
-                            <button class="quick-btn" onclick="requestHint()">📍 Pedir Dica</button>
-                            <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
+                        <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #fbbf24; color: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                                <div style="font-size:32px;">⚠️</div>
+                                <div style="font-size:20px; font-weight:800; color:#fbbf24; letter-spacing:.5px;">QUASE LÁ!</div>
+                            </div>
+                            <div style="background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); border-radius:10px; padding:12px; margin-bottom:14px;">
+                                <div style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:4px;">Sua resposta:</div>
+                                <div style="font-size:16px; color:#fff; font-weight:600;">"${guess}"</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                                <div style="flex:1; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+                                    <div style="width:${(actualSimilarity * 100).toFixed(0)}%; height:100%; background:linear-gradient(90deg, #fbbf24, #f59e0b); border-radius:4px;"></div>
+                                </div>
+                                <div style="font-size:14px; color:#fbbf24; font-weight:700;">${(actualSimilarity * 100).toFixed(0)}%</div>
+                            </div>
+                            <div style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:16px;">Você está perto! Tente ser mais específico ou peça uma dica.</div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button onclick="requestHint()" style="flex:1; min-width:130px; background:linear-gradient(135deg, #fbbf24, #f59e0b); color:#1a1a2e; border:none; padding:12px 16px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    💡 Pedir Dica
+                                </button>
+                                <button onclick="startNextChallenge()" style="flex:1; min-width:130px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px 16px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    🔄 Novo Desafio
+                                </button>
+                            </div>
                         </div>
                     `);
                 } else {
                     addBotMessage(`
-                        <strong>❌ Não foi desta vez...</strong><br><br>
-                        Sua resposta: "${guess}"<br>
-                        Tente novamente ou peça uma dica!<br><br>
-                        
-                        <div class="quick-buttons">
-                            <button class="quick-btn" onclick="requestHint()">📍 Pedir Dica</button>
-                            <button class="quick-btn" onclick="startNextChallenge()">🔄 Novo Desafio</button>
+                        <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #ef4444; color: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                                <div style="font-size:32px;">❌</div>
+                                <div style="font-size:20px; font-weight:800; color:#f87171; letter-spacing:.5px;">NÃO FOI DESSA VEZ</div>
+                            </div>
+                            <div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:12px; margin-bottom:14px;">
+                                <div style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:4px;">Sua resposta:</div>
+                                <div style="font-size:16px; color:#fff; font-weight:600;">"${guess}"</div>
+                            </div>
+                            <div style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:16px;">Não desista! Tente novamente ou peça uma dica para ajudar.</div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button onclick="requestHint()" style="flex:1; min-width:130px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; border:none; padding:12px 16px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    💡 Pedir Dica
+                                </button>
+                                <button onclick="startNextChallenge()" style="flex:1; min-width:130px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px 16px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    🔄 Novo Desafio
+                                </button>
+                            </div>
                         </div>
                     `);
                 }
