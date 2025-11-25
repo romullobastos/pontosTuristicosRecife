@@ -29,18 +29,27 @@
         }
 
         .back-home {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #ffffff;
-            color: #5b5f97;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
             border: none;
-            border-radius: 999px;
-            padding: 10px 14px;
-            font-weight: 700;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
             cursor: pointer;
-            z-index: 9999; /* Aumentado para ficar acima de tudo */
+            transition: background 0.3s ease;
+            font-size: 14px;
+        }
+
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-home .back-text {
+            display: inline;
+        }
+
+        .back-home .back-icon {
+            display: none;
         }
 
         .chat-container {
@@ -158,6 +167,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
 
         .chat-header h2 {
@@ -435,11 +445,27 @@
             }
 
             .back-home {
-                top: 15px;
-                left: 15px;
+                background: transparent;
                 padding: 8px 12px;
-                font-size: 14px;
-                z-index: 10000; /* Garantir que fique acima do header */
+                font-size: 28px;
+                min-width: auto;
+            }
+
+            .back-home:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .back-home .back-text {
+                display: none;
+            }
+
+            .back-home .back-icon {
+                display: inline;
+            }
+
+            .chat-header {
+                padding: 10px;
+                gap: 5px;
             }
 
             .chat-container {
@@ -685,7 +711,6 @@
     
 
     <!-- Interface Principal do Chatbot -->
-    <button class="back-home" onclick="window.location.href='/'">⟵ Voltar</button>
     <div class="chat-container" id="chatbotScreen">
         <!-- Sidebar Esquerda -->
         <div class="sidebar">
@@ -715,6 +740,10 @@
         <!-- Área Central do Chat -->
         <div class="chat-area">
             <div class="chat-header">
+                <button class="back-home" onclick="window.location.href='/'">
+                    <span class="back-icon">‹</span>
+                    <span class="back-text">⟵ Voltar</span>
+                </button>
                 <div>
                     <h2>🤖 Pontos Turísticos do Recife - Bot</h2>
                     <div class="chat-status">
