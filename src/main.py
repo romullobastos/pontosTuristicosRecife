@@ -792,8 +792,12 @@ def compare_visual_similarity():
         if isinstance(user_image, str) and user_image.startswith('data:image'):
             user_image = user_image.split(',')[1]
         
-        user_image_bytes = base64.b64decode(user_image)
-        user_img = Image.open(io.BytesIO(user_image_bytes)).convert('RGB')
+        try:
+            user_image_bytes = base64.b64decode(user_image)
+            user_img = Image.open(io.BytesIO(user_image_bytes)).convert('RGB')
+        except Exception as e:
+            print(f"Erro ao decodificar imagem do usuário: {e}")
+            return jsonify({'error': 'Erro ao processar sua foto. Tente novamente.'}), 400
         
         # Obter foto do desafio
         photo = game.photo_description_game.get_photo_by_id(target_location)
@@ -801,21 +805,31 @@ def compare_visual_similarity():
             return jsonify({'error': 'Foto do desafio não encontrada'}), 404
         
         # Carregar foto do desafio
-        target_img = Image.open(photo['image_path']).convert('RGB')
+        image_path = photo.get('image_path', '')
+        if not image_path or not os.path.exists(image_path):
+            print(f"Caminho da imagem não encontrado: {image_path}")
+            return jsonify({'error': 'Imagem do desafio não encontrada no servidor'}), 404
+        
+        try:
+            target_img = Image.open(image_path).convert('RGB')
+        except Exception as e:
+            print(f"Erro ao carregar imagem do desafio: {e}")
+            return jsonify({'error': 'Erro ao carregar imagem do desafio'}), 500
         
         # Calcular similaridade usando o modelo de pontos históricos
         similarity = game.recife_trainer.compare_images(user_img, target_img)
         
         # Calcular pontos baseado na similaridade
         # Similaridade de 0.8+ = excelente, 0.6+ = bom, 0.4+ = aceitável, 0.30+ = tentativa
+        base_points = photo.get('points', 10)  # Valor padrão de 10 pontos
         if similarity >= 0.8:
-            points = photo['points']  # Pontos completos
+            points = base_points  # Pontos completos
         elif similarity >= 0.6:
-            points = int(photo['points'] * 0.7)  # 70% dos pontos
+            points = int(base_points * 0.7)  # 70% dos pontos
         elif similarity >= 0.4:
-            points = int(photo['points'] * 0.5)  # 50% dos pontos
+            points = int(base_points * 0.5)  # 50% dos pontos
         elif similarity >= 0.3:
-            points = int(photo['points'] * 0.3)  # 30% dos pontos
+            points = int(base_points * 0.3)  # 30% dos pontos
         else:
             points = 0  # Abaixo de 30% não gera pontos
         
