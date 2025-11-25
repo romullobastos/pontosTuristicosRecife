@@ -6,6 +6,7 @@ Desenvolvido do zero sem modelos pré-treinados
 
 import sys
 import os
+import threading
 
 # Adicionar diretório raiz ao path para imports funcionarem
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -367,6 +368,22 @@ def logout():
 # Instanciar o jogo e garantir admin seed
 game = EducationalGame()
 _ensure_admin_seed()
+
+# ---- Auto-reload scheduler (atualiza ranking a cada 5 minutos) ----
+def _auto_reload_players():
+    """Recarrega os dados dos jogadores do arquivo periodicamente"""
+    while True:
+        try:
+            time.sleep(300)  # 5 minutos
+            game.gamification.load_from_file('data/players.json')
+            print("[SCHEDULER] Ranking atualizado automaticamente")
+        except Exception as e:
+            print(f"[SCHEDULER] Erro ao atualizar ranking: {e}")
+
+# Iniciar thread de auto-reload em background
+_reload_thread = threading.Thread(target=_auto_reload_players, daemon=True)
+_reload_thread.start()
+print("[SCHEDULER] Auto-reload do ranking iniciado (a cada 5 minutos)")
 
 @app.route('/')
 def index():
