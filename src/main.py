@@ -806,8 +806,15 @@ def compare_visual_similarity():
         
         # Carregar foto do desafio
         image_path = photo.get('image_path', '')
+        
+        # Garantir caminho absoluto baseado no diretório raiz do projeto
+        if image_path and not os.path.isabs(image_path):
+            image_path = os.path.join(ROOT_DIR, image_path)
+        
         if not image_path or not os.path.exists(image_path):
             print(f"Caminho da imagem não encontrado: {image_path}")
+            print(f"ROOT_DIR: {ROOT_DIR}")
+            print(f"CWD: {os.getcwd()}")
             return jsonify({'error': 'Imagem do desafio não encontrada no servidor'}), 404
         
         try:
